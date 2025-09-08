@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiladores - Análisis Sintáctico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .main-title {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .author-info {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .course-container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .topic-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: scaleIn 0.8s ease-out both;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        .topic-card.available {
+            border: 3px solid #4caf50;
+            position: relative;
+        }
+
+        .topic-card.available::before {
+            content: "✅ DISPONIBLE";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #4caf50;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .topic-card.coming-soon {
+            opacity: 0.6;
+            border: 3px solid #ff9800;
+            position: relative;
+        }
+
+        .topic-card.coming-soon::before {
+            content: "🚧 PRÓXIMAMENTE";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff9800;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .topic-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .topic-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .topic-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .topic-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .topic-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .start-btn.disabled {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            cursor: not-allowed;
+        }
+
+        .start-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .progress-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 25px;
+            height: 20px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            height: 100%;
+            width: 14.3%; /* 1/7 topics completed */
+            border-radius: 25px;
+            transition: width 0.8s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="main-title">Compiladores</h1>
+        <p class="subtitle">Análisis Sintáctico y Semántico</p>
+        <p class="author-info">Curso de Teoría de Lenguajes y Compiladores</p>
+    </div>
+
+    <div class="course-container">
+        <div class="topics-grid">
+            <!-- Tema 1: Análisis Léxico -->
+            <div class="topic-card available" onclick="location.href='analisislexico/slide01.html'">
+                <div class="topic-icon">📝</div>
+                <h2 class="topic-title">1. Análisis Léxico</h2>
+                <p class="topic-description">
+                    Fundamentos del análisis léxico: AFDs vs Expresiones Regulares, Maximal Munch, 
+                    tabla de símbolos y construcción de tokens.
+                </p>
+                <div class="topic-details">
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span>14 slides</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>⏱️</span>
+                            <span>45-60 min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>💻</span>
+                            <span>Código Java</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span>Nivel: Intermedio</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="analisislexico/slide01.html" class="start-btn">
+                    🚀 Comenzar Tema
+                </a>
+            </div>
+
+            <!-- Tema 2: Análisis Sintáctico -->
+            <div class="topic-card coming-soon">
+                <div class="topic-icon">🌳</div>
+                <h2 class="topic-title">2. Análisis Sintáctico</h2>
+                <p class="topic-description">
+                    Gramáticas formales, parsers descendentes y ascendentes, árboles de sintaxis 
+                    abstracta (AST) y manejo de errores.
+                </p>
+                <div class="topic-details">
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span>~16 slides</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>⏱️</span>
+                            <span>60-75 min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>💻</span>
+                            <span>Código Java</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span>Nivel: Avanzado</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="start-btn disabled">
+                    🚧 Próximamente
+                </button>
+            </div>
+
+            <!-- Tema 3: Análisis Semántico -->
+            <div class="topic-card coming-soon">
+                <div class="topic-icon">🧠</div>
+                <h2 class="topic-title">3. Análisis Semántico</h2>
+                <p class="topic-description">
+                    Verificación de tipos, tabla de símbolos avanzada, checking semántico 
+                    y optimizaciones básicas.
+                </p>
+                <div class="topic-details">
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span>~12 slides</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>⏱️</span>
+                            <span>50-65 min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>💻</span>
+                            <span>Código Java</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span>Nivel: Avanzado</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="start-btn disabled">
+                    🚧 Próximamente
+                </button>
+            </div>
+
+            <!-- Tema 4: Generación de Código -->
+            <div class="topic-card coming-soon">
+                <div class="topic-icon">⚙️</div>
+                <h2 class="topic-title">4. Generación de Código</h2>
+                <p class="topic-description">
+                    Traducción a código intermedio, optimización de código y generación 
+                    de código máquina básico.
+                </p>
+                <div class="topic-details">
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span>~14 slides</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>⏱️</span>
+                            <span>55-70 min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>💻</span>
+                            <span>Código Java</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span>Nivel: Avanzado</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="start-btn disabled">
+                    🚧 Próximamente
+                </button>
+            </div>
+
+            <!-- Tema 5: Herramientas -->
+            <div class="topic-card coming-soon">
+                <div class="topic-icon">🛠️</div>
+                <h2 class="topic-title">5. Herramientas</h2>
+                <p class="topic-description">
+                    ANTLR, Flex/Bison, construcción de DSLs y integración con IDEs. 
+                    Proyecto práctico completo.
+                </p>
+                <div class="topic-details">
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span>~10 slides</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>⏱️</span>
+                            <span>40-55 min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>💻</span>
+                            <span>Proyecto</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span>Nivel: Práctico</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="start-btn disabled">
+                    🚧 Próximamente
+                </button>
+            </div>
+
+            <!-- Tema 6: Casos Avanzados -->
+            <div class="topic-card coming-soon">
+                <div class="topic-icon">🎓</div>
+                <h2 class="topic-title">6. Casos Avanzados</h2>
+                <p class="topic-description">
+                    Manejo de errores avanzado, recuperación de errores, compilación JIT 
+                    y temas de investigación actuales.
+                </p>
+                <div class="topic-details">
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span>~8 slides</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>⏱️</span>
+                            <span>35-45 min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>💻</span>
+                            <span>Teórico</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>🎯</span>
+                            <span>Nivel: Experto</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="start-btn disabled">
+                    🚧 Próximamente
+                </button>
+            </div>
+        </div>
+
+        <!-- Progreso del Curso -->
+        <div class="progress-section">
+            <h3 class="progress-title">📈 Progreso del Curso</h3>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <p class="progress-text">
+                <strong>1 de 6 temas completados</strong> • 
+                <span style="color: #4caf50;">Análisis Léxico ✅</span> • 
+                Tiempo estimado total: ~5-6 horas
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🎯 Curso diseñado para estudiantes de Ciencias de la Computación e Ingeniería de Software</p>
+        <p style="margin-top: 0.5rem;">📚 Material educativo interactivo con ejemplos prácticos y código ejecutable</p>
+    </div>
+
+    <script>
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                // Si presiona Enter o Espacio, ir al primer tema disponible
+                window.location.href = 'analisislexico/slide01.html';
+            }
+        });
+
+        // Animación de progreso
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const progressFill = document.querySelector('.progress-fill');
+                progressFill.style.width = '16.7%'; // 1/6 = 16.7%
+            }, 1000);
+        });
+
+        // Efecto hover mejorado para cards
+        document.querySelectorAll('.topic-card.available').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.background = 'rgba(255,255,255,1)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'rgba(255,255,255,0.95)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Analizador Léxico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .main-container {
+            max-width: 1800px;
+            width: 100%;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .architecture-diagram {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: scaleIn 0.8s ease-out 0.2s both;
+        }
+
+        .diagram-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .component {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 2rem 3rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 200px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+            animation: slideInLeft 0.8s ease-out;
+            animation-fill-mode: both;
+            transition: transform 0.3s;
+        }
+
+        .component:hover {
+            transform: scale(1.05);
+        }
+
+        .component.input {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .component.lexer {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .component.output {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            box-shadow: 0 10px 25px rgba(243, 156, 18, 0.3);
+        }
+
+        .component:nth-child(1) { animation-delay: 0.4s; }
+        .component:nth-child(2) { animation-delay: 0.6s; }
+        .component:nth-child(3) { animation-delay: 0.8s; }
+
+        .component-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .component-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .component-desc {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .flow-arrow {
+            font-size: 3rem;
+            color: #34495e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .detailed-sections {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideInLeft 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .detail-card:nth-child(2) { animation-name: slideInRight; }
+
+        .detail-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-example {
+            background: #2d2d2d;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-example pre {
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .features-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .feature-icon {
+            background: #3498db;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .implementation-section {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-top: 2rem;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .impl-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .impl-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .impl-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .impl-step {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .impl-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .impl-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .final-summary {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .summary-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-points {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .summary-point {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .point-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .point-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .point-desc {
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .highlight {
+            background: #f1c40f;
+            color: #333;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">14 / 14</div>
+    
+    <h1>🏗️ Arquitectura del Analizador Léxico</h1>
+    
+    <div class="main-container">
+        <div class="architecture-diagram">
+            <div class="diagram-title">📊 Flujo de Procesamiento</div>
+            
+            <div class="flow-container">
+                <div class="flow-step">
+                    <div class="component input">
+                        <span class="component-icon">📄</span>
+                        <div class="component-title">Código Fuente</div>
+                        <div class="component-desc">
+                            String de entrada<br>
+                            Caracteres sin procesar
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">➡️</div>
+                    
+                    <div class="component lexer">
+                        <span class="component-icon">⚙️</span>
+                        <div class="component-title">Analizador Léxico</div>
+                        <div class="component-desc">
+                            AFD + Tabla de Keywords<br>
+                            Maximal Munch
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">➡️</div>
+                    
+                    <div class="component output">
+                        <span class="component-icon">🎯</span>
+                        <div class="component-title">Stream de Tokens</div>
+                        <div class="component-desc">
+                            Lista de tokens<br>
+                            Para el parser
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detailed-sections">
+            <div class="detail-card">
+                <div class="detail-title">
+                    <span>🔧</span> Componentes Internos
+                </div>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-icon">🤖</div>
+                        <div class="feature-text">
+                            <strong>AFD Global:</strong> Estado único que reconoce todos los tokens
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-text">
+                            <strong>Tabla de Keywords:</strong> HashMap para palabras reservadas
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">📍</div>
+                        <div class="feature-text">
+                            <strong>Buffer de Input:</strong> Manejo eficiente de archivos grandes
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-text">
+                            <strong>Position Tracking:</strong> Línea y columna para errores
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">⚠️</div>
+                        <div class="feature-text">
+                            <strong>Error Recovery:</strong> Manejo de caracteres inválidos
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="code-example">
+                    <pre><code>public class Lexer {
+    private DFA globalDFA;
+    private Map&lt;String, TokenType&gt; keywords;
+    private InputStream input;
+    private int line, column;
+    
+    public Token nextToken() {
+        // Implementación del AFD único
+        return processWithDFA();
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-title">
+                    <span>🎯</span> Algoritmo Principal
+                </div>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-icon">1️⃣</div>
+                        <div class="feature-text">
+                            <strong>Inicializar:</strong> Estado = START, posición = 0
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">2️⃣</div>
+                        <div class="feature-text">
+                            <strong>Transición:</strong> Leer carácter, cambiar estado
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">3️⃣</div>
+                        <div class="feature-text">
+                            <strong>Aceptación:</strong> Marcar último estado válido
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">4️⃣</div>
+                        <div class="feature-text">
+                            <strong>Maximal Munch:</strong> Continuar mientras haya transiciones
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">5️⃣</div>
+                        <div class="feature-text">
+                            <strong>Token Creation:</strong> Crear token del último estado válido
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="code-example">
+                    <pre><code>while (pos &lt; input.length()) {
+    char c = input.charAt(pos);
+    State next = transition(current, c);
+    
+    if (next == null) break;
+    current = next;
+    pos++;
+    
+    if (isAccepting(current)) {
+        lastAccepting = current;
+        lastPos = pos;
+    }
+}
+
+return createToken(lastAccepting, 
+                  input.substring(start, lastPos));</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="implementation-section">
+            <div class="impl-title">🛠️ Proceso de Construcción</div>
+            
+            <div class="impl-grid">
+                <div class="impl-card">
+                    <div class="impl-step">📝</div>
+                    <div class="impl-name">1. Especificación</div>
+                    <div class="impl-desc">
+                        Definir tokens con regex:<br>
+                        • Identificadores: [a-zA-Z][a-zA-Z0-9]*<br>
+                        • Números: [0-9]+(\.[0-9]+)?<br>
+                        • Operadores: +, -, *, /, ==, !=
+                    </div>
+                </div>
+
+                <div class="impl-card">
+                    <div class="impl-step">🔄</div>
+                    <div class="impl-name">2. Conversión</div>
+                    <div class="impl-desc">
+                        Construir AFD único:<br>
+                        • Regex → AFN individual<br>
+                        • Unión de todos los AFN<br>
+                        • AFN → AFD determinista<br>
+                        • Minimización de estados
+                    </div>
+                </div>
+
+                <div class="impl-card">
+                    <div class="impl-step">⚡</div>
+                    <div class="impl-name">3. Optimización</div>
+                    <div class="impl-desc">
+                        Implementación eficiente:<br>
+                        • Tabla de transiciones<br>
+                        • Buffer circular de input<br>
+                        • Cache de keywords<br>
+                        • Manejo de errores inline
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="final-summary">
+            <div class="summary-title">🎓 Resumen Ejecutivo</div>
+            <div style="font-size: 1.3rem; margin-bottom: 2rem;">
+                El analizador léxico es la <span class="highlight">primera fase</span> del compilador y la base 
+                del rendimiento <span class="highlight">O(n) garantizado</span>
+            </div>
+            
+            <div class="summary-points">
+                <div class="summary-point">
+                    <div class="point-icon">🚀</div>
+                    <div class="point-title">Rendimiento</div>
+                    <div class="point-desc">
+                        AFD determinista garantiza procesamiento lineal, 
+                        evitando backtracking exponencial de regex directos
+                    </div>
+                </div>
+
+                <div class="summary-point">
+                    <div class="point-icon">🧩</div>
+                    <div class="point-title">Modularidad</div>
+                    <div class="point-desc">
+                        Separación clara entre léxico y sintáctico, 
+                        permitiendo modificaciones independientes
+                    </div>
+                </div>
+
+                <div class="summary-point">
+                    <div class="point-icon">🔍</div>
+                    <div class="point-title">Precisión</div>
+                    <div class="point-desc">
+                        Maximal Munch y tabla de keywords resuelven 
+                        automáticamente conflictos de ambigüedad
+                    </div>
+                </div>
+
+                <div class="summary-point">
+                    <div class="point-icon">🏭</div>
+                    <div class="point-title">Estándar Industrial</div>
+                    <div class="point-desc">
+                        Usado en todos los compiladores profesionales: 
+                        GCC, LLVM, javac, rustc, tsc
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 2rem; margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">💡 Mensaje Final</h3>
+                <p style="font-size: 1.2rem; line-height: 1.8;">
+                    <strong>Los regex son perfectos para definir tokens, pero los AFD son esenciales para ejecutarlos eficientemente.</strong><br>
+                    Esta combinación es lo que hace posible compilar millones de líneas de código en segundos.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide13.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide01.html'">🏠 Inicio</button>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide01.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide13.html';
+            }
+        });
+
+        // Animación de flujo de arquitectura
+        const components = document.querySelectorAll('.component');
+        let currentIndex = 0;
+        setInterval(() => {
+            components.forEach((comp, i) => {
+                if (i === currentIndex) {
+                    comp.style.transform = 'scale(1.1)';
+                    comp.style.boxShadow = '0 15px 40px rgba(52, 152, 219, 0.5)';
+                } else {
+                    comp.style.transform = 'scale(1)';
+                    comp.style.boxShadow = '0 10px 25px rgba(52, 152, 219, 0.3)';
+                }
+            });
+            currentIndex = (currentIndex + 1) % components.length;
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrategias de Implementación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 3rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .strategies-container {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 0 2rem;
+            flex: 1;
+            align-items: center;
+        }
+
+        .strategy-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 500px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            animation: slideUp 0.8s ease-out;
+            animation-fill-mode: both;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .strategy-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+        }
+
+        .strategy-card:nth-child(1) { animation-delay: 0.2s; }
+        .strategy-card:nth-child(2) { animation-delay: 0.4s; }
+
+        .strategy-number {
+            position: absolute;
+            top: -25px;
+            left: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .strategy-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin: 1.5rem 0 1rem;
+            font-weight: bold;
+        }
+
+        .strategy-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .pros-cons {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .pro, .con {
+            padding: 0.8rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: fadeIn 1s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .pro {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4CAF50;
+            animation-delay: 0.6s;
+        }
+
+        .con {
+            background: rgba(244, 67, 54, 0.1);
+            border-left: 4px solid #f44336;
+            animation-delay: 0.8s;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #333;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .afd-visual {
+            position: absolute;
+            top: 10%;
+            left: -5%;
+            opacity: 0.1;
+            font-size: 15rem;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="afd-visual">⚙️</div>
+    
+    <div class="slide-number">3 / 14</div>
+    
+    <div class="header">
+        <h1>🛠️ Estrategias de Implementación</h1>
+    </div>
+
+    <div class="strategies-container">
+        <div class="strategy-card">
+            <div class="strategy-number">1</div>
+            <h2 class="strategy-title">Expresiones Regulares</h2>
+            <div class="strategy-description">
+                Definir cada token con regex como <code>[a-zA-Z]+</code>, <code>[0-9]+</code>.
+                Evaluar directamente con motor de regex de Java.
+            </div>
+            <div class="pros-cons">
+                <div class="pro">
+                    <span class="icon">✅</span>
+                    <div>
+                        <span class="label">Ventaja:</span>
+                        Fácil de escribir y mantener
+                    </div>
+                </div>
+                <div class="con">
+                    <span class="icon">⚠️</span>
+                    <div>
+                        <span class="label">Problema:</span>
+                        Puede tener <span class="highlight">backtracking exponencial O(2^n)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="strategy-card">
+            <div class="strategy-number">2</div>
+            <h2 class="strategy-title">AFD Único Global</h2>
+            <div class="strategy-description">
+                Todas las regex se compilan a un <strong>único AFD determinista</strong>.
+                Un solo autómata reconoce todos los tipos de tokens.
+            </div>
+            <div class="pros-cons">
+                <div class="pro">
+                    <span class="icon">✅</span>
+                    <div>
+                        <span class="label">Ventaja:</span>
+                        Sin backtracking, garantiza O(n) siempre
+                    </div>
+                </div>
+                <div class="con">
+                    <span class="icon">⚠️</span>
+                    <div>
+                        <span class="label">Desventaja:</span>
+                        Más complejo de implementar manualmente
+                    </div>
+                </div>
+                <div class="pro" style="animation-delay: 1s;">
+                    <span class="icon">🏆</span>
+                    <div>
+                        <strong>Estándar en GCC, LLVM, javac - generado por Lex/Flex</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide02.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide04.html'">Siguiente →</button>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide04.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide02.html';
+            }
+        });
+
+        // Animación de resaltado alternante
+        const highlights = document.querySelectorAll('.highlight');
+        setInterval(() => {
+            highlights.forEach(h => {
+                h.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    h.style.transform = 'scale(1)';
+                }, 500);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

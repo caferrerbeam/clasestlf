@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Bloques - nextToken()</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #3F51B5 0%, #2196F3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .main-container {
+            max-width: 1600px;
+            width: 100%;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .strategies-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .strategy-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: scaleIn 0.8s ease-out 0.2s both;
+        }
+
+        .strategy-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .multiple-afd-title { 
+            background: linear-gradient(135deg, #e74c3c, #c0392b); 
+        }
+        
+        .single-afd-title { 
+            background: linear-gradient(135deg, #27ae60, #2ecc71); 
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .process-box {
+            background: white;
+            border: 3px solid;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .input-box {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .afd-box {
+            border-color: #9c27b0;
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+        }
+
+        .decision-box {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            transform: rotate(45deg);
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .decision-text {
+            transform: rotate(-45deg);
+        }
+
+        .output-box {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        .error-box {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: #666;
+            margin: 0 1rem;
+        }
+
+        .vertical-arrow {
+            font-size: 2rem;
+            color: #666;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .code-example {
+            background: #2d2d2d;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .code-example pre {
+            color: #f8f8f2;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .good-perf {
+            background: #4caf50;
+        }
+
+        .bad-perf {
+            background: #f44336;
+        }
+
+        .visual-diagram {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .diagram-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .strategy-visual {
+            text-align: center;
+        }
+
+        .strategy-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .strategy-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            text-align: left;
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            line-height: 1.8;
+        }
+
+        .vs-symbol {
+            font-size: 3rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .highlight {
+            background: #ffd700;
+            color: #333;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .automata-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .automata-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: #333;
+        }
+
+        .automata-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .multiple-automata-title {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .single-automata-title {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .automata-canvas {
+            height: 300px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .automata-explanation {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #666;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .tab:first-child {
+            border-radius: 5px 0 0 5px;
+        }
+
+        .tab:last-child {
+            border-radius: 0 5px 5px 0;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .tab.active.keywords { background: #dc3545; }
+        .tab.active.identifier { background: #28a745; }
+        .tab.active.number { background: #ffc107; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="slide-number">8 / 14</div>
+    
+    <h1>📊 Diagrama de Bloques de nextToken()</h1>
+    
+    <div class="main-container">
+        <div class="strategies-comparison">
+            <!-- Estrategia 1: Múltiples AFDs -->
+            <div class="strategy-section">
+                <div class="strategy-title multiple-afd-title">
+                    🔄 Estrategia 1: Múltiples AFDs
+                </div>
+                
+                <!-- Ejemplo con "if" -->
+                <div class="example-header" style="text-align: center; margin: 1rem 0; font-size: 1.3rem; font-weight: bold; color: #2980b9;">📝 Ejemplo: "if"</div>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="process-box input-box">
+                            📄 Input: "if"
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box">
+                            AFD #1: Palabras Reservadas<br>
+                            <span style="color: green;">✓ Acepta "if" (2 chars)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box">
+                            AFD #2: Identificador<br>
+                            <span style="color: orange;">⚠️ También acepta "if" (2 chars)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box">
+                            AFD #3: Números<br>
+                            <span style="color: red;">✗ Rechaza</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box output-box">
+                            ✅ Token(IF, "if") - Primer match gana
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Separador -->
+                <div style="border-top: 2px solid #bdc3c7; margin: 2rem 0;"></div>
+
+                <!-- Ejemplo con "ifVariable" -->
+                <div class="example-header" style="text-align: center; margin: 1rem 0; font-size: 1.3rem; font-weight: bold; color: #2980b9;">📝 Ejemplo: "ifVariable"</div>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="process-box input-box">
+                            📄 Input: "ifVariable"
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box">
+                            AFD #1: Palabras Reservadas<br>
+                            <span style="color: red;">✗ "ifVariable" != "if"</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box">
+                            AFD #2: Identificador<br>
+                            <span style="color: green;">✓ Acepta "ifVariable" (10 chars)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box output-box">
+                            ✅ Token(IDENTIFIER, "ifVariable")
+                        </div>
+                    </div>
+                    
+                    <div class="performance-note" style="background: #ffebee; color: #c62828; padding: 0.8rem; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem;">
+                        ⚠️ <strong>PROBLEMA:</strong> Evaluó 2 AFDs innecesariamente (12 transiciones totales)
+                    </div>
+                </div>
+
+                <div class="code-example">
+                    <pre><code>public Token nextToken(String input, int pos) {
+    // ❌ PROBLEMA: Evalúa TODOS los AFDs
+    for (TokenMatcher matcher : matchers) {
+        Token token = matcher.tryMatch(input, pos);
+        if (token != null) {
+            return token; // Primera coincidencia
+        }
+    }
+    throw new LexicalError("Invalid token");
+}</code></pre>
+                </div>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <span class="performance-badge bad-perf">O(k×n) - k AFDs</span>
+                    <span class="performance-badge bad-perf">Backtracking posible</span>
+                </div>
+            </div>
+
+            <!-- Estrategia 2: AFD Único -->
+            <div class="strategy-section">
+                <div class="strategy-title single-afd-title">
+                    ⚡ Estrategia 2: AFD Único Global
+                </div>
+                
+                <!-- Ejemplo con "if" -->
+                <div class="example-header" style="text-align: center; margin: 1rem 0; font-size: 1.3rem; font-weight: bold; color: #27ae60;">📝 Ejemplo: "if"</div>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="process-box input-box">
+                            📄 Input: "if"
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-color: #4caf50;">
+                            AFD ÚNICO GLOBAL<br>
+                            Estado: START → ID_OR_IF → FINAL_IF<br>
+                            <span style="color: green;">✓ Reconoce directamente</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box output-box">
+                            ✅ Token(IF, "if") - 2 transiciones
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Separador -->
+                <div style="border-top: 2px solid #bdc3c7; margin: 2rem 0;"></div>
+
+                <!-- Ejemplo con "ifVariable" -->
+                <div class="example-header" style="text-align: center; margin: 1rem 0; font-size: 1.3rem; font-weight: bold; color: #27ae60;">📝 Ejemplo: "ifVariable"</div>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="process-box input-box">
+                            📄 Input: "ifVariable"
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box afd-box" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-color: #4caf50;">
+                            AFD ÚNICO GLOBAL<br>
+                            Estado: START → ID_OR_IF → ID → ID... → FINAL_ID<br>
+                            <span style="color: green;">✓ Reconoce directamente</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vertical-arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="process-box output-box">
+                            ✅ Token(IDENTIFIER, "ifVariable") - 10 transiciones
+                        </div>
+                    </div>
+                    
+                    <div class="performance-note" style="background: #e8f5e9; color: #2e7d32; padding: 0.8rem; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem;">
+                        ✅ <strong>EFICIENTE:</strong> Solo 1 AFD, exactamente 10 transiciones
+                    </div>
+                </div>
+
+                <div class="code-example">
+                    <pre><code>public Token nextToken(String input, int pos) {
+    State state = START;
+    // ✅ UN SOLO PASE sobre el input
+    while (pos < input.length()) {
+        char c = input.charAt(pos);
+        state = transition(state, c);
+        
+        if (state == ERROR) break;
+        pos++;
+    }
+    
+    return createToken(state, lexeme);
+}</code></pre>
+                </div>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <span class="performance-badge good-perf">O(n) garantizado</span>
+                    <span class="performance-badge good-perf">Sin backtracking</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Autómatas Visuales -->
+        <div class="automata-container">
+            <div class="automata-section">
+                <div class="automata-title multiple-automata-title">
+                    🔄 Múltiples AFDs
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active keywords" onclick="showAutomata('keywords')">AFD Palabras</div>
+                    <div class="tab identifier" onclick="showAutomata('identifier')">AFD Identificador</div>
+                    <div class="tab number" onclick="showAutomata('number')">AFD Números</div>
+                </div>
+                
+                <div id="keywords-automata" class="automata-canvas"></div>
+                <div id="identifier-automata" class="automata-canvas" style="display: none;"></div>
+                <div id="number-automata" class="automata-canvas" style="display: none;"></div>
+                
+                <div class="automata-explanation">
+                    <strong>Problema:</strong> Cada AFD evalúa independientemente. Para "ifVariable": 
+                    AFD Palabras (rechaza) + AFD Identificador (acepta) = 2 evaluaciones innecesarias.
+                </div>
+            </div>
+            
+            <div class="automata-section">
+                <div class="automata-title single-automata-title">
+                    ⚡ AFD Único Global
+                </div>
+                
+                <div id="single-automata" class="automata-canvas" style="height: 360px;"></div>
+                
+                <div class="automata-explanation">
+                    <strong>Solución:</strong> Un solo AFD reconoce todos los tokens. Estados inteligentes:<br>
+                    • <span style="color: #4caf50;"><strong>IF_FINAL:</strong></span> "if" terminado (palabra reservada)<br>
+                    • <span style="color: #ff5722;"><strong>Transición crítica:</strong></span> Si después de "if" viene letra → continúa como ID<br>
+                    • <span style="color: #2196f3;"><strong>Ejemplo:</strong></span> "ifVariable" = START → i → IF_FINAL → ID → ID...<br>
+                    Maximal Munch automático: consume hasta no poder más.
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagrama Visual Comparativo -->
+        <div class="visual-diagram">
+            <div class="diagram-title">🎯 Comparación Visual</div>
+            
+            <div class="comparison-visual">
+                <div class="strategy-visual">
+                    <div class="strategy-icon">🔁</div>
+                    <div class="strategy-name">Múltiples AFDs</div>
+                    <div class="feature-list">
+                        • Cada token → un AFD<br>
+                        • Prueba secuencial<br>
+                        • Puede retroceder<br>
+                        • Orden importa<br>
+                        • <span style="color: #ffcdd2;">Tiempo: O(k×n)</span>
+                    </div>
+                </div>
+                
+                <div class="vs-symbol">VS</div>
+                
+                <div class="strategy-visual">
+                    <div class="strategy-icon">⚡</div>
+                    <div class="strategy-name">AFD Único</div>
+                    <div class="feature-list">
+                        • Todos los tokens → 1 AFD<br>
+                        • Evaluación directa<br>
+                        • Sin retroceso<br>
+                        • Determinista<br>
+                        • <span style="color: #c8e6c9;">Tiempo: O(n)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 1.5rem; margin-top: 2rem; text-align: center;">
+                <h3 style="margin-bottom: 1rem;">🎯 El Problema Explícito</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
+                    <div style="background: rgba(231,76,60,0.2); padding: 1rem; border-radius: 10px;">
+                        <h4 style="color: #c0392b; margin-bottom: 0.5rem;">❌ Múltiples AFDs</h4>
+                        <p style="font-size: 1rem; line-height: 1.4;">
+                            <strong>"if":</strong> 2 + 2 = 4 transiciones<br>
+                            <strong>"ifVariable":</strong> 10 + 10 + rechazos = 22+ transiciones
+                        </p>
+                    </div>
+                    <div style="background: rgba(39,174,96,0.2); padding: 1rem; border-radius: 10px;">
+                        <h4 style="color: #27ae60; margin-bottom: 0.5rem;">✅ AFD Único</h4>
+                        <p style="font-size: 1rem; line-height: 1.4;">
+                            <strong>"if":</strong> 2 transiciones<br>
+                            <strong>"ifVariable":</strong> 10 transiciones
+                        </p>
+                    </div>
+                </div>
+                <p style="font-size: 1.1rem; margin-top: 1rem; font-weight: bold;">
+                    <span class="highlight">El AFD único es consistentemente O(n)</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide07.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide09.html'">Siguiente →</button>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide09.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide07.html';
+            }
+        });
+
+        // Configuración de autómatas
+        const automataOptions = {
+            physics: { enabled: false },
+            nodes: {
+                shape: 'circle',
+                size: 30,
+                font: { size: 12, color: '#333' },
+                borderWidth: 2
+            },
+            edges: {
+                arrows: { to: { enabled: true } },
+                font: { size: 10, color: '#666' },
+                smooth: { enabled: true, type: 'curvedCW' }
+            }
+        };
+
+        // AFD Palabras Reservadas
+        function createKeywordsAutomata() {
+            const nodes = new vis.DataSet([
+                { id: 0, label: 'START', color: { background: '#e3f2fd', border: '#2196f3' }, x: 0, y: 0 },
+                { id: 1, label: 'i', color: { background: '#fff3e0', border: '#ff9800' }, x: 100, y: 0 },
+                { id: 2, label: 'IF', color: { background: '#e8f5e9', border: '#4caf50' }, x: 200, y: 0 },
+                { id: 3, label: 'ERROR', color: { background: '#ffebee', border: '#f44336' }, x: 100, y: 80 }
+            ]);
+            
+            const edges = new vis.DataSet([
+                { from: 0, to: 1, label: 'i' },
+                { from: 1, to: 2, label: 'f' },
+                { from: 1, to: 3, label: 'otros', color: { color: '#f44336' } },
+                { from: 2, to: 3, label: 'letras', color: { color: '#f44336' } }
+            ]);
+            
+            return new vis.Network(document.getElementById('keywords-automata'), { nodes, edges }, automataOptions);
+        }
+
+        // AFD Identificador
+        function createIdentifierAutomata() {
+            const nodes = new vis.DataSet([
+                { id: 0, label: 'START', color: { background: '#e3f2fd', border: '#2196f3' }, x: 0, y: 0 },
+                { id: 1, label: 'ID', color: { background: '#e8f5e9', border: '#4caf50' }, x: 150, y: 0 }
+            ]);
+            
+            const edges = new vis.DataSet([
+                { from: 0, to: 1, label: 'a-z, A-Z' },
+                { from: 1, to: 1, label: 'a-z, A-Z, 0-9' }
+            ]);
+            
+            return new vis.Network(document.getElementById('identifier-automata'), { nodes, edges }, automataOptions);
+        }
+
+        // AFD Números
+        function createNumberAutomata() {
+            const nodes = new vis.DataSet([
+                { id: 0, label: 'START', color: { background: '#e3f2fd', border: '#2196f3' }, x: 0, y: 0 },
+                { id: 1, label: 'NUM', color: { background: '#e8f5e9', border: '#4caf50' }, x: 150, y: 0 }
+            ]);
+            
+            const edges = new vis.DataSet([
+                { from: 0, to: 1, label: '0-9' },
+                { from: 1, to: 1, label: '0-9' }
+            ]);
+            
+            return new vis.Network(document.getElementById('number-automata'), { nodes, edges }, automataOptions);
+        }
+
+        // AFD ÚNICO GLOBAL - SUPER AUTÓMATA
+        function createSingleAutomata() {
+            const nodes = new vis.DataSet([
+                // Estado inicial
+                { id: 0, label: 'START', color: { background: '#e3f2fd', border: '#2196f3' }, x: 0, y: 0, font: { size: 14, color: '#1976d2' } },
+                
+                // Estados para identificadores y palabras reservadas
+                { id: 1, label: 'i', color: { background: '#fff3e0', border: '#ff9800' }, x: -120, y: -80, font: { size: 12 } },
+                { id: 2, label: 'IF_FINAL', color: { background: '#c8e6c9', border: '#4caf50' }, x: -240, y: -80, font: { size: 11, color: '#2e7d32' } },
+                { id: 3, label: 'ID', color: { background: '#c8e6c9', border: '#4caf50' }, x: -120, y: 0, font: { size: 12, color: '#2e7d32' } },
+                
+                // Estados para números
+                { id: 4, label: 'NUM', color: { background: '#c8e6c9', border: '#4caf50' }, x: 120, y: -80, font: { size: 12, color: '#2e7d32' } },
+                
+                // Estados para strings
+                { id: 5, label: 'STR_START', color: { background: '#fff3e0', border: '#ff9800' }, x: 0, y: 80, font: { size: 11 } },
+                { id: 6, label: 'STR_CONTENT', color: { background: '#fff3e0', border: '#ff9800' }, x: -80, y: 140, font: { size: 11 } },
+                { id: 7, label: 'STR_FINAL', color: { background: '#c8e6c9', border: '#4caf50' }, x: 80, y: 140, font: { size: 11, color: '#2e7d32' } },
+                
+                // Estados para operadores (= vs ==, + vs ++)
+                { id: 8, label: 'EQUAL', color: { background: '#c8e6c9', border: '#4caf50' }, x: 200, y: 0, font: { size: 11, color: '#2e7d32' } },
+                { id: 9, label: 'EQUALS', color: { background: '#c8e6c9', border: '#4caf50' }, x: 320, y: 0, font: { size: 11, color: '#2e7d32' } },
+                { id: 10, label: 'PLUS', color: { background: '#c8e6c9', border: '#4caf50' }, x: 200, y: 80, font: { size: 11, color: '#2e7d32' } },
+                { id: 11, label: 'INCR', color: { background: '#c8e6c9', border: '#4caf50' }, x: 320, y: 80, font: { size: 11, color: '#2e7d32' } }
+            ]);
+            
+            const edges = new vis.DataSet([
+                // Desde START
+                { from: 0, to: 1, label: 'i', color: { color: '#1976d2' }, width: 2 },
+                { from: 0, to: 3, label: 'a-h,j-z,A-Z', color: { color: '#388e3c' }, width: 2 },
+                { from: 0, to: 4, label: '0-9', color: { color: '#388e3c' }, width: 2 },
+                { from: 0, to: 5, label: '\"', color: { color: '#f57c00' }, width: 2 },
+                { from: 0, to: 8, label: '=', color: { color: '#388e3c' }, width: 2 },
+                { from: 0, to: 10, label: '+', color: { color: '#388e3c' }, width: 2 },
+                
+                // Estados de identificador/IF
+                { from: 1, to: 2, label: 'f → IF', color: { color: '#4caf50' }, width: 2 },
+                { from: 1, to: 3, label: 'a-e,g-z,A-Z,0-9', color: { color: '#388e3c' } },
+                { from: 2, to: 3, label: 'a-z,A-Z,0-9 → ID', color: { color: '#ff5722' }, width: 2, dashes: true },
+                { from: 3, to: 3, label: 'a-z,A-Z,0-9', color: { color: '#388e3c' } },
+                
+                // Estados de números
+                { from: 4, to: 4, label: '0-9', color: { color: '#388e3c' } },
+                
+                // Estados de strings
+                { from: 5, to: 6, label: 'chars', color: { color: '#f57c00' } },
+                { from: 5, to: 7, label: '\"', color: { color: '#4caf50' }, width: 2 },
+                { from: 6, to: 6, label: 'chars', color: { color: '#f57c00' } },
+                { from: 6, to: 7, label: '\"', color: { color: '#4caf50' }, width: 2 },
+                
+                // Estados de operadores
+                { from: 8, to: 9, label: '= → ==', color: { color: '#4caf50' }, width: 2 },
+                { from: 10, to: 11, label: '+ → ++', color: { color: '#4caf50' }, width: 2 }
+            ]);
+            
+            const options = {
+                ...automataOptions,
+                physics: { enabled: false },
+                layout: { improvedLayout: false },
+                interaction: { dragNodes: false },
+                nodes: {
+                    ...automataOptions.nodes,
+                    size: 35,
+                    borderWidth: 3
+                },
+                edges: {
+                    ...automataOptions.edges,
+                    arrows: { to: { enabled: true, scaleFactor: 1.2 } },
+                    font: { size: 9, color: '#333', strokeWidth: 2, strokeColor: 'white' }
+                }
+            };
+            
+            return new vis.Network(document.getElementById('single-automata'), { nodes, edges }, options);
+        }
+
+        // Función para cambiar entre autómatas
+        function showAutomata(type) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.automata-canvas').forEach(canvas => canvas.style.display = 'none');
+            
+            document.querySelector(`.tab.${type}`).classList.add('active');
+            document.getElementById(`${type}-automata`).style.display = 'block';
+        }
+
+        // Inicializar autómatas cuando la página carga
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                createKeywordsAutomata();
+                createIdentifierAutomata();
+                createNumberAutomata();
+                createSingleAutomata();
+            }, 100);
+        });
+
+        // Animación de flujo
+        const processBoxes = document.querySelectorAll('.process-box');
+        let currentIndex = 0;
+        setInterval(() => {
+            processBoxes.forEach((box, i) => {
+                if (i === currentIndex) {
+                    box.style.transform = 'scale(1.05)';
+                    box.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+                } else {
+                    box.style.transform = 'scale(1)';
+                    box.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+                }
+            });
+            currentIndex = (currentIndex + 1) % processBoxes.length;
+        }, 1000);
+    </script>
+</body>
+</html>

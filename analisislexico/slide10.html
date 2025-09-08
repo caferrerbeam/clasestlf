@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maximal Munch - Regla de la Cadena Más Larga</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .main-container {
+            max-width: 1600px;
+            width: 100%;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .definition-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: scaleIn 0.8s ease-out 0.2s both;
+        }
+
+        .definition-title {
+            font-size: 2.5rem;
+            color: #FF6B6B;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .definition-box {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .definition-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .definition-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .comparison-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .strategy-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideInLeft 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .strategy-card:nth-child(2) {
+            animation-name: slideInRight;
+        }
+
+        .strategy-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .multiple-afd { background: linear-gradient(135deg, #f44336, #e57373); }
+        .single-afd { background: linear-gradient(135deg, #4caf50, #81c784); }
+
+        .code-container {
+            background: #2d2d2d;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-container pre {
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .implementation-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .implementation-title {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            counter-increment: step-counter;
+            position: relative;
+            padding: 1rem 0 1rem 3rem;
+            border-left: 2px solid #e0e0e0;
+            margin-left: 1rem;
+        }
+
+        .step-item:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -1.2rem;
+            top: 0.8rem;
+            background: #4ECDC4;
+            color: white;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .example-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .example-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .example-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .input-demo {
+            font-family: 'Consolas', monospace;
+            font-size: 2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: inline-block;
+        }
+
+        .conflict-resolution {
+            margin-top: 1.5rem;
+        }
+
+        .option {
+            background: rgba(255,255,255,0.1);
+            margin: 0.5rem 0;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option.winner {
+            background: rgba(255, 215, 0, 0.3);
+            border: 2px solid #FFD700;
+        }
+
+        .option-type {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .option-lexeme {
+            font-family: monospace;
+            opacity: 0.9;
+        }
+
+        .winner-badge {
+            background: #FFD700;
+            color: #333;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .highlight {
+            background: #FFD700;
+            color: #333;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">10 / 14</div>
+    
+    <h1>🍔 Maximal Munch - Regla de la Cadena Más Larga</h1>
+    
+    <div class="main-container">
+        <div class="definition-card">
+            <div class="definition-title">
+                <span>📖</span> Definición
+            </div>
+            
+            <div class="definition-box">
+                <div class="definition-text">Regla de la Cadena Más Larga</div>
+                <div class="definition-subtitle">
+                    Cuando múltiples patrones coinciden con el input desde la misma posición,
+                    <br><strong>siempre seleccionar el lexema más largo posible</strong>
+                </div>
+            </div>
+
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; color: #333; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                <strong style="color: #f57c00;">📝 En inglés:</strong> <em>"Maximal Munch Rule"</em> o <em>"Longest Match Rule"</em><br>
+                <strong style="color: #f57c00;">🎯 Propósito:</strong> Resolver ambigüedades cuando el input puede interpretarse de múltiples maneras
+            </div>
+
+            <!-- Nueva sección sobre el orden de las reglas -->
+            <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 15px; padding: 2rem; margin: 2rem 0;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.8rem; text-align: center;">🔄 Orden de Aplicación de Reglas</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 10px;">
+                        <h4 style="margin-bottom: 1rem; font-size: 1.3rem;">1️⃣ PRIMERO: Maximal Munch</h4>
+                        <p style="line-height: 1.6;">El AFD consume la <strong>cadena más larga posible</strong> que coincida con el patrón de identificador:</p>
+                        <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 5px; margin: 1rem 0; font-family: monospace;">
+                            Input: "ifVariable"<br>
+                            AFD: q0 → q1 → q1 → q1 → ... (10 chars)<br>
+                            Lexema: "ifVariable"
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 10px;">
+                        <h4 style="margin-bottom: 1rem; font-size: 1.3rem;">2️⃣ SEGUNDO: Tabla de Keywords</h4>
+                        <p style="line-height: 1.6;"><strong>Después</strong> de obtener el lexema completo, se consulta la tabla:</p>
+                        <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 5px; margin: 1rem 0; font-family: monospace;">
+                            Lexema: "ifVariable"<br>
+                            keywords.get("ifVariable") → null<br>
+                            Resultado: IDENTIFIER
+                        </div>
+                    </div>
+                </div>
+                <div style="background: rgba(255,215,0,0.2); border: 2px solid #ffd700; border-radius: 10px; padding: 1.5rem; margin-top: 1.5rem; text-align: center; color: #333;">
+                    <strong style="font-size: 1.2rem;">⚠️ CLAVE: Maximal Munch se aplica ANTES que la tabla de keywords</strong><br>
+                    <span style="font-size: 1rem;">Por eso "ifVariable" se reconoce como identificador completo, no como "if" + "Variable"</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <div class="strategy-card">
+                <div class="strategy-title multiple-afd">🔄 Múltiples AFDs</div>
+                
+                <div class="implementation-section">
+                    <div class="implementation-title">
+                        <span>⚙️</span> Implementación
+                    </div>
+                    <ol class="step-list">
+                        <li class="step-item">Cada AFD evalúa el input independientemente</li>
+                        <li class="step-item">Se recolectan TODOS los matches válidos</li>
+                        <li class="step-item">Se comparan las longitudes de lexemas</li>
+                        <li class="step-item">Se selecciona el lexema más largo</li>
+                    </ol>
+                </div>
+
+                <div class="code-container">
+                    <pre><code>public class MultipleAFDLexer {
+    public Token nextToken(String input, int pos) {
+        List&lt;Token&gt; candidates = new ArrayList&lt;&gt;();
+        
+        // Evaluar TODOS los AFDs
+        for (TokenMatcher matcher : matchers) {
+            Token token = matcher.tryMatch(input, pos);
+            if (token != null) {
+                candidates.add(token);
+            }
+        }
+        
+        // 🍔 MAXIMAL MUNCH: Elegir el más largo
+        return candidates.stream()
+            .max(Comparator.comparing(
+                token -> token.getLexeme().length()))
+            .orElseThrow(() -> 
+                new LexicalError("No valid token"));
+    }
+}</code></pre>
+                </div>
+
+                <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 1rem; border-radius: 5px; margin-top: 1rem;">
+                    <strong style="color: #d32f2f;">⚠️ Problema:</strong> Evalúa AFDs innecesariamente si ya encontró un match largo
+                </div>
+            </div>
+
+            <div class="strategy-card">
+                <div class="strategy-title single-afd">⚡ AFD Único Global</div>
+                
+                <div class="implementation-section">
+                    <div class="implementation-title">
+                        <span>🎯</span> Implementación
+                    </div>
+                    <ol class="step-list">
+                        <li class="step-item">Continúa leyendo mientras hay transiciones válidas</li>
+                        <li class="step-item">Marca el último estado de aceptación alcanzado</li>
+                        <li class="step-item">Al fallar, retorna el token del último estado válido</li>
+                        <li class="step-item">Automáticamente garantiza maximal munch</li>
+                    </ol>
+                </div>
+
+                <div class="code-container">
+                    <pre><code>public class SingleAFDLexer {
+    public Token nextToken(String input, int pos) {
+        State currentState = START;
+        State lastAcceptingState = null;
+        int lastAcceptingPos = pos;
+        int currentPos = pos;
+        
+        // 🍔 MAXIMAL MUNCH: Continúa mientras pueda
+        while (currentPos &lt; input.length()) {
+            char c = input.charAt(currentPos);
+            State nextState = transition(currentState, c);
+            
+            if (nextState == null) break; // No hay transición
+            
+            currentState = nextState;
+            currentPos++;
+            
+            // Marcar si es estado de aceptación
+            if (isAccepting(currentState)) {
+                lastAcceptingState = currentState;
+                lastAcceptingPos = currentPos;
+            }
+        }
+        
+        if (lastAcceptingState == null) {
+            throw new LexicalError("Invalid token");
+        }
+        
+        String lexeme = input.substring(pos, lastAcceptingPos);
+        return createToken(lastAcceptingState, lexeme);
+    }
+}</code></pre>
+                </div>
+
+                <div style="background: #e8f5e8; border-left: 4px solid #4caf50; padding: 1rem; border-radius: 5px; margin-top: 1rem;">
+                    <strong style="color: #2e7d32;">✅ Ventaja:</strong> Maximal munch automático, sin comparaciones adicionales
+                </div>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <div class="example-title">💡 Ejemplos de Resolución de Conflictos</div>
+            
+            <div class="example-grid">
+                <div class="example-card">
+                    <h3 style="margin-bottom: 1rem;">Identificador vs Keyword</h3>
+                    <div class="input-demo">ifVariable</div>
+                    
+                    <div style="background: rgba(0,0,0,0.1); border-radius: 10px; padding: 1rem; margin: 1rem 0;">
+                        <strong>🔄 Proceso paso a paso:</strong>
+                        <ol style="margin-top: 0.5rem; padding-left: 1.5rem; line-height: 1.8;">
+                            <li><strong>Maximal Munch:</strong> AFD consume "ifVariable" completo (10 chars)</li>
+                            <li><strong>Tabla keywords:</strong> keywords.get("ifVariable") → null</li>
+                            <li><strong>Resultado:</strong> new Token(IDENTIFIER, "ifVariable")</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="conflict-resolution">
+                        <div class="option">
+                            <div>
+                                <div class="option-type">❌ NO SE EVALÚA</div>
+                                <div class="option-lexeme">"if" (2 chars)</div>
+                            </div>
+                        </div>
+                        <div class="option winner">
+                            <div>
+                                <div class="option-type">IDENTIFIER</div>
+                                <div class="option-lexeme">"ifVariable" (10 chars)</div>
+                            </div>
+                            <div class="winner-badge">GANADOR</div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.9; background: rgba(76,175,80,0.1); padding: 0.5rem; border-radius: 5px;">
+                        ✅ Maximal Munch asegura que nunca se fragmente un identificador válido
+                    </p>
+                </div>
+
+                <div class="example-card">
+                    <h3 style="margin-bottom: 1rem;">Entero vs Decimal</h3>
+                    <div class="input-demo">123.456</div>
+                    
+                    <div class="conflict-resolution">
+                        <div class="option">
+                            <div>
+                                <div class="option-type">INTEGER</div>
+                                <div class="option-lexeme">"123" (3 chars)</div>
+                            </div>
+                        </div>
+                        <div class="option winner">
+                            <div>
+                                <div class="option-type">FLOAT</div>
+                                <div class="option-lexeme">"123.456" (7 chars)</div>
+                            </div>
+                            <div class="winner-badge">GANADOR</div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.9;">
+                        ✅ Se reconoce como número decimal completo
+                    </p>
+                </div>
+
+                <div class="example-card">
+                    <h3 style="margin-bottom: 1rem;">Keyword Real</h3>
+                    <div class="input-demo">if</div>
+                    
+                    <div style="background: rgba(0,0,0,0.1); border-radius: 10px; padding: 1rem; margin: 1rem 0;">
+                        <strong>🔄 Proceso paso a paso:</strong>
+                        <ol style="margin-top: 0.5rem; padding-left: 1.5rem; line-height: 1.8;">
+                            <li><strong>Maximal Munch:</strong> AFD consume "if" completo (2 chars)</li>
+                            <li><strong>Tabla keywords:</strong> keywords.get("if") → IF_KEYWORD</li>
+                            <li><strong>Resultado:</strong> new Token(IF_KEYWORD, "if")</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="conflict-resolution">
+                        <div class="option">
+                            <div>
+                                <div class="option-type">IDENTIFIER</div>
+                                <div class="option-lexeme">"if" (2 chars)</div>
+                            </div>
+                        </div>
+                        <div class="option winner">
+                            <div>
+                                <div class="option-type">IF_KEYWORD</div>
+                                <div class="option-lexeme">"if" (2 chars)</div>
+                            </div>
+                            <div class="winner-badge">GANADOR</div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.9; background: rgba(255,152,0,0.1); padding: 0.5rem; border-radius: 5px;">
+                        ✅ La tabla de keywords "overrides" el tipo de token después del reconocimiento
+                    </p>
+                </div>
+
+                <div class="example-card">
+                    <h3 style="margin-bottom: 1rem;">Operadores</h3>
+                    <div class="input-demo">++</div>
+                    
+                    <div class="conflict-resolution">
+                        <div class="option">
+                            <div>
+                                <div class="option-type">PLUS</div>
+                                <div class="option-lexeme">"+" (1 char)</div>
+                            </div>
+                        </div>
+                        <div class="option winner">
+                            <div>
+                                <div class="option-type">INCREMENT</div>
+                                <div class="option-lexeme">"++" (2 chars)</div>
+                            </div>
+                            <div class="winner-badge">GANADOR</div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.9;">
+                        ✅ Se consume como operador de incremento
+                    </p>
+                </div>
+
+                <div class="example-card">
+                    <h3 style="margin-bottom: 1rem;">Comentarios</h3>
+                    <div class="input-demo">/*comment*/</div>
+                    
+                    <div class="conflict-resolution">
+                        <div class="option">
+                            <div>
+                                <div class="option-type">DIVIDE</div>
+                                <div class="option-lexeme">"/" (1 char)</div>
+                            </div>
+                        </div>
+                        <div class="option winner">
+                            <div>
+                                <div class="option-type">COMMENT</div>
+                                <div class="option-lexeme">"/*comment*/" (11 chars)</div>
+                            </div>
+                            <div class="winner-badge">GANADOR</div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.9;">
+                        ✅ Se consume todo el bloque de comentario
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sección de construcción de lista de tokens -->
+            <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border-radius: 20px; padding: 2rem; margin-top: 2rem;">
+                <h3 style="margin-bottom: 2rem; font-size: 2rem; text-align: center;">🔄 nextToken() devuelve UN SOLO token</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: center; margin-bottom: 2rem;">
+                    <div style="background: rgba(255,193,7,0.9); border-radius: 15px; padding: 1.5rem; border: 2px solid #f57c00;">
+                        <h4 style="margin-bottom: 1rem; color: #bf360c; font-weight: bold;">⚠️ Importante</h4>
+                        <p style="line-height: 1.6; font-size: 1.1rem; color: #5d4037; font-weight: 500;">
+                            <strong style="color: #d84315;">nextToken()</strong> analiza el input desde la posición actual y devuelve <strong style="color: #d84315;">exactamente un token</strong>. 
+                            Para obtener todos los tokens, se debe llamar repetidamente.
+                        </p>
+                    </div>
+                    
+                    <div style="font-size: 3rem; color: #f39c12;">→</div>
+                    
+                    <div style="background: rgba(76,175,80,0.9); border-radius: 15px; padding: 1.5rem; border: 2px solid #388e3c;">
+                        <h4 style="margin-bottom: 1rem; color: #1b5e20; font-weight: bold;">✅ Solución</h4>
+                        <p style="line-height: 1.6; font-size: 1.1rem; color: #2e7d32; font-weight: 500;">
+                            Se implementa un <strong style="color: #1b5e20;">método tokenize()</strong> que llama a nextToken() en un loop 
+                            hasta encontrar el token EOF.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="background: #2c3e50; border-radius: 15px; padding: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; color: #3498db;">💻 Implementación completa del Lexer con Tabla de Símbolos</h4>
+                    <pre style="color: #ecf0f1; font-size: 0.85rem; line-height: 1.4; overflow-x: auto; margin: 0;"><code>public class CompleteLexer {
+    private String input;
+    private int position;
+    
+    // 📊 TABLA DE SÍMBOLOS - Palabras reservadas
+    private static final Map&lt;String, TokenType&gt; SYMBOL_TABLE = 
+        Map.of(
+            "if",     TokenType.IF_KEYWORD,
+            "else",   TokenType.ELSE_KEYWORD,
+            "while",  TokenType.WHILE_KEYWORD,
+            "for",    TokenType.FOR_KEYWORD,
+            "int",    TokenType.INT_TYPE,
+            "return", TokenType.RETURN_KEYWORD
+        );
+    
+    public CompleteLexer(String input) {
+        this.input = input;
+        this.position = 0;
+    }
+    
+    // ⭐ nextToken() devuelve UN SOLO token
+    public Token nextToken() throws LexicalException {
+        skipWhitespace();
+        
+        if (position >= input.length()) {
+            return new Token(TokenType.EOF, "", position);
+        }
+        
+        // 1️⃣ AFD único procesando desde position actual
+        Token rawToken = processSingleAFD();
+        
+        // 2️⃣ CONSULTAR TABLA DE SÍMBOLOS después de Maximal Munch
+        Token finalToken = checkSymbolTable(rawToken);
+        
+        position += finalToken.getLexeme().length();
+        return finalToken;
+    }
+    
+    // 📋 Consultar tabla de símbolos
+    private Token checkSymbolTable(Token token) {
+        if (token.getType() == TokenType.IDENTIFIER) {
+            // ⚠️ DESPUÉS de Maximal Munch, verificar si es palabra reservada
+            TokenType keywordType = SYMBOL_TABLE.get(token.getLexeme());
+            if (keywordType != null) {
+                return new Token(keywordType, token.getLexeme(), token.getPosition());
+            }
+        }
+        return token; // Mantener el token original
+    }
+    
+    // 🔄 tokenize() construye la lista COMPLETA
+    public List&lt;Token&gt; tokenize() throws LexicalException {
+        List&lt;Token&gt; tokens = new ArrayList&lt;&gt;();
+        
+        while (true) {
+            Token token = nextToken(); // 📍 UNA llamada = UN token
+            tokens.add(token);
+            
+            if (token.getType() == TokenType.EOF) {
+                break; // Terminamos cuando encontramos EOF
+            }
+        }
+        
+        return tokens;
+    }
+    
+    // Ejemplo de uso mostrando la tabla de símbolos en acción:
+    public static void main(String[] args) {
+        CompleteLexer lexer = new CompleteLexer("if ifVariable while x");
+        List&lt;Token&gt; tokens = lexer.tokenize();
+        
+        // 🔍 RESULTADO mostrando tabla de símbolos:
+        // Token(IF_KEYWORD, "if")        ← Encontrado en tabla
+        // Token(IDENTIFIER, "ifVariable") ← NO en tabla (Maximal Munch)
+        // Token(WHILE_KEYWORD, "while")   ← Encontrado en tabla  
+        // Token(IDENTIFIER, "x")         ← NO en tabla
+        // Token(EOF, "")
+        
+        for (Token token : tokens) {
+            System.out.println(token);
+        }
+    }
+}</code></pre>
+                </div>
+
+                <!-- Nueva sección explicando la tabla de símbolos -->
+                <div style="background: rgba(52, 152, 219, 0.2); border: 2px solid #3498db; border-radius: 15px; padding: 1.5rem; margin-top: 1.5rem;">
+                    <h4 style="color: #2980b9; margin-bottom: 1rem;">📊 Tabla de Símbolos - Orden Crítico</h4>
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5rem; align-items: center;">
+                        <div style="background: rgba(244, 67, 54, 0.9); padding: 1rem; border-radius: 10px; border: 2px solid #d32f2f;">
+                            <h5 style="color: #b71c1c; margin-bottom: 0.5rem; font-weight: bold;">❌ ORDEN INCORRECTO</h5>
+                            <p style="font-size: 0.9rem; line-height: 1.5; color: #1a1a1a; font-weight: 500;">
+                                1. Consultar tabla de símbolos<br>
+                                2. Aplicar Maximal Munch<br><br>
+                                <strong style="color: #b71c1c;">Problema:</strong> "ifVariable" se reconocería como "if" + "Variable"
+                            </p>
+                        </div>
+                        
+                        <div style="font-size: 2rem; color: #e74c3c;">⚠️</div>
+                        
+                        <div style="background: rgba(76, 175, 80, 0.9); padding: 1rem; border-radius: 10px; border: 2px solid #388e3c;">
+                            <h5 style="color: #1b5e20; margin-bottom: 0.5rem; font-weight: bold;">✅ ORDEN CORRECTO</h5>
+                            <p style="font-size: 0.9rem; line-height: 1.5; color: #1a1a1a; font-weight: 500;">
+                                1. Aplicar Maximal Munch<br>
+                                2. Consultar tabla de símbolos<br><br>
+                                <strong style="color: #1b5e20;">Resultado:</strong> "ifVariable" se reconoce completo, luego se verifica si es palabra reservada (no lo es)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; border-radius: 10px; padding: 1.5rem; margin-top: 1.5rem;">
+                    <h4 style="color: #27ae60; margin-bottom: 1rem;">🎯 Flujo detallado con Tabla de Símbolos para "if ifVariable while":</h4>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        <!-- Llamada 1 -->
+                        <div style="background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 8px; border: 2px solid #27ae60;">
+                            <h5 style="color: #1b5e20; margin-bottom: 0.5rem; font-weight: bold;">📍 Llamada 1</h5>
+                            <p style="font-size: 0.85rem; line-height: 1.4; color: #2e7d32; font-weight: 500;">
+                                <strong style="color: #1b5e20;">1. AFD:</strong> "if" → IDENTIFIER<br>
+                                <strong style="color: #1b5e20;">2. Tabla:</strong> SYMBOL_TABLE.get("if") = IF_KEYWORD<br>
+                                <strong style="color: #1b5e20;">3. Resultado:</strong> Token(IF_KEYWORD, "if")
+                            </p>
+                        </div>
+                        
+                        <!-- Llamada 2 -->
+                        <div style="background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 8px; border: 2px solid #27ae60;">
+                            <h5 style="color: #1b5e20; margin-bottom: 0.5rem; font-weight: bold;">📍 Llamada 2</h5>
+                            <p style="font-size: 0.85rem; line-height: 1.4; color: #2e7d32; font-weight: 500;">
+                                <strong style="color: #1b5e20;">1. AFD:</strong> "ifVariable" → IDENTIFIER (Maximal Munch!)<br>
+                                <strong style="color: #1b5e20;">2. Tabla:</strong> SYMBOL_TABLE.get("ifVariable") = null<br>
+                                <strong style="color: #1b5e20;">3. Resultado:</strong> Token(IDENTIFIER, "ifVariable")
+                            </p>
+                        </div>
+                        
+                        <!-- Llamada 3 -->
+                        <div style="background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 8px; border: 2px solid #27ae60;">
+                            <h5 style="color: #1b5e20; margin-bottom: 0.5rem; font-weight: bold;">📍 Llamada 3</h5>
+                            <p style="font-size: 0.85rem; line-height: 1.4; color: #2e7d32; font-weight: 500;">
+                                <strong style="color: #1b5e20;">1. AFD:</strong> "while" → IDENTIFIER<br>
+                                <strong style="color: #1b5e20;">2. Tabla:</strong> SYMBOL_TABLE.get("while") = WHILE_KEYWORD<br>
+                                <strong style="color: #1b5e20;">3. Resultado:</strong> Token(WHILE_KEYWORD, "while")
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 8px; text-align: center; border: 2px solid #4caf50;">
+                        <strong style="color: #1b5e20; font-size: 1.1rem;">🏆 Lista Final:</strong> 
+                        <span style="color: #2e7d32; font-weight: bold; font-size: 1rem;">[IF_KEYWORD, IDENTIFIER, WHILE_KEYWORD, EOF]</span>
+                    </div>
+                    
+                    <div style="background: rgba(255, 193, 7, 0.9); border: 2px solid #f57c00; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                        <strong style="color: #bf360c; font-size: 1rem;">💡 Punto Clave:</strong> 
+                        <span style="color: #5d4037; font-size: 0.95rem; font-weight: 500;">
+                            "ifVariable" NO se fragmenta en "if" + "Variable" porque Maximal Munch se aplica ANTES que la tabla de símbolos.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,215,0,0.2); border: 2px solid #FFD700; border-radius: 15px; padding: 2rem; margin-top: 2rem; text-align: center;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">🏆 Conclusión</h3>
+                <p style="font-size: 1.2rem; line-height: 1.6;">
+                    <span class="highlight">Maximal Munch</span> es fundamental para lexers deterministas.<br>
+                    <strong>nextToken()</strong> devuelve un solo token con Maximal Munch garantizado.<br>
+                    <strong>Tabla de símbolos</strong> se consulta DESPUÉS de Maximal Munch.<br>
+                    <strong>tokenize()</strong> construye la lista completa llamando nextToken() repetidamente.
+                </p>
+                
+                <div style="background: rgba(33, 150, 243, 0.9); border-radius: 10px; padding: 1rem; margin-top: 1rem; border: 2px solid #1976d2;">
+                    <strong style="color: #0d47a1; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(255,255,255,0.7);">🔄 Orden correcto: AFD → Maximal Munch → Tabla de Símbolos → Token Final</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide09.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide11.html'">Siguiente →</button>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide11.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide09.html';
+            }
+        });
+
+        // Animación de resaltado de ejemplos
+        const winnerOptions = document.querySelectorAll('.option.winner');
+        setInterval(() => {
+            winnerOptions.forEach(option => {
+                option.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    option.style.transform = 'scale(1)';
+                }, 500);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00BCD4 0%, #3F51B5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .tests-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .test-category {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: scaleIn 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .test-category:nth-child(1) { animation-delay: 0.2s; }
+        .test-category:nth-child(2) { animation-delay: 0.4s; }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .valid-tests .category-title { color: #4CAF50; }
+        .invalid-tests .category-title { color: #f44336; }
+
+        .test-list {
+            list-style: none;
+        }
+
+        .test-item {
+            background: #f5f5f5;
+            padding: 1rem;
+            margin: 0.8rem 0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideInLeft 0.8s ease-out;
+            animation-fill-mode: both;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .test-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .test-item:nth-child(1) { animation-delay: 0.6s; }
+        .test-item:nth-child(2) { animation-delay: 0.7s; }
+        .test-item:nth-child(3) { animation-delay: 0.8s; }
+        .test-item:nth-child(4) { animation-delay: 0.9s; }
+
+        .test-icon {
+            font-size: 1.5rem;
+        }
+
+        .test-text {
+            color: #333;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .test-code {
+            font-family: 'Consolas', monospace;
+            background: #e3f2fd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            color: #1976D2;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .test-status {
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-pass {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-fail {
+            background: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">11 / 14</div>
+    
+    <h1>🧪 Testing del Analizador Léxico</h1>
+    
+    <div class="tests-container">
+        <div class="test-category valid-tests">
+            <div class="category-header">
+                <div class="category-icon">✅</div>
+                <div class="category-title">Casos Válidos</div>
+            </div>
+            <ul class="test-list">
+                <li class="test-item">
+                    <span class="test-icon">🆔</span>
+                    <span class="test-text">
+                        Identificadores: <span class="test-code">myVariable</span>
+                    </span>
+                    <span class="test-status status-pass">PASS</span>
+                </li>
+                <li class="test-item">
+                    <span class="test-icon">🔢</span>
+                    <span class="test-text">
+                        Números: <span class="test-code">3.14159</span>
+                    </span>
+                    <span class="test-status status-pass">PASS</span>
+                </li>
+                <li class="test-item">
+                    <span class="test-icon">💬</span>
+                    <span class="test-text">
+                        Strings: <span class="test-code">"Hello World"</span>
+                    </span>
+                    <span class="test-status status-pass">PASS</span>
+                </li>
+                <li class="test-item">
+                    <span class="test-icon">🔑</span>
+                    <span class="test-text">
+                        Keywords: <span class="test-code">if, while, return</span>
+                    </span>
+                    <span class="test-status status-pass">PASS</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-category invalid-tests">
+            <div class="category-header">
+                <div class="category-icon">❌</div>
+                <div class="category-title">Casos Inválidos</div>
+            </div>
+            <ul class="test-list">
+                <li class="test-item">
+                    <span class="test-icon">⚠️</span>
+                    <span class="test-text">
+                        Token desconocido: <span class="test-code">@#$</span>
+                    </span>
+                    <span class="test-status status-fail">ERROR</span>
+                </li>
+                <li class="test-item">
+                    <span class="test-icon">🔓</span>
+                    <span class="test-text">
+                        String sin cierre: <span class="test-code">"unclosed</span>
+                    </span>
+                    <span class="test-status status-fail">ERROR</span>
+                </li>
+                <li class="test-item">
+                    <span class="test-icon">🗒️</span>
+                    <span class="test-text">
+                        Comentario no terminado: <span class="test-code">/* no end</span>
+                    </span>
+                    <span class="test-status status-fail">ERROR</span>
+                </li>
+                <li class="test-item">
+                    <span class="test-icon">🚫</span>
+                    <span class="test-text">
+                        Identificador inválido: <span class="test-code">9variable</span>
+                    </span>
+                    <span class="test-status status-fail">ERROR</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide10.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide12.html'">Siguiente →</button>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide12.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide10.html';
+            }
+        });
+
+        // Animación de parpadeo para los status
+        const statuses = document.querySelectorAll('.test-status');
+        setInterval(() => {
+            statuses.forEach(status => {
+                status.style.opacity = '0.7';
+                setTimeout(() => {
+                    status.style.opacity = '1';
+                }, 500);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

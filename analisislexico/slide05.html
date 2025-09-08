@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manejo de Palabras Reservadas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 52%, #2BFF88 90%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .problem-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .problem-title {
+            font-size: 1.5rem;
+            color: #d32f2f;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .problem-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .solution-section {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.8s ease-out 0.4s both;
+        }
+
+        .solution-title {
+            font-size: 1.5rem;
+            color: #388e3c;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .strategy-steps {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            position: relative;
+            animation: scaleIn 0.6s ease-out;
+            animation-fill-mode: both;
+            transition: transform 0.3s;
+        }
+
+        .step:hover {
+            transform: scale(1.05);
+        }
+
+        .step:nth-child(1) { animation-delay: 0.6s; }
+        .step:nth-child(2) { animation-delay: 0.8s; }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #ffd700;
+            color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .step-content {
+            margin-top: 0.5rem;
+        }
+
+        .code-container {
+            background: #2d2d2d;
+            border-radius: 15px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            animation: fadeIn 1s ease-out 1s both;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        pre {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .advantage {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-radius: 10px;
+            animation: slideInLeft 0.8s ease-out 1.2s both;
+        }
+
+        .advantage-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            color: white;
+            opacity: 0.9;
+        }
+
+        .keyword-table {
+            display: inline-block;
+            background: #2d3436;
+            color: #74b9ff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            margin: 0.5rem;
+            animation: pulse 2s infinite;
+            font-family: monospace;
+            font-weight: bold;
+            border: 2px solid #0984e3;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(9, 132, 227, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(9, 132, 227, 0.6); }
+        }
+
+        .problem-demo {
+            background: #ffe6e6;
+            border: 2px solid #d63031;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .demo-title {
+            color: #d63031;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .confusion-example {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-example {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+
+        .input-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .input-code {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #2d3436;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+        }
+
+        .wrong-analysis {
+            background: #ff7675;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .correct-analysis {
+            background: #00b894;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .solution-highlight {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .highlight-keyword {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">5 / 14</div>
+    
+    <div class="container">
+        <h1>🔤 Manejo de Palabras Reservadas</h1>
+        
+        <div class="problem-section">
+            <h2 class="problem-title">
+                <span>⚠️</span> Problema
+            </h2>
+            <p class="problem-text">
+                Las palabras reservadas (<span class="highlight-keyword">if</span>, 
+                <span class="highlight-keyword">while</span>, 
+                <span class="highlight-keyword">return</span>) son un caso especial de identificador.
+                ¿Cómo distinguirlas de identificadores normales?
+            </p>
+
+            <div class="problem-demo">
+                <div class="demo-title">
+                    <span>🚨</span> Confusión del Analizador
+                </div>
+                
+                <div class="confusion-example">
+                    <div class="input-example">
+                        <div class="input-label">Entrada 1:</div>
+                        <div class="input-code">if</div>
+                        <div class="wrong-analysis">❌ Sin tabla: IDENTIFIER</div>
+                        <div class="correct-analysis">✅ Con tabla: IF_KEYWORD</div>
+                    </div>
+
+                    <div class="input-example">
+                        <div class="input-label">Entrada 2:</div>
+                        <div class="input-code">ifVariable</div>
+                        <div class="correct-analysis">✅ Ambos: IDENTIFIER</div>
+                    </div>
+
+                    <div class="input-example">
+                        <div class="input-label">Entrada 3:</div>
+                        <div class="input-code">while</div>
+                        <div class="wrong-analysis">❌ Sin tabla: IDENTIFIER</div>
+                        <div class="correct-analysis">✅ Con tabla: WHILE_KEYWORD</div>
+                    </div>
+                </div>
+
+                <p style="margin-top: 1.5rem; font-size: 1.1rem; color: #2d3436;">
+                    <strong>Sin tabla de keywords:</strong> Todo se reconoce como identificador → 
+                    <span style="color: #d63031;">Pérdida de información semántica</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="solution-section">
+            <h2 class="solution-title">
+                <span>✅</span> Estrategia Usada
+            </h2>
+            
+            <div class="strategy-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>AFD reconoce como identificador</strong><br>
+                        El autómata trata toda secuencia válida como identificador inicialmente
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Consulta tabla de keywords</strong><br>
+                        <span class="keyword-table">if → IF</span>
+                        <span class="keyword-table">while → WHILE</span>
+                        <span class="keyword-table">return → RETURN</span>
+                        <span class="keyword-table">class → CLASS</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-container">
+                <pre><code class="language-java">import java.util.HashMap;
+import java.util.Map;
+
+public class Lexer {
+    private Map&lt;String, TokenType&gt; keywords;
+    
+    public Lexer() {
+        keywords = new HashMap&lt;&gt;();
+        keywords.put("if", TokenType.KEYWORD_IF);
+        keywords.put("while", TokenType.KEYWORD_WHILE);
+        keywords.put("return", TokenType.KEYWORD_RETURN);
+        keywords.put("class", TokenType.KEYWORD_CLASS);
+        keywords.put("public", TokenType.KEYWORD_PUBLIC);
+    }
+    
+    public Token matchIdentifier(String lexeme) {
+        // Primero verificamos si es palabra reservada
+        if (keywords.containsKey(lexeme)) {
+            return new Token(keywords.get(lexeme), lexeme);
+        } else {
+            // Si no, es un identificador normal
+            return new Token(TokenType.IDENTIFIER, lexeme);
+        }
+    }
+}</code></pre>
+            </div>
+
+            <div class="solution-highlight">
+                <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">💡 Solución Elegante</h3>
+                <p style="font-size: 1.2rem; line-height: 1.6;">
+                    ✅ Un solo AFD para identificadores<br>
+                    ✅ Tabla de hash para palabras reservadas<br>
+                    ✅ Decisión post-reconocimiento<br>
+                    ✅ Fácil mantenimiento y extensión
+                </p>
+            </div>
+
+            <div class="advantage">
+                <div class="advantage-title">🏆 Ventaja</div>
+                <p>Evita conflictos y mantiene un único AFD para identificadores. 
+                La tabla de keywords permite agregar nuevas palabras reservadas fácilmente.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide04.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide06.html'">Siguiente →</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide06.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide04.html';
+            }
+        });
+
+        // Animación de resaltado de keywords
+        const keywords = document.querySelectorAll('.highlight-keyword');
+        let index = 0;
+        setInterval(() => {
+            keywords.forEach((k, i) => {
+                k.style.transform = i === index ? 'scale(1.2)' : 'scale(1)';
+            });
+            index = (index + 1) % keywords.length;
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Qué es un Token?</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .definition-card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .definition-title {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .definition-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: #555;
+        }
+
+        .token-anatomy {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .anatomy-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .token-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .token-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .attribute-box {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .attribute-label {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 0.3rem;
+        }
+
+        .attribute-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .structure-card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .code-section {
+            background: #2d2d2d;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .examples-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .example-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            color: white;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2rem;
+            align-items: center;
+            animation: fadeIn 1s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .example-item:nth-child(1) { animation-delay: 0.2s; }
+        .example-item:nth-child(2) { animation-delay: 0.4s; }
+        .example-item:nth-child(3) { animation-delay: 0.6s; }
+        .example-item:nth-child(4) { animation-delay: 0.8s; }
+
+        .example-input {
+            font-family: monospace;
+            font-size: 1.3rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        .example-token {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .token-field {
+            text-align: center;
+        }
+
+        .field-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-bottom: 0.2rem;
+        }
+
+        .field-value {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background: rgba(255,255,255,0.3);
+            padding: 0.3rem 0.5rem;
+            border-radius: 5px;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .important-note {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+            font-weight: bold;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">4 / 14</div>
+    
+    <h1>🎯 ¿Qué es un Token?</h1>
+    
+    <div class="main-container">
+        <div class="definition-card">
+            <div class="definition-title">
+                <span>📦</span> Definición
+            </div>
+            <div class="definition-text">
+                Un <strong>token</strong> es la unidad léxica mínima con significado
+                en un lenguaje de programación. Es el resultado del análisis léxico
+                y representa elementos como identificadores, números, operadores, etc.
+            </div>
+            
+            <div class="token-anatomy">
+                <div class="anatomy-title">Anatomía de un Token</div>
+                <div class="token-visual">
+                    <div class="token-box">
+                        "while"
+                    </div>
+                    <div class="arrow">→</div>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="attribute-box">
+                            <div class="attribute-label">Tipo</div>
+                            <div class="attribute-value">WHILE</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-label">Lexema</div>
+                            <div class="attribute-value">"while"</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-label">Línea</div>
+                            <div class="attribute-value">15</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="important-note">
+                💡 El token contiene toda la información necesaria
+                para las siguientes fases del compilador
+            </div>
+        </div>
+
+        <div class="structure-card">
+            <div class="definition-title">
+                <span>💻</span> Estructura en Java
+            </div>
+            
+            <div class="code-section">
+                <pre><code class="language-java">public class Token {
+    private TokenType type;      // Tipo del token
+    private String lexeme;        // Texto original
+    private Object value;         // Valor (si aplica)
+    private int line;            // Línea en el código
+    private int column;          // Columna en el código
+    
+    public Token(TokenType type, String lexeme, 
+                 int line, int column) {
+        this.type = type;
+        this.lexeme = lexeme;
+        this.line = line;
+        this.column = column;
+        this.value = extractValue(type, lexeme);
+    }
+    
+    private Object extractValue(TokenType type, 
+                                String lexeme) {
+        switch(type) {
+            case INTEGER:
+                return Integer.parseInt(lexeme);
+            case FLOAT:
+                return Float.parseFloat(lexeme);
+            case STRING:
+                return lexeme.substring(1, 
+                       lexeme.length() - 1);
+            default:
+                return lexeme;
+        }
+    }
+}</code></pre>
+            </div>
+
+            <div class="examples-grid">
+                <div class="example-item">
+                    <div class="example-input">count</div>
+                    <div class="example-token">
+                        <div class="token-field">
+                            <div class="field-label">Tipo</div>
+                            <div class="field-value">IDENTIFIER</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Lexema</div>
+                            <div class="field-value">"count"</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Valor</div>
+                            <div class="field-value">"count"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="example-input">3.14</div>
+                    <div class="example-token">
+                        <div class="token-field">
+                            <div class="field-label">Tipo</div>
+                            <div class="field-value">FLOAT</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Lexema</div>
+                            <div class="field-value">"3.14"</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Valor</div>
+                            <div class="field-value">3.14f</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <div class="example-input">"Hello"</div>
+                    <div class="example-token">
+                        <div class="token-field">
+                            <div class="field-label">Tipo</div>
+                            <div class="field-value">STRING</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Lexema</div>
+                            <div class="field-value">"\"Hello\""</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Valor</div>
+                            <div class="field-value">"Hello"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item" style="background: linear-gradient(135deg, #f77062 0%, #fe5196 100%);">
+                    <div class="example-input">while</div>
+                    <div class="example-token">
+                        <div class="token-field">
+                            <div class="field-label">Tipo</div>
+                            <div class="field-value">WHILE</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Lexema</div>
+                            <div class="field-value">"while"</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="field-label">Valor</div>
+                            <div class="field-value">null</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide03.html'">← Anterior</button>
+        <button class="nav-btn" onclick="window.location.href='slide05.html'">Siguiente →</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                window.location.href = 'slide05.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide03.html';
+            }
+        });
+    </script>
+</body>
+</html>
