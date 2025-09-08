@@ -62,215 +62,12 @@
             margin: 0 auto;
         }
 
-        .afd-examples {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 3rem;
-            margin-top: 3rem;
-        }
-
-        .example-card {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            animation: slideInLeft 0.8s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .example-card:nth-child(2) {
-            animation-name: slideInRight;
-        }
-
-        .example-title {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            padding: 1rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        .afd-diagram {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .state {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .state.initial {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
-        }
-
-        .state.accepting {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
-            border: 4px solid #FFD54F;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .transition {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 1rem 0;
-            font-size: 1.1rem;
-        }
-
-        .transition-arrow {
-            color: #667eea;
-            font-size: 1.5rem;
-        }
-
-        .transition-label {
-            background: #f0f0f0;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-family: monospace;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .alphabet-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .alphabet-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .alphabet-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        .alphabet-item {
-            background: #667eea;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .table-section {
-            margin-top: 2rem;
-        }
-
-        .table-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .transition-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .transition-table th {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .transition-table td {
-            padding: 0.8rem;
-            text-align: center;
-            border: 1px solid #e0e0e0;
-            font-family: monospace;
-            font-weight: bold;
-        }
-
-        .transition-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        .error-state {
-            color: #f44336;
-            font-weight: bold;
-        }
-
-        .code-section {
-            background: #2d2d2d;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            overflow-x: auto;
-        }
-
-        .code-section pre {
-            color: #f8f8f2;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            margin: 0;
-            font-family: 'Consolas', 'Monaco', monospace;
-        }
-
-        .code-title {
-            color: #667eea;
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
 
         @keyframes slideDown {
             from { transform: translateY(-30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
-        @keyframes slideInLeft {
-            from { transform: translateX(-50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
 
         @keyframes scaleIn {
             from { transform: scale(0.8); opacity: 0; }
@@ -402,98 +199,12 @@
             <!-- AFD Identificadores -->
             <div id="identifier-interactive" class="afd-interactive">
                 <div id="identifier-visual-canvas" class="afd-visual-canvas"></div>
-                <div class="afd-description">
-                    <h4>🔤 AFD para Identificadores</h4>
-                    <p><strong>Patrón:</strong> [a-zA-Z][a-zA-Z0-9]* • <strong>Estados:</strong> q₀ (inicial), q₁ (aceptación) • <strong>Acepta:</strong> variable, count, x1, myVar</p>
-                </div>
-            </div>
-            
-            <!-- AFD Números -->
-            <div id="number-interactive" class="afd-interactive" style="display: none;">
-                <div id="number-visual-canvas" class="afd-visual-canvas"></div>
-                <div class="afd-description">
-                    <h4>🔢 AFD para Números</h4>
-                    <p><strong>Patrón:</strong> [0-9]+ • <strong>Estados:</strong> q₀ (inicial), q₁ (aceptación) • <strong>Acepta:</strong> 123, 0, 9999</p>
-                </div>
-            </div>
-            
-            <!-- AFD Strings -->
-            <div id="string-interactive" class="afd-interactive" style="display: none;">
-                <div id="string-visual-canvas" class="afd-visual-canvas"></div>
-                <div class="afd-description">
-                    <h4>📝 AFD para Strings</h4>
-                    <p><strong>Patrón:</strong> "[^"]*" • <strong>Estados:</strong> q₀ (inicial), q₁ (contenido), q₂ (aceptación) • <strong>Acepta:</strong> "hello", "123", ""</p>
-                </div>
-            </div>
-            
-            <!-- AFD Operadores -->
-            <div id="operator-interactive" class="afd-interactive" style="display: none;">
-                <div id="operator-visual-canvas" class="afd-visual-canvas"></div>
-                <div class="afd-description">
-                    <h4>⚡ AFD para Operadores</h4>
-                    <p><strong>Patrón:</strong> +, ++, =, == • <strong>Maximal Munch:</strong> "++" se prefiere sobre "+" • "==" se prefiere sobre "="</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="afd-examples">
-            <div class="example-card">
-                <div class="example-title">🔤 AFD para Identificadores</div>
                 
-                <div class="afd-diagram">
-                    <div class="state initial">q0</div>
-                    <div class="transition">
-                        <span class="transition-label">[a-zA-Z]</span>
-                        <span class="transition-arrow">→</span>
-                    </div>
-                    <div class="state accepting">q1</div>
-                    <div class="transition">
-                        <span class="transition-label">[a-zA-Z0-9]</span>
-                        <span class="transition-arrow">↺</span>
-                    </div>
-                </div>
-
-                <div class="alphabet-section">
-                    <div class="alphabet-title">Alfabeto Σ:</div>
-                    <div class="alphabet-items">
-                        <div class="alphabet-item">a-z</div>
-                        <div class="alphabet-item">A-Z</div>
-                        <div class="alphabet-item">0-9</div>
-                        <div class="alphabet-item">_</div>
-                    </div>
-                </div>
-
-                <div class="table-section">
-                    <div class="table-title">Tabla de Transiciones</div>
-                    <table class="transition-table">
-                        <thead>
-                            <tr>
-                                <th>Estado</th>
-                                <th>Letra</th>
-                                <th>Dígito</th>
-                                <th>Otro</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>q0</strong></td>
-                                <td>q1</td>
-                                <td class="error-state">ERROR</td>
-                                <td class="error-state">ERROR</td>
-                            </tr>
-                            <tr>
-                                <td><strong>q1*</strong></td>
-                                <td>q1</td>
-                                <td>q1</td>
-                                <td class="error-state">ERROR</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="code-section">
-                    <div class="code-title">📝 Implementación en Java</div>
-                    <pre><code>public class IdentifierAFD {
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                    <!-- Código Java -->
+                    <div class="code-section" style="background: #272822; border-radius: 15px; padding: 1.5rem;">
+                        <h4 style="color: #66d9ef; margin-bottom: 1rem;">☕ Implementación Java</h4>
+                        <pre style="color: #f8f8f2; font-size: 0.85rem; line-height: 1.4; margin: 0;"><code>public class IdentifierAFD {
     enum State { Q0, Q1, ERROR }
     
     public Token recognize(String input, int pos) {
@@ -502,182 +213,353 @@
         
         while (pos < input.length()) {
             char c = input.charAt(pos);
+            state = transition(state, c);
             
-            switch (state) {
-                case Q0:  // Estado inicial
-                    if (Character.isLetter(c) || c == '_') {
-                        state = State.Q1;
-                        pos++;
-                    } else {
-                        return null;  // No es identificador
-                    }
-                    break;
-                    
-                case Q1:  // Estado de aceptación
-                    if (Character.isLetterOrDigit(c) || c == '_') {
-                        pos++;  // Continúa en Q1
-                    } else {
-                        // Fin del identificador
-                        String lexeme = input.substring(start, pos);
-                        return new Token(TokenType.IDENTIFIER, lexeme);
-                    }
-                    break;
-            }
+            if (state == State.ERROR) break;
+            pos++;
         }
         
-        // Fin del input
         if (state == State.Q1) {
             String lexeme = input.substring(start, pos);
-            return new Token(TokenType.IDENTIFIER, lexeme);
+            return new Token(IDENTIFIER, lexeme);
         }
         return null;
     }
+    
+    private State transition(State current, char c) {
+        switch (current) {
+            case Q0:
+                return Character.isLetter(c) ? 
+                       State.Q1 : State.ERROR;
+            case Q1:
+                return Character.isLetterOrDigit(c) ? 
+                       State.Q1 : State.ERROR;
+            default:
+                return State.ERROR;
+        }
+    }
 }</code></pre>
+                    </div>
+                    
+                    <!-- Tabla de Transiciones -->
+                    <div class="table-section">
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Tabla de Transiciones</h4>
+                        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 1rem; text-align: center;">Estado</th>
+                                    <th style="padding: 1rem; text-align: center;">a-z, A-Z</th>
+                                    <th style="padding: 1rem; text-align: center;">0-9</th>
+                                    <th style="padding: 1rem; text-align: center;">Otros</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;"><strong>q₀</strong> (inicial)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #e8f5e9;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; background: #c8e6c9;"><strong>q₁</strong> (final)</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #e8f5e9;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #e8f5e9;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                            <p style="margin: 0; color: #333; line-height: 1.6;">
+                                <strong>✅ Acepta:</strong> variable, count, x1, myVar<br>
+                                <strong>❌ Rechaza:</strong> 123var, $pecial, 2times
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="example-card">
-                <div class="example-title">🔢 AFD para Números</div>
+            
+            <!-- AFD Números -->
+            <div id="number-interactive" class="afd-interactive" style="display: none;">
+                <div id="number-visual-canvas" class="afd-visual-canvas"></div>
                 
-                <div class="afd-diagram">
-                    <div class="state initial">q0</div>
-                    <div class="transition">
-                        <span class="transition-label">[0-9]</span>
-                        <span class="transition-arrow">→</span>
-                    </div>
-                    <div class="state accepting">q1</div>
-                    <div class="transition">
-                        <span class="transition-label">.</span>
-                        <span class="transition-arrow">→</span>
-                    </div>
-                    <div class="state">q2</div>
-                    <div class="transition">
-                        <span class="transition-label">[0-9]</span>
-                        <span class="transition-arrow">→</span>
-                    </div>
-                    <div class="state accepting">q3</div>
-                </div>
-
-                <div class="alphabet-section">
-                    <div class="alphabet-title">Alfabeto Σ:</div>
-                    <div class="alphabet-items">
-                        <div class="alphabet-item">0-9</div>
-                        <div class="alphabet-item">.</div>
-                    </div>
-                </div>
-
-                <div class="table-section">
-                    <div class="table-title">Tabla de Transiciones</div>
-                    <table class="transition-table">
-                        <thead>
-                            <tr>
-                                <th>Estado</th>
-                                <th>Dígito</th>
-                                <th>Punto</th>
-                                <th>Otro</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>q0</strong></td>
-                                <td>q1</td>
-                                <td class="error-state">ERROR</td>
-                                <td class="error-state">ERROR</td>
-                            </tr>
-                            <tr>
-                                <td><strong>q1*</strong></td>
-                                <td>q1</td>
-                                <td>q2</td>
-                                <td class="error-state">ERROR</td>
-                            </tr>
-                            <tr>
-                                <td><strong>q2</strong></td>
-                                <td>q3</td>
-                                <td class="error-state">ERROR</td>
-                                <td class="error-state">ERROR</td>
-                            </tr>
-                            <tr>
-                                <td><strong>q3*</strong></td>
-                                <td>q3</td>
-                                <td class="error-state">ERROR</td>
-                                <td class="error-state">ERROR</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="code-section">
-                    <div class="code-title">📝 Implementación en Java</div>
-                    <pre><code>public class NumberAFD {
-    enum State { Q0, Q1, Q2, Q3, ERROR }
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                    <!-- Código Java -->
+                    <div class="code-section" style="background: #272822; border-radius: 15px; padding: 1.5rem;">
+                        <h4 style="color: #66d9ef; margin-bottom: 1rem;">☕ Implementación Java</h4>
+                        <pre style="color: #f8f8f2; font-size: 0.85rem; line-height: 1.4; margin: 0;"><code>public class NumberAFD {
+    enum State { Q0, Q1, ERROR }
     
     public Token recognize(String input, int pos) {
         State state = State.Q0;
         int start = pos;
-        TokenType type = TokenType.INTEGER;
         
         while (pos < input.length()) {
             char c = input.charAt(pos);
+            state = transition(state, c);
             
-            switch (state) {
-                case Q0:  // Estado inicial
-                    if (Character.isDigit(c)) {
-                        state = State.Q1;
-                        pos++;
-                    } else {
-                        return null;  // No es número
-                    }
-                    break;
-                    
-                case Q1:  // Entero (estado de aceptación)
-                    if (Character.isDigit(c)) {
-                        pos++;  // Continúa en Q1
-                    } else if (c == '.') {
-                        state = State.Q2;
-                        pos++;
-                        type = TokenType.FLOAT;
-                    } else {
-                        // Fin del entero
-                        String lexeme = input.substring(start, pos);
-                        return new Token(TokenType.INTEGER, lexeme);
-                    }
-                    break;
-                    
-                case Q2:  // Después del punto
-                    if (Character.isDigit(c)) {
-                        state = State.Q3;
-                        pos++;
-                    } else {
-                        return null;  // Error: punto sin dígitos
-                    }
-                    break;
-                    
-                case Q3:  // Decimal (estado de aceptación)
-                    if (Character.isDigit(c)) {
-                        pos++;  // Continúa en Q3
-                    } else {
-                        // Fin del decimal
-                        String lexeme = input.substring(start, pos);
-                        return new Token(TokenType.FLOAT, lexeme);
-                    }
-                    break;
-            }
+            if (state == State.ERROR) break;
+            pos++;
         }
         
-        // Fin del input - verificar estado de aceptación
         if (state == State.Q1) {
             String lexeme = input.substring(start, pos);
-            return new Token(TokenType.INTEGER, lexeme);
-        } else if (state == State.Q3) {
-            String lexeme = input.substring(start, pos);
-            return new Token(TokenType.FLOAT, lexeme);
+            return new Token(NUMBER, lexeme);
         }
         return null;
     }
+    
+    private State transition(State current, char c) {
+        switch (current) {
+            case Q0:
+                return Character.isDigit(c) ? 
+                       State.Q1 : State.ERROR;
+            case Q1:
+                return Character.isDigit(c) ? 
+                       State.Q1 : State.ERROR;
+            default:
+                return State.ERROR;
+        }
+    }
 }</code></pre>
+                    </div>
+                    
+                    <!-- Tabla de Transiciones -->
+                    <div class="table-section">
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Tabla de Transiciones</h4>
+                        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 1rem; text-align: center;">Estado</th>
+                                    <th style="padding: 1rem; text-align: center;">0-9</th>
+                                    <th style="padding: 1rem; text-align: center;">Otros</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;"><strong>q₀</strong> (inicial)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #e8f5e9;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; background: #c8e6c9;"><strong>q₁</strong> (final)</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #e8f5e9;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                            <p style="margin: 0; color: #333; line-height: 1.6;">
+                                <strong>✅ Acepta:</strong> 123, 0, 9999, 42<br>
+                                <strong>❌ Rechaza:</strong> abc, 12.34, +5, a123
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AFD Strings -->
+            <div id="string-interactive" class="afd-interactive" style="display: none;">
+                <div id="string-visual-canvas" class="afd-visual-canvas"></div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                    <!-- Código Java -->
+                    <div class="code-section" style="background: #272822; border-radius: 15px; padding: 1.5rem;">
+                        <h4 style="color: #66d9ef; margin-bottom: 1rem;">☕ Implementación Java</h4>
+                        <pre style="color: #f8f8f2; font-size: 0.85rem; line-height: 1.4; margin: 0;"><code>public class StringAFD {
+    enum State { Q0, Q1, Q2, ERROR }
+    
+    public Token recognize(String input, int pos) {
+        State state = State.Q0;
+        int start = pos;
+        
+        while (pos < input.length()) {
+            char c = input.charAt(pos);
+            state = transition(state, c);
+            
+            if (state == State.ERROR) break;
+            if (state == State.Q2) {
+                pos++; // Consume closing quote
+                break;
+            }
+            pos++;
+        }
+        
+        if (state == State.Q2) {
+            String lexeme = input.substring(start, pos);
+            return new Token(STRING, lexeme);
+        }
+        return null;
+    }
+    
+    private State transition(State current, char c) {
+        switch (current) {
+            case Q0:
+                return (c == '"') ? State.Q1 : State.ERROR;
+            case Q1:
+                return (c == '"') ? State.Q2 : State.Q1;
+            case Q2:
+                return State.ERROR; // Final state
+            default:
+                return State.ERROR;
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                    <!-- Tabla de Transiciones -->
+                    <div class="table-section">
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Tabla de Transiciones</h4>
+                        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 1rem; text-align: center;">Estado</th>
+                                    <th style="padding: 1rem; text-align: center;">"</th>
+                                    <th style="padding: 1rem; text-align: center;">Otros chars</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;"><strong>q₀</strong> (inicial)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #fff3e0;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;"><strong>q₁</strong> (contenido)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #e8f5e9;">q₂</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #fff3e0;">q₁</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; background: #c8e6c9;"><strong>q₂</strong> (final)</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                            <p style="margin: 0; color: #333; line-height: 1.6;">
+                                <strong>✅ Acepta:</strong> "hello", "123", "", "text with spaces"<br>
+                                <strong>❌ Rechaza:</strong> "unclosed, hello"world, text"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AFD Operadores -->
+            <div id="operator-interactive" class="afd-interactive" style="display: none;">
+                <div id="operator-visual-canvas" class="afd-visual-canvas"></div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                    <!-- Código Java -->
+                    <div class="code-section" style="background: #272822; border-radius: 15px; padding: 1.5rem;">
+                        <h4 style="color: #66d9ef; margin-bottom: 1rem;">☕ Implementación Java</h4>
+                        <pre style="color: #f8f8f2; font-size: 0.85rem; line-height: 1.4; margin: 0;"><code>public class OperatorAFD {
+    enum State { Q0, Q1, Q2, Q3, Q4, ERROR }
+    
+    public Token recognize(String input, int pos) {
+        State state = State.Q0;
+        int start = pos;
+        State lastAccepting = null;
+        int lastAcceptingPos = pos;
+        
+        while (pos < input.length()) {
+            char c = input.charAt(pos);
+            state = transition(state, c);
+            
+            if (state == State.ERROR) break;
+            
+            // Maximal Munch: guardar último estado válido
+            if (isAccepting(state)) {
+                lastAccepting = state;
+                lastAcceptingPos = pos + 1;
+            }
+            pos++;
+        }
+        
+        if (lastAccepting != null) {
+            String lexeme = input.substring(start, lastAcceptingPos);
+            return createToken(lastAccepting, lexeme);
+        }
+        return null;
+    }
+    
+    private State transition(State current, char c) {
+        switch (current) {
+            case Q0:
+                if (c == '+') return State.Q1;
+                if (c == '=') return State.Q3;
+                return State.ERROR;
+            case Q1: // PLUS
+                return (c == '+') ? State.Q2 : State.ERROR;
+            case Q3: // EQUAL  
+                return (c == '=') ? State.Q4 : State.ERROR;
+            default:
+                return State.ERROR;
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                    <!-- Tabla de Transiciones -->
+                    <div class="table-section">
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Tabla de Transiciones</h4>
+                        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 1rem; text-align: center;">Estado</th>
+                                    <th style="padding: 1rem; text-align: center;">+</th>
+                                    <th style="padding: 1rem; text-align: center;">=</th>
+                                    <th style="padding: 1rem; text-align: center;">Otros</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6;"><strong>q₀</strong> (inicial)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #fff3e0;">q₁</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #fff3e0;">q₃</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #c8e6c9;"><strong>q₁</strong> (PLUS)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #e8f5e9;">q₂</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #a5d6a7;"><strong>q₂</strong> (INCREMENT)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #c8e6c9;"><strong>q₃</strong> (EQUAL)</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #e8f5e9;">q₄</td>
+                                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #dee2e6; background: #ffebee;">—</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; text-align: center; background: #a5d6a7;"><strong>q₄</strong> (EQUALS)</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                    <td style="padding: 0.75rem; text-align: center; background: #ffebee;">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                            <p style="margin: 0; color: #333; line-height: 1.6;">
+                                <strong>✅ Maximal Munch:</strong> "++" prefiere sobre "+", "==" prefiere sobre "="<br>
+                                <strong>🎯 Tokens:</strong> PLUS(+), INCREMENT(++), EQUAL(=), EQUALS(==)
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
 
         <div style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border-radius: 15px; padding: 2rem; margin-top: 3rem; text-align: center;">
             <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">🎯 Características Clave</h3>
@@ -821,18 +703,6 @@
             }, 300);
         });
 
-        // Animación de estados
-        const states = document.querySelectorAll('.state');
-        setInterval(() => {
-            states.forEach((state, index) => {
-                setTimeout(() => {
-                    state.style.transform = 'scale(1.1)';
-                    setTimeout(() => {
-                        state.style.transform = 'scale(1)';
-                    }, 300);
-                }, index * 500);
-            });
-        }, 4000);
     </script>
 </body>
 </html>
