@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación Interactiva del Analizador Léxico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .simulation-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .code-input {
+            font-family: 'Consolas', monospace;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            flex: 1;
+            min-height: 60px;
+        }
+
+        .simulate-btn {
+            background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .simulate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .automata-visual {
+            height: 300px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .state {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e3f2fd;
+            border: 3px solid #2196f3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .state div {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .state small {
+            font-size: 0.7rem;
+            margin-top: 2px;
+            opacity: 0.8;
+        }
+
+        .state.active {
+            background: #ffeb3b;
+            border-color: #f57c00;
+            transform: scale(1.2);
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.6);
+        }
+
+        .state.accepting {
+            border-width: 5px;
+        }
+
+        .identifier-state {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .number-state {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .operator-state {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .transition-arrow {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        .transition-arrow.active {
+            color: #f57c00;
+            font-weight: bold;
+            transform: scale(1.2);
+        }
+
+        .arrow-symbol {
+            font-size: 1.8rem;
+            color: inherit;
+        }
+
+        .arrow-label {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #ddd;
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+
+        .loop-arrow {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #4caf50;
+            transition: all 0.3s;
+        }
+
+        .loop-arrow.active {
+            color: #f57c00;
+            font-weight: bold;
+            transform: scale(1.2);
+        }
+
+        .loop-arrow .arrow-symbol {
+            font-size: 1.5rem;
+            color: inherit;
+        }
+
+        .loop-arrow .arrow-label {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #ddd;
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+
+        .current-info {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+
+        .token-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            padding: 1rem;
+        }
+
+        .token-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .token-item.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+
+        .token-type {
+            font-weight: bold;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .token-type.identifier { background: #4caf50; }
+        .token-type.number { background: #2196f3; }
+        .token-type.keyword { background: #ff9800; }
+        .token-type.operator { background: #f44336; }
+        .token-type.string { background: #9c27b0; }
+        .token-type.assign { background: #795548; }
+        .token-type.plus { background: #607d8b; }
+        .token-type.increment { background: #e91e63; }
+
+        .step-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .step-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .step-btn:hover:not(:disabled) {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .step-btn:disabled {
+            background: #bbb;
+            cursor: not-allowed;
+        }
+
+        .input-display {
+            font-family: 'Consolas', monospace;
+            font-size: 1.2rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            letter-spacing: 0.1em;
+            margin: 1rem 0;
+        }
+
+        .char-processed {
+            background: #c8e6c9;
+            padding: 0.2rem 0.3rem;
+            border-radius: 3px;
+            opacity: 0.7;
+        }
+
+        .char-current {
+            background: #ffeb3b;
+            padding: 0.2rem 0.3rem;
+            border-radius: 3px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .char-current::after {
+            content: "▲";
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #f44336;
+            font-size: 1.2rem;
+        }
+
+        .code-section {
+            background: #2d2d2d;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            color: #f8f8f2;
+        }
+
+        .code-title {
+            color: #67cdff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .code-content {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .highlight-line {
+            background: rgba(255, 193, 7, 0.3);
+            padding: 0.2rem;
+            border-left: 3px solid #ffc107;
+            margin: 0.2rem 0;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">10a / 14</div>
+    
+    <h1>🎮 Simulación Interactiva - Analizador Léxico</h1>
+    
+    <div class="simulation-container">
+        <div class="control-panel">
+            <div class="section-title" style="color: white;">🚀 Simulador del Autómata</div>
+            <div class="input-section">
+                <input type="text" class="code-input" id="codeInput" placeholder="Código a tokenizar" value="if x = 123; y++;">
+                <button class="simulate-btn" onclick="startSimulation()">⚡ Simular</button>
+            </div>
+        </div>
+
+        <div class="simulation-grid">
+            <div class="section">
+                <div class="section-title">🤖 Autómata Finito Determinista</div>
+                <div class="automata-visual" id="automataVisual">
+                    <!-- Estados del autómata -->
+                    <div class="state" id="state0" style="left: 50px; top: 130px;">
+                        <div>q₀</div>
+                        <small>INICIAL</small>
+                    </div>
+                    
+                    <!-- Estados de Identificadores -->
+                    <div class="state accepting identifier-state" id="state1" style="left: 200px; top: 50px;">
+                        <div>q₁</div>
+                        <small>IDENTIFIER</small>
+                    </div>
+                    
+                    <!-- Estados de Números -->
+                    <div class="state accepting number-state" id="state2" style="left: 200px; top: 130px;">
+                        <div>q₂</div>
+                        <small>NUMBER</small>
+                    </div>
+                    
+                    <!-- Estados de Operadores -->
+                    <div class="state accepting operator-state" id="state3" style="left: 200px; top: 210px;">
+                        <div>q₃</div>
+                        <small>OPERATOR</small>
+                    </div>
+                    
+                    <!-- Estados adicionales para operadores compuestos -->
+                    <div class="state accepting operator-state" id="state4" style="left: 350px; top: 210px;">
+                        <div>q₄</div>
+                        <small>INCREMENT</small>
+                    </div>
+                    
+                    <!-- Transiciones principales desde q0 -->
+                    <div class="transition-arrow" id="arrow0to1" style="left: 120px; top: 100px; transform: rotate(-25deg);">
+                        <span class="arrow-symbol">→</span>
+                        <span class="arrow-label">a-z,A-Z</span>
+                    </div>
+                    
+                    <div class="transition-arrow" id="arrow0to2" style="left: 130px; top: 140px;">
+                        <span class="arrow-symbol">→</span>
+                        <span class="arrow-label">0-9</span>
+                    </div>
+                    
+                    <div class="transition-arrow" id="arrow0to3" style="left: 120px; top: 180px; transform: rotate(25deg);">
+                        <span class="arrow-symbol">→</span>
+                        <span class="arrow-label">=,+</span>
+                    </div>
+                    
+                    <!-- Transiciones de bucle -->
+                    <div class="loop-arrow" id="loop1" style="left: 200px; top: 20px;">
+                        <span class="arrow-symbol">↺</span>
+                        <span class="arrow-label">a-z,A-Z,0-9</span>
+                    </div>
+                    
+                    <div class="loop-arrow" id="loop2" style="left: 200px; top: 100px;">
+                        <span class="arrow-symbol">↺</span>
+                        <span class="arrow-label">0-9</span>
+                    </div>
+                    
+                    <!-- Transición de operador compuesto -->
+                    <div class="transition-arrow" id="arrow3to4" style="left: 270px; top: 220px;">
+                        <span class="arrow-symbol">→</span>
+                        <span class="arrow-label">+</span>
+                    </div>
+                </div>
+
+                <div class="current-info" id="stateInfo">
+                    <strong>Estado:</strong> <span id="currentState">q₀ (inicial)</span><br>
+                    <strong>Carácter:</strong> <span id="currentChar">-</span><br>
+                    <strong>Lexema:</strong> <span id="currentLexeme"></span>
+                </div>
+
+                <div class="step-controls">
+                    <button class="step-btn" id="prevBtn" onclick="previousStep()" disabled>← Anterior</button>
+                    <button class="step-btn" id="nextBtn" onclick="nextStep()" disabled>Siguiente →</button>
+                    <button class="step-btn" onclick="resetSimulation()">🔄 Reset</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📋 Tokens Generados</div>
+                <div class="token-list" id="tokenList">
+                    <div style="text-align: center; color: #666; padding: 2rem;">
+                        Ejecuta una simulación para ver los tokens
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 1rem;">📍 Progreso de Lectura</div>
+                <div class="input-display" id="inputDisplay">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <div class="code-section">
+            <div class="code-title">💻 Algoritmo de Tokenización con AFD (Maximal Munch)</div>
+            <div class="code-content" id="codeContent">public class LexicalAnalyzer {
+    enum State { Q0, Q1_ID, Q2_NUM, Q3_OP, Q4_INCR }
+    
+    public Token nextToken(String input, int position) {
+        State currentState = State.Q0;
+        StringBuilder lexeme = new StringBuilder();
+        State lastAcceptingState = null;
+        int lastAcceptingPos = position;
+        
+        <span class="highlight-line">// MAXIMAL MUNCH: Consumir mientras haya transiciones válidas</span>
+        while (position < input.length()) {
+            char c = input.charAt(position);
+            State nextState = transition(currentState, c);
+            
+            if (nextState == null) break; // No hay transición válida
+            
+            currentState = nextState;
+            lexeme.append(c);
+            position++;
+            
+            <span class="highlight-line">// Marcar si es estado de aceptación</span>
+            if (isAccepting(currentState)) {
+                lastAcceptingState = currentState;
+                lastAcceptingPos = position;
+            }
+        }
+        
+        // Crear token del último estado de aceptación
+        if (lastAcceptingState != null) {
+            String finalLexeme = input.substring(startPos, lastAcceptingPos);
+            return createToken(lastAcceptingState, finalLexeme);
+        }
+        throw new LexicalError("No valid token at position " + position);
+    }
+    
+    <span class="highlight-line">// FUNCIÓN DE TRANSICIÓN DEL AFD</span>
+    private State transition(State current, char c) {
+        switch (current) {
+            case Q0:  // Estado inicial
+                if (Character.isLetter(c)) return State.Q1_ID;   // q0 → q1
+                if (Character.isDigit(c))  return State.Q2_NUM;  // q0 → q2
+                if (c == '=' || c == '+')  return State.Q3_OP;   // q0 → q3
+                return null;
+                
+            case Q1_ID:  // Identificadores
+                if (Character.isLetterOrDigit(c)) return State.Q1_ID; // q1 → q1 (loop)
+                return null;
+                
+            case Q2_NUM:  // Números
+                if (Character.isDigit(c)) return State.Q2_NUM;  // q2 → q2 (loop)
+                return null;
+                
+            case Q3_OP:  // Operador simple
+                if (c == '+') return State.Q4_INCR;  // q3 → q4 (para ++)
+                return null;
+                
+            case Q4_INCR:  // Operador compuesto
+                return null;  // Estado final, no más transiciones
+        }
+        return null;
+    }
+    
+    <span class="highlight-line">// ESTADOS DE ACEPTACIÓN</span>
+    private boolean isAccepting(State state) {
+        return state == State.Q1_ID || state == State.Q2_NUM || 
+               state == State.Q3_OP || state == State.Q4_INCR;
+    }
+    
+    <span class="highlight-line">// CREAR TOKEN SEGÚN ESTADO FINAL</span>
+    private Token createToken(State state, String lexeme) {
+        switch (state) {
+            case Q1_ID:
+                // Verificar tabla de palabras reservadas
+                TokenType type = keywords.get(lexeme);
+                return new Token(type != null ? type : TokenType.IDENTIFIER, lexeme);
+                
+            case Q2_NUM:
+                return new Token(TokenType.NUMBER, lexeme);
+                
+            case Q3_OP:
+                if (lexeme.equals("=")) return new Token(TokenType.ASSIGN, lexeme);
+                if (lexeme.equals("+")) return new Token(TokenType.PLUS, lexeme);
+                break;
+                
+            case Q4_INCR:
+                return new Token(TokenType.INCREMENT, lexeme);
+        }
+        return null;
+    }
+}</div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='slide10.html'">← Volver a Maximal Munch</button>
+    </div>
+
+    <script>
+        let simulationSteps = [];
+        let currentStep = -1;
+        let tokens = [];
+
+        function startSimulation() {
+            const input = document.getElementById('codeInput').value.trim();
+            if (!input) {
+                alert('Por favor ingresa código para simular');
+                return;
+            }
+
+            // Generar pasos de simulación
+            simulationSteps = [];
+            tokens = [];
+            currentStep = -1;
+
+            tokenizeInput(input);
+            
+            console.log('Pasos generados:', simulationSteps.length);
+            
+            // Habilitar controles
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            
+            nextBtn.disabled = simulationSteps.length === 0;
+            prevBtn.disabled = true;
+            
+            // Resetear visualización
+            updateAutomataState(null);
+            updateInputDisplay(input, 0);
+            updateTokenList([]);
+            updateStateInfo({ state: 0, char: null, lexeme: '', description: 'Listo para comenzar' });
+            
+            if (simulationSteps.length > 0) {
+                alert(`Simulación preparada con ${simulationSteps.length} pasos. Usa "Siguiente" para comenzar.`);
+            } else {
+                alert('No se pudieron generar pasos de simulación');
+            }
+        }
+
+        function tokenizeInput(input) {
+            let position = 0;
+            console.log('Iniciando tokenización de:', input);
+            
+            while (position < input.length) {
+                // Saltar espacios
+                while (position < input.length && /\s/.test(input[position])) {
+                    position++;
+                }
+                
+                if (position >= input.length) break;
+
+                const tokenResult = simulateTokenRecognition(input, position);
+                if (tokenResult) {
+                    tokens.push(tokenResult.token);
+                    simulationSteps.push(...tokenResult.steps);
+                    position = tokenResult.endPosition;
+                    console.log('Token generado:', tokenResult.token);
+                } else {
+                    position++; // Saltar caracteres no reconocidos
+                }
+            }
+
+            // Agregar EOF
+            tokens.push({ type: 'EOF', lexeme: '', position: position });
+            simulationSteps.push({
+                type: 'complete',
+                position: position,
+                state: null,
+                char: null,
+                lexeme: '',
+                description: 'Tokenización completa'
+            });
+            
+            console.log('Tokens generados:', tokens);
+            console.log('Total de pasos:', simulationSteps.length);
+        }
+
+        function simulateTokenRecognition(input, startPos) {
+            let position = startPos;
+            let lexeme = '';
+            let currentState = 0;
+            let lastAcceptingState = null;
+            let lastAcceptingPos = startPos;
+            let steps = [];
+
+            console.log(`Reconociendo token desde posición ${startPos}, char: '${input[startPos]}'`);
+
+            // Paso inicial
+            steps.push({
+                type: 'transition',
+                position: position,
+                state: currentState,
+                char: input[position],
+                lexeme: lexeme,
+                description: 'Estado inicial'
+            });
+
+            while (position < input.length) {
+                const char = input[position];
+                console.log(`Procesando char: '${char}' en estado ${currentState}`);
+                
+                const nextState = getNextState(currentState, char);
+                console.log(`Transición: ${currentState} -> ${nextState}`);
+                
+                if (nextState === null) {
+                    console.log('No hay transición válida, terminando');
+                    break;
+                }
+
+                currentState = nextState;
+                lexeme += char;
+                position++;
+
+                if (isAcceptingState(currentState)) {
+                    lastAcceptingState = currentState;
+                    lastAcceptingPos = position;
+                    console.log(`Estado de aceptación: ${currentState}, lexeme: '${lexeme}'`);
+                }
+
+                steps.push({
+                    type: 'transition',
+                    position: position,
+                    state: currentState,
+                    char: position < input.length ? input[position] : null,
+                    lexeme: lexeme,
+                    description: `Transición a estado q${currentState}`
+                });
+
+                // Parar en delimitadores después de al menos un carácter válido
+                if (position < input.length && /[\s;]/.test(input[position]) && lexeme.length > 0) {
+                    console.log(`Encontrado delimitador: '${input[position]}'`);
+                    break;
+                }
+            }
+
+            if (lastAcceptingState !== null) {
+                const finalLexeme = input.substring(startPos, lastAcceptingPos);
+                const tokenType = getTokenType(lastAcceptingState, finalLexeme);
+                const token = { type: tokenType, lexeme: finalLexeme, position: startPos };
+
+                steps.push({
+                    type: 'token_created',
+                    position: lastAcceptingPos,
+                    state: lastAcceptingState,
+                    char: null,
+                    lexeme: finalLexeme,
+                    token: token,
+                    description: `Token creado: ${tokenType} - "${finalLexeme}"`
+                });
+
+                console.log(`Token creado: ${tokenType} - "${finalLexeme}"`);
+
+                return {
+                    token: token,
+                    steps: steps,
+                    endPosition: lastAcceptingPos
+                };
+            }
+
+            console.log('No se pudo crear token válido');
+            return null;
+        }
+
+        function getNextState(currentState, char) {
+            switch (currentState) {
+                case 0: // Estado inicial
+                    if (/[a-zA-Z]/.test(char)) return 1; // Identificador
+                    if (/[0-9]/.test(char)) return 2;    // Número
+                    if (char === '=') return 3;          // Operador =
+                    if (char === '+') return 3;          // Operador +
+                    return null;
+                case 1: // Identificador
+                    if (/[a-zA-Z0-9]/.test(char)) return 1;
+                    return null;
+                case 2: // Número
+                    if (/[0-9]/.test(char)) return 2;
+                    return null;
+                case 3: // Operador simple (+ o =)
+                    if (char === '+') return 4; // Para ++
+                    return null;
+                case 4: // Operador compuesto (++)
+                    return null; // Estado final
+                default:
+                    return null;
+            }
+        }
+
+        function isAcceptingState(state) {
+            return [1, 2, 3, 4].includes(state);
+        }
+
+        function getTokenType(state, lexeme) {
+            switch (state) {
+                case 1:
+                    return ['if', 'else', 'while', 'for'].includes(lexeme) ? 'KEYWORD' : 'IDENTIFIER';
+                case 2: 
+                    return 'NUMBER';
+                case 3: 
+                    return lexeme === '=' ? 'ASSIGN' : 'PLUS';
+                case 4:
+                    return 'INCREMENT';
+                default: 
+                    return 'UNKNOWN';
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < simulationSteps.length - 1) {
+                currentStep++;
+                const step = simulationSteps[currentStep];
+                const prevStep = currentStep > 0 ? simulationSteps[currentStep - 1] : null;
+                
+                // Información de transición
+                const transitionInfo = prevStep ? {
+                    from: prevStep.state,
+                    to: step.state,
+                    char: step.char
+                } : null;
+                
+                updateAutomataState(step.state, transitionInfo);
+                updateStateInfo(step);
+                updateInputDisplay(document.getElementById('codeInput').value, step.position);
+                
+                if (step.type === 'token_created') {
+                    updateTokenList([...tokens.slice(0, tokens.findIndex(t => t.lexeme === step.token.lexeme) + 1)]);
+                }
+                
+                document.getElementById('prevBtn').disabled = currentStep === 0;
+                document.getElementById('nextBtn').disabled = currentStep === simulationSteps.length - 1;
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                const step = simulationSteps[currentStep];
+                const prevStep = currentStep > 0 ? simulationSteps[currentStep - 1] : null;
+                
+                // Información de transición
+                const transitionInfo = prevStep ? {
+                    from: prevStep.state,
+                    to: step.state,
+                    char: step.char
+                } : null;
+                
+                updateAutomataState(step.state, transitionInfo);
+                updateStateInfo(step);
+                updateInputDisplay(document.getElementById('codeInput').value, step.position);
+                
+                document.getElementById('prevBtn').disabled = currentStep === 0;
+                document.getElementById('nextBtn').disabled = currentStep === simulationSteps.length - 1;
+            }
+        }
+
+        function resetSimulation() {
+            currentStep = -1;
+            updateAutomataState(null);
+            updateStateInfo({ state: 0, char: null, lexeme: '', description: 'Estado inicial' });
+            updateInputDisplay(document.getElementById('codeInput').value, 0);
+            updateTokenList([]);
+            
+            document.getElementById('prevBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = simulationSteps.length === 0;
+        }
+
+        function updateAutomataState(activeState, transitionInfo) {
+            // Resetear todos los estados y transiciones
+            const states = document.querySelectorAll('.state');
+            const arrows = document.querySelectorAll('.transition-arrow, .loop-arrow');
+            
+            states.forEach((state, index) => {
+                state.classList.toggle('active', index === activeState);
+            });
+            
+            arrows.forEach(arrow => {
+                arrow.classList.remove('active');
+            });
+            
+            // Resaltar la transición actual si se proporciona
+            if (transitionInfo) {
+                highlightTransition(transitionInfo.from, transitionInfo.to, transitionInfo.char);
+            }
+        }
+        
+        function highlightTransition(fromState, toState, char) {
+            // Mapear transiciones a elementos visuales
+            const transitionMap = {
+                '0->1': 'arrow0to1',    // a-z,A-Z
+                '0->2': 'arrow0to2',    // 0-9  
+                '0->3': 'arrow0to3',    // =,+
+                '1->1': 'loop1',        // a-z,A-Z,0-9 (identificadores)
+                '2->2': 'loop2',        // 0-9 (números)
+                '3->3': 'loop2',        // + (para ++)
+                '3->4': 'arrow3to4'     // + (para ++)
+            };
+            
+            const transitionKey = `${fromState}->${toState}`;
+            const arrowId = transitionMap[transitionKey];
+            
+            if (arrowId) {
+                const arrow = document.getElementById(arrowId);
+                if (arrow) {
+                    arrow.classList.add('active');
+                }
+            }
+        }
+
+        function updateStateInfo(step) {
+            document.getElementById('currentState').textContent = 
+                step.state !== null ? `q${step.state} (${getStateName(step.state)})` : 'q₀ (inicial)';
+            document.getElementById('currentChar').textContent = step.char || '-';
+            document.getElementById('currentLexeme').textContent = step.lexeme || '';
+        }
+
+        function getStateName(state) {
+            const names = { 
+                0: 'inicial', 
+                1: 'identificador', 
+                2: 'número', 
+                3: 'operador', 
+                4: 'incremento' 
+            };
+            return names[state] || 'desconocido';
+        }
+
+        function updateInputDisplay(input, currentPos) {
+            let html = '';
+            for (let i = 0; i < input.length; i++) {
+                let char = input[i];
+                if (char === ' ') char = '␣';
+                
+                if (i < currentPos - 1) {
+                    html += `<span class="char-processed">${char}</span>`;
+                } else if (i === currentPos - 1) {
+                    html += `<span class="char-current">${char}</span>`;
+                } else {
+                    html += char;
+                }
+            }
+            document.getElementById('inputDisplay').innerHTML = html;
+        }
+
+        function updateTokenList(tokenList) {
+            let html = '';
+            if (tokenList.length === 0) {
+                html = '<div style="text-align: center; color: #666; padding: 1rem;">No hay tokens aún</div>';
+            } else {
+                tokenList.forEach(token => {
+                    const typeClass = token.type.toLowerCase();
+                    html += `
+                        <div class="token-item active">
+                            <div>
+                                <span class="token-type ${typeClass}">${token.type}</span>
+                                <span style="margin-left: 0.5rem; font-family: monospace; font-weight: bold;">"${token.lexeme}"</span>
+                            </div>
+                            <span style="color: #666; font-size: 0.9rem;">pos: ${token.position}</span>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('tokenList').innerHTML = html;
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextStep();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousStep();
+            } else if (e.key === 'Escape') {
+                window.location.href = 'slide10.html';
+            }
+        });
+    </script>
+</body>
+</html>
