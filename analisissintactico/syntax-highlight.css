@@ -1,0 +1,122 @@
+/* Syntax Highlighting Styles */
+.code-block, .code-example, .parser-code, .class-definition, .visitor-code, .test-code, .grammar-example {
+    position: relative;
+    background: #1e1e1e !important;
+    color: #d4d4d4 !important;
+    padding: 1.5rem !important;
+    border-radius: 10px !important;
+    font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace !important;
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+    overflow-x: auto !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Keywords */
+.keyword {
+    color: #569cd6 !important;
+    font-weight: bold;
+}
+
+/* Functions */
+.function {
+    color: #dcdcaa !important;
+}
+
+/* Strings */
+.string {
+    color: #ce9178 !important;
+}
+
+/* Comments */
+.comment {
+    color: #6a9955 !important;
+    font-style: italic;
+}
+
+/* Numbers */
+.number {
+    color: #b5cea8 !important;
+}
+
+/* Classes and Types */
+.class, .type {
+    color: #4ec9b0 !important;
+}
+
+/* Variables */
+.variable {
+    color: #9cdcfe !important;
+}
+
+/* Operators */
+.operator {
+    color: #d4d4d4 !important;
+}
+
+/* Properties */
+.property {
+    color: #9cdcfe !important;
+}
+
+/* BNF Grammar specific */
+.grammar-rule {
+    color: #4ec9b0 !important;
+    font-weight: bold;
+}
+
+.grammar-terminal {
+    color: #ce9178 !important;
+}
+
+.grammar-nonterminal {
+    color: #dcdcaa !important;
+}
+
+.grammar-operator {
+    color: #d4d4d4 !important;
+}
+
+/* Line numbers */
+.line-numbers {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3rem;
+    background: #2d2d30;
+    color: #858585;
+    padding: 1.5rem 0.5rem;
+    text-align: right;
+    border-right: 1px solid #464647;
+    user-select: none;
+}
+
+.with-line-numbers {
+    padding-left: 4rem !important;
+}
+
+/* Copy button */
+.copy-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #007acc;
+    color: white;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.code-block:hover .copy-button,
+.code-example:hover .copy-button {
+    opacity: 1;
+}
+
+.copy-button:hover {
+    background: #005a9e;
+}

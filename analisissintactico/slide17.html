@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pruebas y Depuración del Parser</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .testing-framework {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .testing-card {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out both;
+            border: 3px solid transparent;
+            background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), 
+                              linear-gradient(45deg, #667eea, #764ba2);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+        }
+
+        .testing-card:nth-child(1) { animation-delay: 0.1s; }
+        .testing-card:nth-child(2) { animation-delay: 0.3s; }
+
+        .testing-card h3 {
+            color: #667eea;
+            margin-bottom: 2rem;
+            font-size: 1.6rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .testing-card .icon {
+            font-size: 2.5rem;
+        }
+
+        .test-suite {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .test-suite h3 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        pre[class*="language-"] {
+            margin: 1.5rem 0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .benefits-list, .important-cases {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .benefits-list h4, .important-cases h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .benefits-list ul, .important-cases ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li, .important-cases li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .benefits-list li:before {
+            content: "✅ ";
+            margin-right: 0.5rem;
+        }
+
+        .important-cases li:before {
+            content: "⚠️ ";
+            margin-right: 0.5rem;
+        }
+
+        .benefits-list li:last-child, .important-cases li:last-child {
+            border-bottom: none;
+        }
+
+        .debugging-strategies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .debug-card {
+            background: rgba(255,255,255,0.08);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,215,0,0.3);
+            backdrop-filter: blur(15px);
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .debug-card:nth-child(1) { animation-delay: 0.5s; }
+        .debug-card:nth-child(2) { animation-delay: 0.7s; }
+        .debug-card:nth-child(3) { animation-delay: 0.9s; }
+
+        .debug-card h4 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .debug-techniques {
+            list-style: none;
+            padding: 0;
+        }
+
+        .debug-techniques li {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 1rem;
+            line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .debug-techniques li:last-child {
+            border-bottom: none;
+        }
+
+        .debug-techniques li:before {
+            content: "🔍";
+            margin-right: 1rem;
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+        }
+
+        .debug-techniques strong {
+            color: #FFD700;
+        }
+
+        .interactive-demo {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            border: 2px solid rgba(255,215,0,0.2);
+            text-align: center;
+        }
+
+        .demo-button {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,215,0,0.4);
+        }
+
+        .demo-output {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            text-align: left;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .testing-framework {
+                grid-template-columns: 1fr;
+            }
+            
+            .debugging-strategies {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Pruebas y Depuración del Parser</h1>
+
+        <div class="testing-framework">
+            <div class="testing-card">
+                <h3><span class="icon">🧪</span>Framework de Pruebas</h3>
+                
+                <pre><code class="language-java">// Sistema completo de pruebas unitarias
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ParserTestSuite {
+    private RecursiveDescentParser parser;
+    private TokenStream tokens;
+    
+    @BeforeEach
+    void setUp() {
+        // Configuración inicial para cada prueba
+    }
+    
+    @Test
+    public void testArithmeticExpression() {
+        tokens = new TokenStream("x + 5 * 2");
+        parser = new RecursiveDescentParser(tokens);
+        ASTNode ast = parser.parseExpression();
+        
+        assertTrue(ast instanceof BinaryOpNode);
+        BinaryOpNode binOp = (BinaryOpNode) ast;
+        assertEquals("+", binOp.getOperator());
+        assertTrue(binOp.getLeft() instanceof VariableNode);
+        assertTrue(binOp.getRight() instanceof BinaryOpNode);
+    }
+    
+    @Test
+    public void testIfStatement() {
+        tokens = new TokenStream("if (x > 0) y = 1;");
+        parser = new RecursiveDescentParser(tokens);
+        ASTNode ast = parser.parseStatement();
+        
+        assertTrue(ast instanceof IfNode);
+        IfNode ifNode = (IfNode) ast;
+        assertTrue(ifNode.getCondition() instanceof BinaryOpNode);
+        assertTrue(ifNode.getThenStmt() instanceof AssignmentNode);
+    }
+}</code></pre>
+                
+                <div class="benefits-list">
+                    <h4>Beneficios del Testing</h4>
+                    <ul>
+                        <li>Detectar regresiones en cambios de código</li>
+                        <li>Verificar casos límite y edge cases</li>
+                        <li>Documentar comportamiento esperado</li>
+                        <li>Facilitar refactoring seguro</li>
+                        <li>Mejorar confianza en el código</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="testing-card">
+                <h3><span class="icon">⚠️</span>Pruebas de Errores</h3>
+                
+                <pre><code class="language-java">// Pruebas específicas para manejo de errores
+@Test
+public void testMissingSemicolon() {
+    tokens = new TokenStream("x = 5 y = 3");
+    parser = new RecursiveDescentParser(tokens);
+    
+    ParseException exception = assertThrows(
+        ParseException.class, 
+        () -> parser.parseProgram()
+    );
+    
+    assertTrue(exception.getMessage().contains("Se esperaba \";\""));
+    assertEquals(6, exception.getPosition()); // Posición del error
+}
+
+@Test
+public void testUnmatchedParentheses() {
+    tokens = new TokenStream("if (x > 5 { y = 1; }");
+    parser = new RecursiveDescentParser(tokens);
+    
+    ParseException exception = assertThrows(
+        ParseException.class,
+        () -> parser.parseStatement()
+    );
+    
+    assertTrue(exception.getMessage().contains("Se esperaba \")\""));
+}
+
+@Test
+public void testInvalidExpression() {
+    tokens = new TokenStream("x + + 5");
+    parser = new RecursiveDescentParser(tokens);
+    
+    assertThrows(ParseException.class, () -> {
+        parser.parseExpression();
+    });
+}</code></pre>
+                
+                <div class="important-cases">
+                    <h4>Casos Críticos de Error</h4>
+                    <ul>
+                        <li>Tokens faltantes o inesperados</li>
+                        <li>Estructuras sintácticas incompletas</li>
+                        <li>Anidamiento excesivo de expresiones</li>
+                        <li>Paréntesis, llaves o corchetes desbalanceados</li>
+                        <li>Operadores mal formados</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-suite">
+            <h3>🎯 Suite de Pruebas Avanzadas</h3>
+            <pre><code class="language-java">// Pruebas de integración para casos complejos
+@Test
+public void testNestedExpressions() {
+    String input = "((x + y) * (z - w)) / ((a + b) - c)";
+    tokens = new TokenStream(input);
+    parser = new RecursiveDescentParser(tokens);
+    
+    ASTNode ast = parser.parseExpression();
+    assertNotNull(ast);
+    
+    // Verificar estructura del AST
+    assertTrue(ast instanceof BinaryOpNode);
+    assertEquals("/", ((BinaryOpNode) ast).getOperator());
+}
+
+@Test
+public void testComplexIfElseChain() {
+    String input = """
+        if (x > 0) {
+            y = x * 2;
+        } else if (x < 0) {
+            y = x * -1;
+        } else {
+            y = 0;
+        }
+    """;
+    
+    tokens = new TokenStream(input);
+    parser = new RecursiveDescentParser(tokens);
+    ASTNode ast = parser.parseStatement();
+    
+    assertTrue(ast instanceof IfNode);
+    IfNode ifNode = (IfNode) ast;
+    assertNotNull(ifNode.getElseStmt());
+}</code></pre>
+        </div>
+
+        <div class="debugging-strategies">
+            <div class="debug-card">
+                <h4>🔍 Estrategias de Logging</h4>
+                <ul class="debug-techniques">
+                    <li><strong>Token Tracing:</strong> Registrar cada token procesado con su posición y tipo</li>
+                    <li><strong>Method Entry/Exit:</strong> Log al inicio y final de cada método de parsing</li>
+                    <li><strong>Decision Points:</strong> Registrar qué regla gramatical se está aplicando</li>
+                    <li><strong>Stack Depth:</strong> Mostrar profundidad de recursión actual</li>
+                </ul>
+            </div>
+
+            <div class="debug-card">
+                <h4>🎯 Técnicas de Visualización</h4>
+                <ul class="debug-techniques">
+                    <li><strong>AST Pretty Print:</strong> Función que imprime el árbol en formato legible</li>
+                    <li><strong>Parse Tree Dump:</strong> Exportar árbol de parsing completo</li>
+                    <li><strong>Token Stream View:</strong> Visualizar secuencia de tokens con cursor actual</li>
+                    <li><strong>Grammar Rule Trace:</strong> Mostrar qué reglas se aplicaron en orden</li>
+                </ul>
+            </div>
+
+            <div class="debug-card">
+                <h4>⚡ Optimización Debug</h4>
+                <ul class="debug-techniques">
+                    <li><strong>Minimal Reproductions:</strong> Reducir entrada al caso más simple que falla</li>
+                    <li><strong>Binary Search:</strong> Dividir entrada grande para localizar error</li>
+                    <li><strong>Checkpoint Testing:</strong> Verificar estado en puntos clave del parsing</li>
+                    <li><strong>Performance Profiling:</strong> Identificar cuellos de botella en parsing</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="interactive-demo">
+            <h3>🚀 Demostración de Debugging</h3>
+            <p>Ejemplo interactivo de debugging con entrada problemática</p>
+            <button class="demo-button" onclick="runDebugDemo()">Ejecutar Debug Demo</button>
+            <div class="demo-output" id="debugOutput"></div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide16.html" class="nav-btn">← Anterior</a>
+        <a href="slide18.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        function runDebugDemo() {
+            const output = document.getElementById('debugOutput');
+            output.style.display = 'block';
+            
+            const debugLog = `
+🔍 DEBUGGING SESSION: "if (x > { y = 1;"
+════════════════════════════════════════
+
+📍 Token Stream:
+[IF, LPAREN, IDENTIFIER(x), GT, LBRACE, IDENTIFIER(y), ASSIGN, NUMBER(1), SEMICOLON, EOF]
+
+🔄 Parsing Trace:
+parseStatement() → detectando IF
+parseIfStatement() → iniciando
+parseExpression() → x > {
+  ❌ ERROR: Se esperaba expresión después de '>'
+  🔍 Token actual: LBRACE
+  📍 Posición: 8
+  
+💡 DIAGNÓSTICO:
+- Paréntesis sin cerrar en condición
+- LBRACE encontrado donde se esperaba expresión
+- Falta RPAREN antes de LBRACE
+
+🔧 SUGERENCIAS:
+1. Verificar balance de paréntesis
+2. Revisar gramática de expresiones
+3. Agregar mejor recuperación de errores
+
+✅ SOLUCIÓN: "if (x > 0) { y = 1; }"
+            `;
+            
+            output.textContent = debugLog;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide18.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide16.html';
+            }
+        });
+
+        // Auto-highlight code when page loads
+        document.addEventListener('DOMContentLoaded', (event) => {
+            Prism.highlightAll();
+        });
+    </script>
+</body>
+</html>

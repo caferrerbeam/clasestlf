@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Top-Down: Recursive Descent - Pasos Detallados</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .section {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+
+        .parsing-demo {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        .parsing-demo h2 {
+            color: #FFD700;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .grammar-box {
+            background: #2d3748;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .step-visualization {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .step-column {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .step-column h4 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .parsing-steps {
+            background: #1a202c;
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .step-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .step-number {
+            background: #FFD700;
+            color: #333;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .code-trace {
+            background: #2d3748;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .current-token {
+            background: #FFD700;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .tree-visualization {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .tree-node {
+            background: #4a5568;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 5px;
+            display: inline-block;
+            border: 2px solid #FFD700;
+        }
+
+        .tree-level {
+            margin: 1rem 0;
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .flow-step {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: #FFD700;
+        }
+
+        .interactive-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+        }
+
+        .interactive-section h3 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .example-input {
+            background: #2d3748;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 1.2rem;
+            border: 2px solid #FFD700;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .current-parsing {
+            animation: pulse 1.5s infinite;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .step-visualization {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Análisis Top-Down: Pasos Detallados</h1>
+
+        <div class="section">
+            <h2>📋 Algoritmo Recursive Descent</h2>
+            <p>El análisis <strong>Recursive Descent</strong> es la implementación más directa del enfoque Top-Down. Cada regla gramatical se convierte en una función que reconoce esa estructura.</p>
+            
+            <h3>🎯 Principios Fundamentales</h3>
+            <div class="step-item">
+                <span class="step-number">1</span>
+                <strong>Una función por regla:</strong> Cada no-terminal de la gramática tiene su propia función
+            </div>
+            <div class="step-item">
+                <span class="step-number">2</span>
+                <strong>Decisión por primer token:</strong> El parser decide qué regla aplicar mirando el token actual
+            </div>
+            <div class="step-item">
+                <span class="step-number">3</span>
+                <strong>Llamadas recursivas:</strong> Las funciones se llaman entre sí siguiendo la gramática
+            </div>
+            <div class="step-item">
+                <span class="step-number">4</span>
+                <strong>Construcción del AST:</strong> Cada función retorna un nodo del árbol sintáctico
+            </div>
+
+            <h3>📝 Gramática de Ejemplo</h3>
+            <div class="grammar-box">
+<span class="grammar-rule">Expression</span> <span class="grammar-operator">→</span> <span class="grammar-nonterminal">Term</span> <span class="grammar-terminal">(("+" | "-")</span> <span class="grammar-nonterminal">Term</span><span class="grammar-terminal">)*</span>
+<span class="grammar-rule">Term</span>       <span class="grammar-operator">→</span> <span class="grammar-nonterminal">Factor</span> <span class="grammar-terminal">(("*" | "/")</span> <span class="grammar-nonterminal">Factor</span><span class="grammar-terminal">)*</span>
+<span class="grammar-rule">Factor</span>     <span class="grammar-operator">→</span> <span class="grammar-terminal">NUMBER</span> <span class="grammar-operator">|</span> <span class="grammar-terminal">"("</span> <span class="grammar-nonterminal">Expression</span> <span class="grammar-terminal">")"</span>
+            </div>
+        </div>
+
+        <div class="parsing-demo">
+            <h2>🎬 Demostración Paso a Paso</h2>
+            
+            <div class="interactive-section">
+                <h3>📝 Entrada a Analizar</h3>
+                <div class="example-input">3 + 5 * 2</div>
+                <p style="text-align: center; margin-top: 1rem;">Tokens: <span class="current-token">3</span> <span class="current-token">+</span> <span class="current-token">5</span> <span class="current-token">*</span> <span class="current-token">2</span></p>
+            </div>
+
+            <div class="step-visualization">
+                <div class="step-column">
+                    <h4>🔄 Flujo de Llamadas</h4>
+                    <div class="parsing-steps">
+                        <div>1. parseExpression() ← INICIO</div>
+                        <div>2. ├─ parseTerm()</div>
+                        <div>3. │  ├─ parseFactor() → retorna 3</div>
+                        <div>4. │  └─ retorna TermNode(3)</div>
+                        <div>5. ├─ ve token '+', continúa</div>
+                        <div>6. ├─ parseTerm()</div>
+                        <div>7. │  ├─ parseFactor() → retorna 5</div>
+                        <div>8. │  ├─ ve token '*', continúa</div>
+                        <div>9. │  ├─ parseFactor() → retorna 2</div>
+                        <div>10.│  └─ retorna BinaryOp('*', 5, 2)</div>
+                        <div>11.└─ retorna BinaryOp('+', 3, Term)</div>
+                    </div>
+                </div>
+
+                <div class="step-column">
+                    <h4>🌳 Construcción del AST</h4>
+                    <div class="tree-visualization">
+                        <div class="tree-level">
+                            <div class="tree-node">BinaryOp('+')</div>
+                        </div>
+                        <div class="tree-level">
+                            <div class="tree-node">3</div>
+                            <div class="tree-node">BinaryOp('*')</div>
+                        </div>
+                        <div class="tree-level">
+                            <div style="visibility: hidden;" class="tree-node">-</div>
+                            <div class="tree-node">5</div>
+                            <div class="tree-node">2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Implementación Detallada</h2>
+            
+            <h3>🔧 Función parseExpression()</h3>
+            <div class="code-trace">
+<span class="keyword">function</span> <span class="function">parseExpression</span>() {
+    <span class="comment">// 1. Parsear el primer término</span>
+    <span class="keyword">let</span> <span class="variable">left</span> = <span class="function">parseTerm</span>();
+    
+    <span class="comment">// 2. Mientras haya operadores de suma/resta</span>
+    <span class="keyword">while</span> (<span class="variable">currentToken</span>.<span class="property">type</span> === <span class="string">"PLUS"</span> || 
+           <span class="variable">currentToken</span>.<span class="property">type</span> === <span class="string">"MINUS"</span>) {
+        
+        <span class="comment">// 3. Guardar el operador</span>
+        <span class="keyword">let</span> <span class="variable">operator</span> = <span class="variable">currentToken</span>.<span class="property">value</span>;
+        <span class="function">advance</span>(); <span class="comment">// Consumir operador</span>
+        
+        <span class="comment">// 4. Parsear el siguiente término</span>
+        <span class="keyword">let</span> <span class="variable">right</span> = <span class="function">parseTerm</span>();
+        
+        <span class="comment">// 5. Crear nodo binario</span>
+        <span class="variable">left</span> = <span class="keyword">new</span> <span class="type">BinaryOpNode</span>(<span class="variable">operator</span>, <span class="variable">left</span>, <span class="variable">right</span>);
+    }
+    
+    <span class="keyword">return</span> <span class="variable">left</span>;
+}
+            </div>
+
+            <h3>🔧 Función parseTerm()</h3>
+            <div class="code-trace">
+<span class="keyword">function</span> <span class="function">parseTerm</span>() {
+    <span class="keyword">let</span> <span class="variable">left</span> = <span class="function">parseFactor</span>();
+    
+    <span class="keyword">while</span> (<span class="variable">currentToken</span>.<span class="property">type</span> === <span class="string">"MULTIPLY"</span> || 
+           <span class="variable">currentToken</span>.<span class="property">type</span> === <span class="string">"DIVIDE"</span>) {
+        
+        <span class="keyword">let</span> <span class="variable">operator</span> = <span class="variable">currentToken</span>.<span class="property">value</span>;
+        <span class="function">advance</span>();
+        <span class="keyword">let</span> <span class="variable">right</span> = <span class="function">parseFactor</span>();
+        <span class="variable">left</span> = <span class="keyword">new</span> <span class="type">BinaryOpNode</span>(<span class="variable">operator</span>, <span class="variable">left</span>, <span class="variable">right</span>);
+    }
+    
+    <span class="keyword">return</span> <span class="variable">left</span>;
+}
+            </div>
+
+            <h3>🔧 Función parseFactor()</h3>
+            <div class="code-trace">
+<span class="keyword">function</span> <span class="function">parseFactor</span>() {
+    <span class="keyword">if</span> (<span class="variable">currentToken</span>.<span class="property">type</span> === <span class="string">"NUMBER"</span>) {
+        <span class="keyword">let</span> <span class="variable">value</span> = <span class="variable">currentToken</span>.<span class="property">value</span>;
+        <span class="function">advance</span>();
+        <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">LiteralNode</span>(<span class="variable">value</span>);
+    }
+    
+    <span class="keyword">if</span> (<span class="variable">currentToken</span>.<span class="property">type</span> === <span class="string">"LPAREN"</span>) {
+        <span class="function">advance</span>(); <span class="comment">// Consumir '('</span>
+        <span class="keyword">let</span> <span class="variable">expr</span> = <span class="function">parseExpression</span>(); <span class="comment">// Recursión!</span>
+        <span class="function">expect</span>(<span class="string">"RPAREN"</span>); <span class="comment">// Verificar ')'</span>
+        <span class="keyword">return</span> <span class="variable">expr</span>;
+    }
+    
+    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">Error</span>(<span class="string">"Token inesperado: "</span> + <span class="variable">currentToken</span>.<span class="property">value</span>);
+}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Flujo de Control Detallado</h2>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>🏁 Inicio</h4>
+                    <p>parseExpression() llamada</p>
+                    <p><span class="current-token">3</span> + 5 * 2</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h4>🔍 Primer Term</h4>
+                    <p>parseTerm() → parseFactor()</p>
+                    <p>Reconoce <span class="highlight">3</span></p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h4>➕ Operador</h4>
+                    <p>Ve token '+', continúa</p>
+                    <p>3 <span class="current-token">+</span> 5 * 2</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h4>🔍 Segundo Term</h4>
+                    <p>parseTerm() maneja 5 * 2</p>
+                    <p>Reconoce <span class="highlight">5 * 2</span></p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h4>🌳 AST Final</h4>
+                    <p>BinaryOp('+', 3, Term)</p>
+                    <p>Análisis completo ✅</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚡ Características Clave</h2>
+            
+            <div class="step-item">
+                <span class="step-number">✓</span>
+                <strong>Precedencia automática:</strong> La estructura de la gramática maneja la precedencia de operadores
+            </div>
+            <div class="step-item">
+                <span class="step-number">✓</span>
+                <strong>Asociatividad izquierda:</strong> Los operadores se evalúan de izquierda a derecha
+            </div>
+            <div class="step-item">
+                <span class="step-number">✓</span>
+                <strong>Detección de errores:</strong> Falla rápidamente en tokens inesperados
+            </div>
+            <div class="step-item">
+                <span class="step-number">✓</span>
+                <strong>AST directo:</strong> Construye el árbol durante el análisis
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide07.html" class="nav-btn">← Anterior</a>
+        <a href="slide09.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="syntax-highlighter.js"></script>
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide09.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide07.html';
+            }
+        });
+
+        // Animation for parsing demonstration
+        document.addEventListener('DOMContentLoaded', () => {
+            const steps = document.querySelectorAll('.parsing-steps div');
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.style.animation = 'slideUp 0.5s ease-out';
+                    step.style.background = 'rgba(255, 215, 0, 0.1)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

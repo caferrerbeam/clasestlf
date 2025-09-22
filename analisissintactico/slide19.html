@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramientas y Recursos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.3s; }
+        .tool-card:nth-child(3) { animation-delay: 0.5s; }
+        .tool-card:nth-child(4) { animation-delay: 0.7s; }
+
+        .tool-card h3 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .tool-card .icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .tool-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tool-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .tool-list li:last-child {
+            border-bottom: none;
+        }
+
+        .tool-list li:before {
+            content: "" ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .resources-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 0.9s both;
+        }
+
+        .resources-section h3 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .resource-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .resource-item h4 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .resource-item p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Herramientas y Recursos</h1>
+
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="icon">=‡</div>
+                <h3>Generadores de Parsers</h3>
+                
+                <ul class="tool-list">
+                    <li><strong>ANTLR:</strong> Generador universal multiplataforma</li>
+                    <li><strong>Yacc/Bison:</strong> Cl·sicos para C/C++</li>
+                    <li><strong>PEG.js:</strong> Para JavaScript, sintaxis simple</li>
+                    <li><strong>Pest:</strong> Para Rust, muy r·pido</li>
+                    <li><strong>Nearley:</strong> Parser gen para Node.js</li>
+                </ul>
+                
+                <p style="margin-top: 1rem; font-style: italic;">Estos generan el cÛdigo del parser autom·ticamente a partir de una gram·tica.</p>
+            </div>
+
+            <div class="tool-card">
+                <div class="icon">=⁄</div>
+                <h3>LibrerÌas de Parsing</h3>
+                
+                <ul class="tool-list">
+                    <li><strong>Chevrotain:</strong> Parser combinator para JS/TS</li>
+                    <li><strong>Parsec:</strong> Haskell, muy expresivo</li>
+                    <li><strong>Nom:</strong> Rust, parser combinator r·pido</li>
+                    <li><strong>FastParse:</strong> Scala, simple y r·pido</li>
+                    <li><strong>Parsy:</strong> Python, f·cil de usar</li>
+                </ul>
+                
+                <p style="margin-top: 1rem; font-style: italic;">Permiten escribir parsers usando funciones componibles.</p>
+            </div>
+
+            <div class="tool-card">
+                <div class="icon">=</div>
+                <h3>Herramientas de DepuraciÛn</h3>
+                
+                <ul class="tool-list">
+                    <li><strong>AST Explorer:</strong> Visualizar ASTs en el navegador</li>
+                    <li><strong>Tree-sitter:</strong> Parser incremental con highlighting</li>
+                    <li><strong>Language Server Protocol:</strong> Para IDEs</li>
+                    <li><strong>Grammar debuggers:</strong> Trazas paso a paso</li>
+                    <li><strong>Parse tree visualizers:</strong> Gr·ficos interactivos</li>
+                </ul>
+                
+                <p style="margin-top: 1rem; font-style: italic;">Facilitan la comprensiÛn y depuraciÛn de parsers complejos.</p>
+            </div>
+
+            <div class="tool-card">
+                <div class="icon">ô</div>
+                <h3>IDEs y Plugins</h3>
+                
+                <ul class="tool-list">
+                    <li><strong>VS Code:</strong> Extensions para gram·ticas</li>
+                    <li><strong>IntelliJ IDEA:</strong> Grammar-Kit plugin</li>
+                    <li><strong>Eclipse Xtext:</strong> Framework completo DSL</li>
+                    <li><strong>Atom:</strong> Tree-sitter integration</li>
+                    <li><strong>Emacs:</strong> Modos para diferentes gram·ticas</li>
+                </ul>
+                
+                <p style="margin-top: 1rem; font-style: italic;">Entornos especializados para desarrollo de lenguajes.</p>
+            </div>
+        </div>
+
+        <div class="resources-section">
+            <h3>=› Recursos de aprendizaje</h3>
+            
+            <div class="resources-grid">
+                <div class="resource-item">
+                    <h4>=⁄ Libros recomendados</h4>
+                    <p>" "Compilers: Principles, Techniques, and Tools" (Dragon Book)<br>
+                    " "Language Implementation Patterns"<br>
+                    " "Crafting Interpreters"</p>
+                </div>
+                
+                <div class="resource-item">
+                    <h4>< Sitios web ˙tiles</h4>
+                    <p>" Compiler Explorer (godbolt.org)<br>
+                    " AST Explorer (astexplorer.net)<br>
+                    " ANTLR Documentation</p>
+                </div>
+                
+                <div class="resource-item">
+                    <h4><• Cursos y tutorials</h4>
+                    <p>" Stanford CS143 (Compilers)<br>
+                    " MIT 6.035 (Computer Language Engineering)<br>
+                    " YouTube: "Let's Build a Compiler"</p>
+                </div>
+                
+                <div class="resource-item">
+                    <h4>=e Comunidades</h4>
+                    <p>" /r/Compilers (Reddit)<br>
+                    " Language Design Stack Exchange<br>
+                    " ANTLR Users Group</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide18.html" class="nav-btn">ê Anterior</a>
+        <a href="slide20.html" class="nav-btn">Siguiente í</a>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide20.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide18.html';
+            }
+        });
+    </script>
+</body>
+</html>

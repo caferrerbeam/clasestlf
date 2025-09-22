@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top-Down vs Bottom-Up: Diferencias Fundamentales</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        /* Comparison Grid */
+        .comparison-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .approach-section {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .approach-section.top-down { 
+            animation-delay: 0.2s;
+            border: 3px solid #26d0ce;
+        }
+        
+        .approach-section.bottom-up { 
+            animation-delay: 0.4s;
+            border: 3px solid #ff6b6b;
+        }
+
+        .approach-title {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+        }
+
+        .top-down .approach-title {
+            color: #26d0ce;
+        }
+
+        .bottom-up .approach-title {
+            color: #ff6b6b;
+        }
+
+        .approach-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Visual Building Animation */
+        .building-demo {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            position: relative;
+            height: 350px;
+            overflow: hidden;
+        }
+
+        .tree-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .tree-node {
+            position: absolute;
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 2px solid #4a5c96;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s ease;
+        }
+
+        .tree-node.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .tree-line {
+            position: absolute;
+            background: #667eea;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .tree-line.visible {
+            opacity: 1;
+        }
+
+        /* Example Section */
+        .example-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 0.6s both;
+        }
+
+        .example-title {
+            color: #FFD700;
+            font-size: 1.6rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+
+        .parsing-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .demo-panel {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 3px solid;
+        }
+
+        .demo-panel.td { border-color: #26d0ce; }
+        .demo-panel.bu { border-color: #ff6b6b; }
+
+        .demo-steps {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .step {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInStep 0.6s ease-out forwards;
+        }
+
+        .step.td { background: rgba(38, 208, 206, 0.1); }
+        .step.bu { background: rgba(255, 107, 107, 0.1); }
+
+        .step:nth-child(1) { animation-delay: 1s; }
+        .step:nth-child(2) { animation-delay: 1.3s; }
+        .step:nth-child(3) { animation-delay: 1.6s; }
+        .step:nth-child(4) { animation-delay: 1.9s; }
+        .step:nth-child(5) { animation-delay: 2.2s; }
+        .step:nth-child(6) { animation-delay: 2.5s; }
+
+        .current-state {
+            background: #FFD700;
+            color: #333;
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Characteristics Table */
+        .characteristics-table {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out 0.8s both;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .table-header {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .table-cell {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .table-cell.td { 
+            background: rgba(38, 208, 206, 0.1); 
+            border-color: #26d0ce;
+        }
+        
+        .table-cell.bu { 
+            background: rgba(255, 107, 107, 0.1); 
+            border-color: #ff6b6b;
+        }
+
+        .table-cell.feature {
+            background: #f8f9fa;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 1.5rem;
+        }
+
+        /* Algorithms Visualization */
+        .algorithms-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 1s both;
+        }
+
+        .algorithms-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .algorithm-card {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            border: 3px solid;
+        }
+
+        .algorithm-card.td { border-color: #26d0ce; }
+        .algorithm-card.bu { border-color: #ff6b6b; }
+
+        .pseudocode {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .keyword { color: #569cd6; }
+        .function-name { color: #dcdcaa; }
+        .comment { color: #6a9955; font-style: italic; }
+
+        /* Parsing Tables Section */
+        .parsing-tables-section {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out 1s both;
+        }
+
+        .tables-explanation {
+            margin-top: 1.5rem;
+        }
+
+        .table-concept {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            margin-bottom: 2rem;
+        }
+
+        .tables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .table-type {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .table-type.td {
+            border-color: #26d0ce;
+            background: rgba(38, 208, 206, 0.05);
+        }
+
+        .table-type.bu {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .table-example {
+            margin-top: 1rem;
+        }
+
+        .key-differences {
+            margin-top: 2rem;
+        }
+
+        /* Focus Section */
+        .focus-section {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 1.2s both;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        }
+
+        .focus-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInStep {
+            from { 
+                opacity: 0; 
+                transform: translateX(-20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .play-button {
+            background: #26d0ce;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 1rem 0;
+            transition: all 0.3s;
+        }
+
+        .play-button:hover {
+            background: #1ca8a6;
+            transform: scale(1.05);
+        }
+
+        .play-button.bu {
+            background: #ff6b6b;
+        }
+
+        .play-button.bu:hover {
+            background: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Top-Down vs Bottom-Up</h1>
+        <p class="subtitle">Dos estrategias fundamentalmente diferentes para construir el AST</p>
+
+        <!-- Main Comparison -->
+        <div class="comparison-main">
+            <!-- Top-Down Section -->
+            <div class="approach-section top-down">
+                <div class="approach-icon">🌱</div>
+                <h3 class="approach-title">Top-Down (Descendente)</h3>
+                
+                <div class="building-demo" id="topDownDemo">
+                    <div class="tree-container">
+                        <!-- Tree nodes for Top-Down -->
+                        <div class="tree-node" style="top: 20px; left: 120px;" data-step="1">Program</div>
+                        <div class="tree-node" style="top: 80px; left: 120px;" data-step="2">Statement</div>
+                        <div class="tree-node" style="top: 140px; left: 120px;" data-step="3">Assignment</div>
+                        <div class="tree-node" style="top: 200px; left: 40px;" data-step="4">x</div>
+                        <div class="tree-node" style="top: 200px; left: 120px;" data-step="5">=</div>
+                        <div class="tree-node" style="top: 200px; left: 200px;" data-step="6">5</div>
+                        
+                        <!-- Lines for Top-Down -->
+                        <div class="tree-line" style="top: 60px; left: 140px; width: 2px; height: 20px;" data-step="2"></div>
+                        <div class="tree-line" style="top: 120px; left: 140px; width: 2px; height: 20px;" data-step="3"></div>
+                        <div class="tree-line" style="top: 180px; left: 60px; width: 160px; height: 2px;" data-step="4"></div>
+                        <div class="tree-line" style="top: 180px; left: 60px; width: 2px; height: 20px;" data-step="4"></div>
+                        <div class="tree-line" style="top: 180px; left: 140px; width: 2px; height: 20px;" data-step="5"></div>
+                        <div class="tree-line" style="top: 180px; left: 220px; width: 2px; height: 20px;" data-step="6"></div>
+                    </div>
+                </div>
+                
+                <button class="play-button" onclick="playTopDown()">▶️ Ver Construcción</button>
+                
+                <div style="margin-top: 1rem;">
+                    <h4 style="color: #26d0ce; margin-bottom: 0.5rem;">¿Cómo funciona?</h4>
+                    <ul style="text-align: left; padding-left: 1rem;">
+                        <li>Empieza con el símbolo inicial (raíz)</li>
+                        <li>Expande reglas hacia abajo</li>
+                        <li>Predice qué producción usar</li>
+                        <li>Como construir una casa desde el techo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom-Up Section -->
+            <div class="approach-section bottom-up">
+                <div class="approach-icon">🌳</div>
+                <h3 class="approach-title">Bottom-Up (Ascendente)</h3>
+                
+                <div class="building-demo" id="bottomUpDemo">
+                    <div class="tree-container">
+                        <!-- Tree nodes for Bottom-Up -->
+                        <div class="tree-node" style="top: 200px; left: 40px;" data-step="1">x</div>
+                        <div class="tree-node" style="top: 200px; left: 120px;" data-step="2">=</div>
+                        <div class="tree-node" style="top: 200px; left: 200px;" data-step="3">5</div>
+                        <div class="tree-node" style="top: 140px; left: 120px;" data-step="4">Assignment</div>
+                        <div class="tree-node" style="top: 80px; left: 120px;" data-step="5">Statement</div>
+                        <div class="tree-node" style="top: 20px; left: 120px;" data-step="6">Program</div>
+                        
+                        <!-- Lines for Bottom-Up -->
+                        <div class="tree-line" style="top: 180px; left: 60px; width: 160px; height: 2px;" data-step="4"></div>
+                        <div class="tree-line" style="top: 180px; left: 60px; width: 2px; height: 20px;" data-step="4"></div>
+                        <div class="tree-line" style="top: 180px; left: 140px; width: 2px; height: 20px;" data-step="4"></div>
+                        <div class="tree-line" style="top: 180px; left: 220px; width: 2px; height: 20px;" data-step="4"></div>
+                        <div class="tree-line" style="top: 120px; left: 140px; width: 2px; height: 20px;" data-step="5"></div>
+                        <div class="tree-line" style="top: 60px; left: 140px; width: 2px; height: 20px;" data-step="6"></div>
+                    </div>
+                </div>
+                
+                <button class="play-button bu" onclick="playBottomUp()">▶️ Ver Construcción</button>
+                
+                <div style="margin-top: 1rem;">
+                    <h4 style="color: #ff6b6b; margin-bottom: 0.5rem;">¿Cómo funciona?</h4>
+                    <ul style="text-align: left; padding-left: 1rem;">
+                        <li>Empieza con tokens (hojas)</li>
+                        <li>Reduce combinaciones hacia arriba</li>
+                        <li>Usa un stack para construir</li>
+                        <li>Como construir una casa desde cimientos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Example -->
+        <div class="example-section">
+            <h3 class="example-title">📊 Ejemplo Detallado: Parseando "x = 5"</h3>
+            
+            <div class="parsing-demo">
+                <!-- Top-Down Steps -->
+                <div class="demo-panel td">
+                    <h4 style="color: #26d0ce; text-align: center; margin-bottom: 1rem;">🌱 Top-Down (Recursive Descent)</h4>
+                    
+                    <div class="demo-steps">
+                        <div class="step td">1. Empezar con Program</div>
+                        <div class="step td">2. Program → Statement</div>
+                        <div class="step td">3. Statement → Assignment</div>
+                        <div class="step td">4. Assignment → ID "=" Expression</div>
+                        <div class="step td">5. Consumir tokens: x, =, 5</div>
+                        <div class="step td">6. ✅ Árbol completo!</div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(38, 208, 206, 0.1); border-radius: 8px;">
+                        <strong>Decisión:</strong> ¿Qué regla usar?<br>
+                        <em>Mira el próximo token para decidir</em>
+                    </div>
+                </div>
+
+                <!-- Bottom-Up Steps -->
+                <div class="demo-panel bu">
+                    <h4 style="color: #ff6b6b; text-align: center; margin-bottom: 1rem;">🌳 Bottom-Up (LR)</h4>
+                    
+                    <div class="demo-steps">
+                        <div class="step bu">1. Stack: [] | Input: x = 5</div>
+                        <div class="step bu">2. Stack: [x] | Input: = 5</div>
+                        <div class="step bu">3. Stack: [x, =] | Input: 5</div>
+                        <div class="step bu">4. Stack: [x, =, 5] | Input: []</div>
+                        <div class="step bu">5. Reducir: x = 5 → Assignment</div>
+                        <div class="step bu">6. ✅ Árbol completo!</div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 107, 107, 0.1); border-radius: 8px;">
+                        <strong>Decisión:</strong> ¿Cuándo reducir?<br>
+                        <em>Usa tabla de parsing para decidir</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Characteristics Comparison Table -->
+        <div class="characteristics-table">
+            <h3 style="color: #667eea; text-align: center; margin-bottom: 1rem;">⚖️ Comparación Detallada de Características</h3>
+            
+            <div class="table-grid">
+                <div class="table-header">Característica</div>
+                <div class="table-header" style="background: #26d0ce;">Top-Down</div>
+                <div class="table-header" style="background: #ff6b6b;">Bottom-Up</div>
+                
+                <div class="table-cell feature">Dirección de construcción</div>
+                <div class="table-cell td">Raíz → Hojas</div>
+                <div class="table-cell bu">Hojas → Raíz</div>
+                
+                <div class="table-cell feature">Estructura de datos principal</div>
+                <div class="table-cell td">Pila de llamadas (recursión)</div>
+                <div class="table-cell bu">Stack explícito</div>
+                
+                <div class="table-cell feature">Decisión de parsing</div>
+                <div class="table-cell td">Predictivo (mira hacia adelante)</div>
+                <div class="table-cell bu">Por reducción (tabla LR)</div>
+                
+                <div class="table-cell feature">Facilidad de implementación</div>
+                <div class="table-cell td">⭐⭐⭐⭐⭐ Muy fácil</div>
+                <div class="table-cell bu">⭐⭐ Complejo</div>
+                
+                <div class="table-cell feature">Manejo de recursión izquierda</div>
+                <div class="table-cell td">❌ Problemas</div>
+                <div class="table-cell bu">✅ Sin problemas</div>
+                
+                <div class="table-cell feature">Tipos de gramática soportada</div>
+                <div class="table-cell td">LL(k) - limitado</div>
+                <div class="table-cell bu">LR(k) - más amplio</div>
+                
+                <div class="table-cell feature">Mensajes de error</div>
+                <div class="table-cell td">⭐⭐⭐⭐⭐ Excelentes</div>
+                <div class="table-cell bu">⭐⭐⭐ Buenos</div>
+                
+                <div class="table-cell feature">Eficiencia</div>
+                <div class="table-cell td">⭐⭐⭐⭐ Rápido</div>
+                <div class="table-cell bu">⭐⭐⭐⭐⭐ Muy rápido</div>
+                
+                <div class="table-cell feature">Uso en la industria</div>
+                <div class="table-cell td">Compiladores simples, DSLs</div>
+                <div class="table-cell bu">Compiladores comerciales</div>
+            </div>
+        </div>
+
+        <!-- Algorithms Section -->
+        <div class="algorithms-section">
+            <h3 style="color: #FFD700; text-align: center; font-size: 1.6rem; margin-bottom: 1rem;">
+                🔧 Pseudocódigo de los Algoritmos
+            </h3>
+            
+            <div class="algorithms-grid">
+                <!-- Top-Down Algorithm -->
+                <div class="algorithm-card td">
+                    <h4 style="color: #26d0ce; text-align: center; margin-bottom: 1rem;">Recursive Descent</h4>
+                    
+                    <div class="pseudocode">
+<span class="keyword">function</span> <span class="function-name">parseExpression</span>() {
+  <span class="keyword">if</span> (currentToken == ID) {
+    token = advance()
+    <span class="keyword">if</span> (currentToken == "=") {
+      advance() <span class="comment">// consume "="</span>
+      right = parseExpression()
+      <span class="keyword">return new</span> Assignment(token, right)
+    }
+  }
+  <span class="keyword">throw</span> ParseError("Expected assignment")
+}
+
+<span class="comment">// Predictivo: decide por lookahead</span>
+<span class="keyword">function</span> <span class="function-name">parseStatement</span>() {
+  <span class="keyword">switch</span> (currentToken.type) {
+    <span class="keyword">case</span> IF: <span class="keyword">return</span> parseIf()
+    <span class="keyword">case</span> WHILE: <span class="keyword">return</span> parseWhile()
+    <span class="keyword">case</span> ID: <span class="keyword">return</span> parseAssignment()
+  }
+}</div>
+                </div>
+
+                <!-- Bottom-Up Algorithm -->
+                <div class="algorithm-card bu">
+                    <h4 style="color: #ff6b6b; text-align: center; margin-bottom: 1rem;">LR Parser</h4>
+                    
+                    <div class="pseudocode">
+<span class="keyword">function</span> <span class="function-name">parseLR</span>() {
+  stack = [0] <span class="comment">// estado inicial</span>
+  
+  <span class="keyword">while</span> (<span class="keyword">true</span>) {
+    state = stack.top()
+    token = currentToken
+    
+    action = table[state][token]
+    
+    <span class="keyword">if</span> (action == SHIFT(s)) {
+      stack.push(token, s)
+      advance()
+    } <span class="keyword">else if</span> (action == REDUCE(rule)) {
+      <span class="comment">// Pop elementos de la regla</span>
+      items = stack.pop(rule.length * 2)
+      newState = goto[stack.top()][rule.lhs]
+      stack.push(rule.lhs, newState)
+    } <span class="keyword">else if</span> (action == ACCEPT) {
+      <span class="keyword">return</span> stack[1] <span class="comment">// AST raíz</span>
+    } <span class="keyword">else</span> {
+      <span class="keyword">throw</span> ParseError()
+    }
+  }
+}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parsing Tables Explanation -->
+        <div class="parsing-tables-section">
+            <h3 style="color: #FFD700; text-align: center; font-size: 1.8rem; margin-bottom: 2rem;">
+                📊 ¿Qué son las Tablas de Parsing?
+            </h3>
+            
+            <div class="tables-explanation">
+                <div class="table-concept">
+                    <h4 style="color: #667eea; margin-bottom: 1rem;">🎯 Concepto Fundamental</h4>
+                    <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                        Las <strong>tablas de parsing</strong> son estructuras de datos que contienen las <strong>decisiones precalculadas</strong> 
+                        del parser para cada situación posible durante el análisis sintáctico.
+                    </p>
+                </div>
+                
+                <div class="tables-grid">
+                    <div class="table-type td">
+                        <h4 style="color: #26d0ce; text-align: center; margin-bottom: 1rem;">📋 Tabla LL (Top-Down)</h4>
+                        <div class="table-example">
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; color: #333; font-family: monospace;">
+                                <div style="font-weight: bold; margin-bottom: 0.5rem;">M[A, a] = "qué regla usar"</div>
+                                <div style="display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
+                                    <div style="font-weight: bold;"></div>
+                                    <div style="font-weight: bold; text-align: center; background: #e9ecef; padding: 0.3rem;">id</div>
+                                    <div style="font-weight: bold; text-align: center; background: #e9ecef; padding: 0.3rem;">+</div>
+                                    <div style="font-weight: bold; text-align: center; background: #e9ecef; padding: 0.3rem;">$</div>
+                                    
+                                    <div style="font-weight: bold; background: #e9ecef; padding: 0.3rem;">E</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">E→TE'</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    
+                                    <div style="font-weight: bold; background: #e9ecef; padding: 0.3rem;">E'</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">E'→+TE'</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">E'→ε</div>
+                                    
+                                    <div style="font-weight: bold; background: #e9ecef; padding: 0.3rem;">T</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">T→id</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <strong>Funcionamiento:</strong>
+                                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                    <li>Mira el <strong>no-terminal actual</strong> (E, E', T)</li>
+                                    <li>Mira el <strong>token actual</strong> (id, +, $)</li>
+                                    <li>La tabla dice <strong>qué regla aplicar</strong></li>
+                                    <li>Si está vacía (-), hay un <strong>error de sintaxis</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-type bu">
+                        <h4 style="color: #ff6b6b; text-align: center; margin-bottom: 1rem;">📋 Tabla LR (Bottom-Up)</h4>
+                        <div class="table-example">
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; color: #333; font-family: monospace;">
+                                <div style="font-weight: bold; margin-bottom: 0.5rem;">ACTION[estado, terminal] + GOTO[estado, no-terminal]</div>
+                                <div style="display: grid; grid-template-columns: auto 1fr 1fr 1fr 1fr; gap: 0.5rem; font-size: 0.8rem;">
+                                    <div style="font-weight: bold;"></div>
+                                    <div style="font-weight: bold; text-align: center; background: #e9ecef; padding: 0.3rem;">id</div>
+                                    <div style="font-weight: bold; text-align: center; background: #e9ecef; padding: 0.3rem;">+</div>
+                                    <div style="font-weight: bold; text-align: center; background: #e9ecef; padding: 0.3rem;">$</div>
+                                    <div style="font-weight: bold; text-align: center; background: #ffe4e1; padding: 0.3rem;">E</div>
+                                    
+                                    <div style="font-weight: bold; background: #e9ecef; padding: 0.3rem;">0</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">s5</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #fff3cd; padding: 0.3rem; text-align: center;">1</div>
+                                    
+                                    <div style="font-weight: bold; background: #e9ecef; padding: 0.3rem;">1</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">s6</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">acc</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    
+                                    <div style="font-weight: bold; background: #e9ecef; padding: 0.3rem;">5</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">r2</div>
+                                    <div style="background: #d4edda; padding: 0.3rem; text-align: center;">r2</div>
+                                    <div style="background: #f8d7da; padding: 0.3rem; text-align: center;">-</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <strong>Funcionamiento:</strong>
+                                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                    <li><strong>s5</strong> = shift al estado 5</li>
+                                    <li><strong>r2</strong> = reduce con regla 2</li>
+                                    <li><strong>acc</strong> = aceptar (éxito)</li>
+                                    <li>Estados controlan el <strong>contexto actual</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="key-differences">
+                    <h4 style="color: #667eea; margin: 2rem 0 1rem 0; text-align: center;">🔑 Diferencias Clave</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div style="background: rgba(38, 208, 206, 0.1); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #26d0ce;">
+                            <h5 style="color: #26d0ce; margin-bottom: 0.5rem;">📋 Tabla LL (Top-Down)</h5>
+                            <ul style="line-height: 1.6;">
+                                <li><strong>Predictiva:</strong> decide qué regla expandir</li>
+                                <li><strong>Entrada:</strong> (No-terminal, Terminal)</li>
+                                <li><strong>Salida:</strong> regla de producción</li>
+                                <li><strong>Tamaño:</strong> más pequeña</li>
+                                <li><strong>Construcción:</strong> relativamente simple</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: rgba(255, 107, 107, 0.1); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #ff6b6b;">
+                            <h5 style="color: #ff6b6b; margin-bottom: 0.5rem;">📋 Tabla LR (Bottom-Up)</h5>
+                            <ul style="line-height: 1.6;">
+                                <li><strong>Basada en estados:</strong> shift/reduce/goto</li>
+                                <li><strong>Entrada:</strong> (Estado, Terminal/No-terminal)</li>
+                                <li><strong>Salida:</strong> acción (shift/reduce/accept)</li>
+                                <li><strong>Tamaño:</strong> más grande</li>
+                                <li><strong>Construcción:</strong> compleja (autómatas)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255, 215, 0, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #FFD700; margin-top: 2rem;">
+                    <h4 style="color: #B8860B; text-align: center; margin-bottom: 1rem;">💡 ¿Por qué son importantes?</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
+                            <strong>Eficiencia</strong><br>
+                            <small>Decisiones precalculadas = parsing rápido</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                            <strong>Determinismo</strong><br>
+                            <small>Sin ambigüedad en las decisiones</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔧</div>
+                            <strong>Automatización</strong><br>
+                            <small>Generadas automáticamente por herramientas</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                            <strong>Análisis</strong><br>
+                            <small>Permiten verificar propiedades de la gramática</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Focus Section -->
+        <div class="focus-section">
+            <div class="focus-title">🎯 Nuestro Enfoque en el Curso</div>
+            <p style="font-size: 1.2rem; line-height: 1.6;">
+                Nos enfocaremos en <strong>Top-Down (Recursive Descent)</strong> porque:<br>
+                ✅ Es más fácil de entender conceptualmente<br>
+                ✅ Permite implementación directa desde la gramática<br>
+                ✅ Genera mejores mensajes de error<br>
+                ✅ Es perfecto para aprender los fundamentos
+            </p>
+            <p style="margin-top: 1rem; font-style: italic;">
+                Bottom-Up es más potente, pero lo mencionaremos solo como referencia
+            </p>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide06.html" class="nav-btn">← Anterior</a>
+        <a href="slide08.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="syntax-highlighter.js"></script>
+    <script>
+        function playTopDown() {
+            const demo = document.getElementById('topDownDemo');
+            const nodes = demo.querySelectorAll('.tree-node');
+            const lines = demo.querySelectorAll('.tree-line');
+            
+            // Reset
+            nodes.forEach(node => node.classList.remove('visible'));
+            lines.forEach(line => line.classList.remove('visible'));
+            
+            // Animate top-down construction
+            let delay = 0;
+            for (let step = 1; step <= 6; step++) {
+                setTimeout(() => {
+                    demo.querySelectorAll(`[data-step="${step}"]`).forEach(el => {
+                        el.classList.add('visible');
+                    });
+                }, delay);
+                delay += 800;
+            }
+        }
+        
+        function playBottomUp() {
+            const demo = document.getElementById('bottomUpDemo');
+            const nodes = demo.querySelectorAll('.tree-node');
+            const lines = demo.querySelectorAll('.tree-line');
+            
+            // Reset
+            nodes.forEach(node => node.classList.remove('visible'));
+            lines.forEach(line => line.classList.remove('visible'));
+            
+            // Animate bottom-up construction
+            let delay = 0;
+            for (let step = 1; step <= 6; step++) {
+                setTimeout(() => {
+                    demo.querySelectorAll(`[data-step="${step}"]`).forEach(el => {
+                        el.classList.add('visible');
+                    });
+                }, delay);
+                delay += 800;
+            }
+        }
+
+        // Auto-play demos when slide loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(playTopDown, 2000);
+            setTimeout(playBottomUp, 4000);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide08.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide06.html';
+            }
+        });
+    </script>
+</body>
+</html>

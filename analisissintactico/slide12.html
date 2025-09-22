@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TokenStream: Navegación Inteligente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: #FFD700;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .section-title {
+            color: #FFD700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .method-card:hover::before {
+            animation: shine 0.8s ease-in-out;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
+        .method-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #FFD700;
+        }
+
+        .method-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .method-signature {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-description {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .visual-demo {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .token-stream-visual {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .token-box {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            min-width: 80px;
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .token-box.current {
+            background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255,107,107,0.5);
+        }
+
+        .token-box.peek {
+            background: linear-gradient(135deg, #FFD93D, #f1c40f);
+            color: #333;
+        }
+
+        .position-indicator {
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .code-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .code-title {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0 0 8px 8px;
+            background: #2d3748 !important;
+        }
+
+        pre code {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .demo-button {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: white;
+            color: #f093fb;
+            transform: translateY(-2px);
+        }
+
+        .step-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .step-box {
+            background: #667eea;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 120px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        .step-box:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .step-arrow {
+            font-size: 1.5rem;
+            color: #FFD700;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            color: #333;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+        .section:nth-child(5) { animation-delay: 0.5s; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-flow {
+                flex-direction: column;
+            }
+            
+            .step-arrow {
+                transform: rotate(90deg);
+            }
+            
+            .token-stream-visual {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">12 / 20</div>
+    
+    <div class="container">
+        <h1>🎯 TokenStream: Navegación Inteligente</h1>
+        <div class="subtitle">Abstracción para el Manejo Eficiente de Secuencias de Tokens</div>
+
+        <!-- Concepto Principal -->
+        <div class="section">
+            <div class="section-title">
+                🗺️ ¿Qué es un TokenStream?
+            </div>
+            
+            <div class="grid-2">
+                <div>
+                    <h3 style="color: #FFD700; margin-bottom: 1rem;">📚 Definición Técnica</h3>
+                    <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 10px;">
+                        <p style="margin-bottom: 1rem;">
+                            <strong>TokenStream</strong> es una abstracción que encapsula la secuencia de tokens producida por el analizador léxico, proporcionando una interfaz controlada para que el parser navegue y consuma tokens de manera eficiente.
+                        </p>
+                        <div style="background: rgba(255,215,0,0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #FFD700;">
+                            <h4 style="color: #FFD700; margin-bottom: 0.5rem;">Propósito Principal:</h4>
+                            <p style="margin: 0;">
+                                Separar la lógica de navegación de tokens de la lógica de parsing, permitiendo operaciones como lookahead, backtracking y verificación de tipos sin comprometer la integridad del flujo de datos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="color: #FFD700; margin-bottom: 1rem;">⚡ Operaciones Fundamentales</h3>
+                    <div class="step-flow" style="flex-direction: column; gap: 0.5rem;">
+                        <div class="step-box" style="animation: none; width: 100%;">📍 Inspección de Posición Actual</div>
+                        <div class="step-box" style="animation: none; width: 100%;">➡️ Avance Secuencial Controlado</div>
+                        <div class="step-box" style="animation: none; width: 100%;">👀 Lookahead sin Consumo</div>
+                        <div class="step-box" style="animation: none; width: 100%;">✅ Verificación y Consumo Condicional</div>
+                        <div class="step-box" style="animation: none; width: 100%;">🔚 Detección de Terminación</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualización del Stream -->
+        <div class="section">
+            <div class="section-title">
+                🎬 Visualización del Token Stream
+            </div>
+            
+            <div class="visual-demo">
+                <h3 style="color: #FFD700; margin-bottom: 1rem; text-align: center;">
+                    Stream: <code>if ( x > 5 ) { print ( "mayor" ) ; }</code>
+                </h3>
+                
+                <div id="token-visualization" class="token-stream-visual">
+                    <div class="token-box current" style="position: relative;">
+                        if
+                        <div class="position-indicator">current()</div>
+                    </div>
+                    <div class="token-box">(</div>
+                    <div class="token-box peek">
+                        x
+                        <div class="position-indicator">peek(1)</div>
+                    </div>
+                    <div class="token-box">&gt;</div>
+                    <div class="token-box">5</div>
+                    <div class="token-box">)</div>
+                    <div class="token-box">{</div>
+                    <div class="token-box">print</div>
+                    <div class="token-box">(</div>
+                    <div class="token-box">"mayor"</div>
+                    <div class="token-box">)</div>
+                    <div class="token-box">;</div>
+                    <div class="token-box">}</div>
+                </div>
+                
+                <div style="text-align: center; color: #FFD700; margin-top: 1rem;">
+                    <strong>Posición Actual: 0</strong> | <strong>Token Actual: "if"</strong> | <strong>Siguiente: "("</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métodos del TokenStream -->
+        <div class="section">
+            <div class="section-title">
+                🛠️ Métodos Fundamentales
+            </div>
+            
+            <div class="grid-4">
+                <div class="method-card">
+                    <div class="method-icon">👁️</div>
+                    <div class="method-name">current()</div>
+                    <div class="method-signature">Token current()</div>
+                    <div class="method-description">
+                        Obtiene el token en la posición actual sin modificar el estado del stream.
+                    </div>
+                </div>
+
+                <div class="method-card">
+                    <div class="method-icon">➡️</div>
+                    <div class="method-name">advance()</div>
+                    <div class="method-signature">Token advance()</div>
+                    <div class="method-description">
+                        Consume el token actual e incrementa la posición del stream al siguiente token.
+                    </div>
+                </div>
+
+                <div class="method-card">
+                    <div class="method-icon">🔭</div>
+                    <div class="method-name">peek()</div>
+                    <div class="method-signature">Token peek(int offset)</div>
+                    <div class="method-description">
+                        Realiza lookahead para inspeccionar tokens futuros sin modificar la posición actual.
+                    </div>
+                </div>
+
+                <div class="method-card">
+                    <div class="method-icon">✅</div>
+                    <div class="method-name">match()</div>
+                    <div class="method-signature">boolean match(TokenType)</div>
+                    <div class="method-description">
+                        Implementa consumo condicional: verifica tipo y consume solo si hay coincidencia.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementación Java -->
+        <div class="section">
+            <div class="section-title">
+                💻 Implementación Java Profesional
+            </div>
+            
+            <div class="code-container">
+                <div class="code-title">🎯 Clase TokenStream Completa</div>
+                <pre><code class="language-java">public class TokenStream {
+    private final List&lt;Token&gt; tokens;
+    private int position;
+    
+    public TokenStream(List&lt;Token&gt; tokens) {
+        this.tokens = new ArrayList&lt;&gt;(tokens);
+        this.position = 0;
+        
+        // Asegurar que siempre termine con EOF
+        if (tokens.isEmpty() || tokens.get(tokens.size()-1).getType() != TokenType.EOF) {
+            this.tokens.add(new Token(TokenType.EOF, "", -1, -1));
+        }
+    }
+    
+    /**
+     * Devuelve el token en la posición actual sin avanzar
+     * @return Token actual o EOF si está al final
+     */
+    public Token current() {
+        if (position >= tokens.size()) {
+            return tokens.get(tokens.size() - 1); // EOF
+        }
+        return tokens.get(position);
+    }
+    
+    /**
+     * Devuelve el token actual y avanza al siguiente
+     * @return Token que estaba en la posición actual
+     */
+    public Token advance() {
+        Token current = current();
+        if (position < tokens.size() - 1) { // No avanzar más allá de EOF
+            position++;
+        }
+        return current;
+    }
+    
+    /**
+     * Mira hacia adelante sin consumir tokens
+     * @param offset Cuántos tokens mirar hacia adelante (1 = siguiente)
+     * @return Token en la posición actual + offset
+     */
+    public Token peek(int offset) {
+        int peekPosition = position + offset;
+        if (peekPosition >= tokens.size()) {
+            return tokens.get(tokens.size() - 1); // EOF
+        }
+        return tokens.get(peekPosition);
+    }
+    
+    /**
+     * Verifica si el token actual es del tipo esperado y lo consume
+     * @param expectedType Tipo de token esperado
+     * @return true si coincide y fue consumido, false si no
+     */
+    public boolean match(TokenType expectedType) {
+        if (current().getType() == expectedType) {
+            advance();
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Consume múltiples tipos de tokens (OR lógico)
+     * @param types Tipos de tokens aceptables
+     * @return true si alguno coincidió y fue consumido
+     */
+    public boolean matchAny(TokenType... types) {
+        TokenType currentType = current().getType();
+        for (TokenType type : types) {
+            if (currentType == type) {
+                advance();
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Verifica si llegamos al final del stream
+     * @return true si el token actual es EOF
+     */
+    public boolean isAtEnd() {
+        return current().getType() == TokenType.EOF;
+    }
+    
+    /**
+     * Verifica el token actual sin consumirlo
+     * @param expectedType Tipo esperado
+     * @return true si el token actual es del tipo esperado
+     */
+    public boolean check(TokenType expectedType) {
+        return current().getType() == expectedType;
+    }
+    
+    /**
+     * Consume un token esperado o lanza excepción
+     * @param expectedType Tipo de token que DEBE estar presente
+     * @param errorMessage Mensaje si no se encuentra
+     * @return El token consumido
+     * @throws ParseException si el token no es del tipo esperado
+     */
+    public Token consume(TokenType expectedType, String errorMessage) throws ParseException {
+        if (check(expectedType)) {
+            return advance();
+        }
+        
+        Token errorToken = current();
+        throw new ParseException(
+            String.format("%s. Se encontró '%s' en línea %d, columna %d", 
+                         errorMessage, 
+                         errorToken.getLexeme(),
+                         errorToken.getLine(),
+                         errorToken.getColumn()),
+            errorToken
+        );
+    }
+    
+    // Métodos de utilidad para depuración
+    public int getPosition() { return position; }
+    public int size() { return tokens.size(); }
+    public List&lt;Token&gt; getTokens() { return new ArrayList&lt;&gt;(tokens); }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Ejemplo de Uso -->
+        <div class="section">
+            <div class="section-title">
+                🎯 Ejemplo Práctico: Parsing de IF
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">📝 Código a Parsear</h3>
+                    <div style="background: #2d3748; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: monospace;">
+                        if (x > 5) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;print("mayor");<br>
+                        }
+                    </div>
+                    
+                    <h4 style="color: #667eea; margin: 1rem 0 0.5rem 0;">🪙 Tokens Generados:</h4>
+                    <div style="background: #f8f9fa; color: #333; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem;">
+                        IF, LPAREN, IDENTIFIER(x), GT, INTEGER(5), RPAREN, LBRACE, IDENTIFIER(print), LPAREN, STRING("mayor"), RPAREN, SEMICOLON, RBRACE, EOF
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">⚙️ Proceso de Parsing</h3>
+                    <div class="code-container">
+                        <div class="code-title">Parser en Acción</div>
+                        <pre><code class="language-java">public IfStatementNode parseIfStatement() throws ParseException {
+    // 1. Verificar y consumir 'if'
+    tokenStream.consume(TokenType.IF, "Se esperaba 'if'");
+    
+    // 2. Verificar y consumir '('
+    tokenStream.consume(TokenType.LPAREN, "Se esperaba '(' después de 'if'");
+    
+    // 3. Parsear la condición (x > 5)
+    ExpressionNode condition = parseExpression();
+    
+    // 4. Verificar y consumir ')'
+    tokenStream.consume(TokenType.RPAREN, "Se esperaba ')' después de la condición");
+    
+    // 5. Decidir si es bloque o statement simple
+    StatementNode thenStatement;
+    if (tokenStream.check(TokenType.LBRACE)) {
+        // Es un bloque { ... }
+        thenStatement = parseBlock();
+    } else {
+        // Es un statement simple
+        thenStatement = parseStatement();
+    }
+    
+    // 6. Verificar si hay 'else' (opcional)
+    StatementNode elseStatement = null;
+    if (tokenStream.match(TokenType.ELSE)) {
+        elseStatement = tokenStream.check(TokenType.LBRACE) 
+                       ? parseBlock() 
+                       : parseStatement();
+    }
+    
+    return new IfStatementNode(condition, thenStatement, elseStatement);
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparación de Métodos -->
+        <div class="section">
+            <div class="section-title">
+                ⚖️ Comparación de Métodos TokenStream
+            </div>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>¿Consume Token?</th>
+                        <th>¿Puede Fallar?</th>
+                        <th>Valor de Retorno</th>
+                        <th>Uso Principal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>current()</strong></td>
+                        <td style="color: #dc3545;">❌ No</td>
+                        <td style="color: #28a745;">❌ Nunca</td>
+                        <td>Token</td>
+                        <td>Inspeccionar sin avanzar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>advance()</strong></td>
+                        <td style="color: #28a745;">✅ Sí</td>
+                        <td style="color: #28a745;">❌ Nunca</td>
+                        <td>Token</td>
+                        <td>Moverse al siguiente</td>
+                    </tr>
+                    <tr>
+                        <td><strong>peek()</strong></td>
+                        <td style="color: #dc3545;">❌ No</td>
+                        <td style="color: #28a745;">❌ Nunca</td>
+                        <td>Token</td>
+                        <td>Lookahead para decisiones</td>
+                    </tr>
+                    <tr>
+                        <td><strong>match()</strong></td>
+                        <td style="color: #ffc107;">⚠️ Condicional</td>
+                        <td style="color: #28a745;">❌ Nunca</td>
+                        <td>boolean</td>
+                        <td>Consumo opcional</td>
+                    </tr>
+                    <tr>
+                        <td><strong>consume()</strong></td>
+                        <td style="color: #28a745;">✅ Sí</td>
+                        <td style="color: #dc3545;">✅ Puede</td>
+                        <td>Token</td>
+                        <td>Consumo obligatorio</td>
+                    </tr>
+                    <tr>
+                        <td><strong>check()</strong></td>
+                        <td style="color: #dc3545;">❌ No</td>
+                        <td style="color: #28a745;">❌ Nunca</td>
+                        <td>boolean</td>
+                        <td>Verificación sin consumo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Demo Interactivo -->
+        <div class="interactive-demo">
+            <h3 style="margin-bottom: 1rem;">🎮 Simulador TokenStream</h3>
+            <p style="margin-bottom: 1.5rem;">Experimenta con diferentes operaciones del TokenStream:</p>
+            
+            <button class="demo-button" onclick="demonstrateMethod('current')">
+                👁️ current()
+            </button>
+            <button class="demo-button" onclick="demonstrateMethod('advance')">
+                ➡️ advance()
+            </button>
+            <button class="demo-button" onclick="demonstrateMethod('peek')">
+                🔭 peek(2)
+            </button>
+            <button class="demo-button" onclick="demonstrateMethod('match')">
+                ✅ match(IF)
+            </button>
+            
+            <div id="demo-output" style="background: #2d3748; padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; font-family: monospace; display: none;">
+                <!-- El contenido se mostrará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide11.html" class="nav-btn">← Anterior</a>
+        <a href="slide13.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        // Simular un TokenStream para la demo
+        const demoTokens = ['if', '(', 'x', '>', '5', ')', '{', 'print', '(', '"mayor"', ')', ';', '}'];
+        let demoPosition = 0;
+
+        const methodDemos = {
+            current: {
+                title: "👁️ Método current()",
+                description: "Inspecciona el token actual sin modificar el estado del stream",
+                code: `Token token = tokenStream.current();
+// Resultado: "${demoTokens[demoPosition]}"
+// Posición después: ${demoPosition} (sin cambio)`,
+                action: () => {
+                    return {
+                        result: demoTokens[demoPosition],
+                        newPosition: demoPosition
+                    };
+                }
+            },
+            
+            advance: {
+                title: "➡️ Método advance()",
+                description: "Consume el token actual e incrementa la posición del stream",
+                code: `Token token = tokenStream.advance();
+// Resultado: "${demoTokens[demoPosition]}"
+// Posición después: ${Math.min(demoPosition + 1, demoTokens.length - 1)}`,
+                action: () => {
+                    const current = demoTokens[demoPosition];
+                    demoPosition = Math.min(demoPosition + 1, demoTokens.length - 1);
+                    return {
+                        result: current,
+                        newPosition: demoPosition
+                    };
+                }
+            },
+            
+            peek: {
+                title: "🔭 Método peek(2)",
+                description: "Realiza lookahead de 2 posiciones sin modificar el estado",
+                code: `Token token = tokenStream.peek(2);
+// Resultado: "${demoTokens[Math.min(demoPosition + 2, demoTokens.length - 1)]}"
+// Posición después: ${demoPosition} (sin cambio)`,
+                action: () => {
+                    const peekPosition = Math.min(demoPosition + 2, demoTokens.length - 1);
+                    return {
+                        result: demoTokens[peekPosition],
+                        newPosition: demoPosition
+                    };
+                }
+            },
+            
+            match: {
+                title: "✅ Método match(IF)",
+                description: "Implementa consumo condicional basado en verificación de tipo",
+                code: `boolean matched = tokenStream.match(TokenType.IF);
+// Resultado: ${demoTokens[demoPosition] === 'if'}
+// Token actual era: "${demoTokens[demoPosition]}"
+// Posición después: ${demoTokens[demoPosition] === 'if' ? Math.min(demoPosition + 1, demoTokens.length - 1) : demoPosition}`,
+                action: () => {
+                    const matched = demoTokens[demoPosition] === 'if';
+                    if (matched) {
+                        demoPosition = Math.min(demoPosition + 1, demoTokens.length - 1);
+                    }
+                    return {
+                        result: matched,
+                        newPosition: demoPosition
+                    };
+                }
+            }
+        };
+
+        function demonstrateMethod(methodName) {
+            const demo = methodDemos[methodName];
+            const output = document.getElementById('demo-output');
+            
+            const result = demo.action();
+            
+            output.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="color: #FFD700; margin-bottom: 0.5rem;">${demo.title}</h4>
+                    <p style="color: #bee3f8; margin-bottom: 1rem;">${demo.description}</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <h5 style="color: #9ae6b4; margin-bottom: 0.5rem;">🔍 Estado del Stream:</h5>
+                    <div style="background: #1a202c; padding: 1rem; border-radius: 5px;">
+                        <strong>Tokens:</strong> [${demoTokens.map((token, idx) => {
+                            if (idx === demoPosition) return `<span style="color: #ff6b6b; font-weight: bold;">${token}</span>`;
+                            if (idx < demoPosition) return `<span style="color: #888;">${token}</span>`;
+                            return token;
+                        }).join(', ')}]<br>
+                        <strong>Posición:</strong> ${demoPosition}<br>
+                        <strong>Token Actual:</strong> "${demoTokens[demoPosition]}"
+                    </div>
+                </div>
+                
+                <div>
+                    <h5 style="color: #fbb6ce; margin-bottom: 0.5rem;">⚙️ Código y Resultado:</h5>
+                    <pre style="background: #22543d; padding: 1rem; border-radius: 5px; margin: 0;"><code>${demo.code}</code></pre>
+                </div>
+            `;
+            
+            output.style.display = 'block';
+            output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Actualizar la visualización
+            updateTokenVisualization();
+        }
+
+        function updateTokenVisualization() {
+            const tokenBoxes = document.querySelectorAll('.token-box');
+            tokenBoxes.forEach((box, index) => {
+                box.classList.remove('current', 'peek');
+                if (index === demoPosition) {
+                    box.classList.add('current');
+                } else if (index === demoPosition + 1) {
+                    box.classList.add('peek');
+                }
+            });
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide13.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide11.html';
+            }
+        });
+    </script>
+</body>
+</html>

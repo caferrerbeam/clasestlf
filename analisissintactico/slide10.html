@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problema: Recursión a la Izquierda</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .problem-alert {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.3);
+            animation: slideUp 0.8s ease-out;
+            text-align: center;
+        }
+
+        .problem-alert h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+
+        .grammar-problematic {
+            background: #2d3748;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 3px solid #ff4757;
+        }
+
+        .demonstration-container {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+        }
+
+        .demonstration-container h2 {
+            color: #FFD700;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .call-stack {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .call-stack h3 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .stack-visualization {
+            background: #1a202c;
+            border-radius: 10px;
+            padding: 1rem;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stack-frame {
+            background: #4a5568;
+            border: 2px solid #FFD700;
+            padding: 0.8rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: white;
+            position: relative;
+            animation: stackPush 0.5s ease-out;
+        }
+
+        .stack-frame.error {
+            background: #e53e3e;
+            border-color: #ff6b6b;
+            animation: shake 0.5s infinite;
+        }
+
+        .infinite-indicator {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff6b6b;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+
+        .parsing-flow {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .parsing-flow h3 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .flow-step {
+            background: #2d3748;
+            color: white;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            font-family: 'Courier New', monospace;
+            position: relative;
+        }
+
+        .flow-step.recursive {
+            border-left-color: #ff4757;
+            background: #4a1a1a;
+        }
+
+        .step-number {
+            background: #FFD700;
+            color: #333;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+
+        .step-number.error {
+            background: #ff4757;
+            color: white;
+        }
+
+        .loop-animation {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .loop-animation h3 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        .circular-arrow {
+            width: 150px;
+            height: 150px;
+            margin: 1rem auto;
+            position: relative;
+        }
+
+        .circular-arrow svg {
+            width: 100%;
+            height: 100%;
+            animation: rotate 3s linear infinite;
+        }
+
+        .function-call {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4a5568;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 2px solid #ff4757;
+        }
+
+        .comparison-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+        }
+
+        .comparison-section h2 {
+            color: #FFD700;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .grammar-card {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .grammar-card.problematic {
+            border-color: #ff4757;
+        }
+
+        .grammar-card.correct {
+            border-color: #4ade80;
+        }
+
+        .grammar-card h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .grammar-card.problematic h3 {
+            color: #ff6b6b;
+        }
+
+        .grammar-card.correct h3 {
+            color: #4ade80;
+        }
+
+        .demo-controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .demo-button {
+            background: #FFD700;
+            color: #333;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0 1rem;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: #f39c12;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .demo-button:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes stackPush {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .visualization-grid,
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Problema: Recursión a la Izquierda</h1>
+
+        <div class="problem-alert">
+            <h2>🚨 El Enemigo del Top-Down Parsing</h2>
+            <p style="font-size: 1.2rem; margin-top: 1rem;">
+                Algunas gramáticas causan <strong>bucles infinitos</strong> que hacen que el parser explote 💥
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>🎯 ¿Qué es la Recursión a la Izquierda?</h2>
+            
+            <p>La <strong>recursión a la izquierda</strong> ocurre cuando una regla gramatical tiene la forma:</p>
+            
+            <div class="grammar-problematic">
+<span class="grammar-rule">A</span> <span class="grammar-operator">→</span> <span class="grammar-rule" style="color: #ff6b6b;">A</span> <span class="grammar-terminal">α</span> | <span class="grammar-terminal">β</span>
+            </div>
+
+            <p style="margin-top: 1rem;">Donde <code>A</code> aparece como el <strong>primer símbolo</strong> en el lado derecho de su propia definición.</p>
+
+            <h3>📝 Ejemplo Problemático</h3>
+            <div class="grammar-problematic">
+<span class="grammar-rule">Expression</span> <span class="grammar-operator">→</span> <span class="grammar-rule" style="color: #ff6b6b;">Expression</span> <span class="grammar-terminal">"+"</span> <span class="grammar-nonterminal">Term</span> | <span class="grammar-nonterminal">Term</span>
+            </div>
+        </div>
+
+        <div class="demonstration-container">
+            <h2>🎬 Demostración Interactiva del Bucle Infinito</h2>
+            
+            <div class="demo-controls">
+                <button class="demo-button" id="startDemo">Iniciar Demostración</button>
+                <button class="demo-button" id="resetDemo">Reiniciar</button>
+                <button class="demo-button" id="stepDemo" disabled>Paso a Paso</button>
+            </div>
+
+            <div class="visualization-grid">
+                <div class="call-stack">
+                    <h3>📚 Pila de Llamadas (Call Stack)</h3>
+                    <div class="stack-visualization" id="stackContainer">
+                        <p style="text-align: center; color: #999; margin-top: 2rem;">
+                            Presiona "Iniciar Demostración" para ver el bucle infinito
+                        </p>
+                    </div>
+                </div>
+
+                <div class="parsing-flow">
+                    <h3>🔄 Flujo de Parsing</h3>
+                    <div id="flowContainer">
+                        <p style="text-align: center; color: #999; margin-top: 2rem;">
+                            El flujo de llamadas aparecerá aquí
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loop-animation">
+                <h3>♾️ Bucle Infinito Visualizado</h3>
+                <div class="circular-arrow">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M50,15 A35,35 0 1,1 49,15" fill="none" stroke="#ff4757" stroke-width="3" 
+                              marker-end="url(#arrowhead)"/>
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                                    refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#ff4757"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                    <div class="function-call">parseExpression()</div>
+                </div>
+                <p>La función se llama a sí misma indefinidamente sin progresar</p>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <h2>🔍 Comparación: Problemática vs Correcta</h2>
+            
+            <div class="comparison-grid">
+                <div class="grammar-card problematic">
+                    <h3>❌ Recursión a la Izquierda (MALA)</h3>
+                    <div class="grammar-problematic">
+<span class="grammar-rule">Expression</span> <span class="grammar-operator">→</span> <span class="grammar-rule" style="color: #ff6b6b;">Expression</span> <span class="grammar-terminal">"+"</span> <span class="grammar-nonterminal">Term</span>
+                    </div>
+                    <h4 style="color: #ff6b6b; margin-top: 1rem;">Problemas:</h4>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>🔄 Bucle infinito en Top-Down parsing</li>
+                        <li>💥 Stack overflow</li>
+                        <li>🚫 No consume tokens</li>
+                        <li>⏱️ Nunca progresa</li>
+                    </ul>
+                </div>
+
+                <div class="grammar-card correct">
+                    <h3>✅ Recursión a la Derecha (BUENA)</h3>
+                    <div class="code-example">
+<span class="grammar-rule">Expression</span> <span class="grammar-operator">→</span> <span class="grammar-nonterminal">Term</span> <span class="grammar-terminal">"+"</span> <span class="grammar-rule" style="color: #4ade80;">Expression</span>
+                    </div>
+                    <h4 style="color: #4ade80; margin-top: 1rem;">Beneficios:</h4>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>✅ Funciona perfectamente</li>
+                        <li>📈 Progresa correctamente</li>
+                        <li>🎯 Consume tokens</li>
+                        <li>🏁 Termina exitosamente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔬 ¿Por qué es Problemático para Top-Down?</h2>
+            
+            <div style="background: #f0f4ff; padding: 2rem; border-radius: 15px; border-left: 5px solid #667eea; margin: 1.5rem 0;">
+                <h3 style="color: #667eea;">🧠 Proceso Mental del Parser</h3>
+                <ol style="margin-top: 1rem; line-height: 1.8;">
+                    <li><strong>parseExpression():</strong> "Necesito parsear una Expression"</li>
+                    <li><strong>Ve la regla:</strong> "Expression → Expression + Term"</li>
+                    <li><strong>Piensa:</strong> "Para parsear Expression, primero necesito... ¡otra Expression!"</li>
+                    <li><strong>Se llama a sí mismo:</strong> "parseExpression() otra vez"</li>
+                    <li><strong>Bucle infinito:</strong> "Nunca avanzo, solo me llamo infinitamente"</li>
+                </ol>
+            </div>
+
+            <h3>🎯 Características del Problema</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="background: rgba(255,107,107,0.1); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #ff6b6b;">
+                    <h4 style="color: #ff6b6b;">🔄 No Progresa</h4>
+                    <p>No consume ningún token de la entrada</p>
+                </div>
+                <div style="background: rgba(255,107,107,0.1); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #ff6b6b;">
+                    <h4 style="color: #ff6b6b;">💥 Stack Overflow</h4>
+                    <p>Llamadas recursivas infinitas llenan la pila</p>
+                </div>
+                <div style="background: rgba(255,107,107,0.1); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #ff6b6b;">
+                    <h4 style="color: #ff6b6b;">🚫 Indecidible</h4>
+                    <p>No puede determinar qué regla aplicar</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💡 La Solución: Transformación de Gramática</h2>
+            <p>En el siguiente slide veremos cómo <strong>eliminar la recursión a la izquierda</strong> transformando la gramática a una forma equivalente que funciona con Top-Down parsing.</p>
+            
+            <div style="background: #e8f5e8; padding: 2rem; border-radius: 15px; border-left: 5px solid #4ade80; margin-top: 1.5rem;">
+                <h3 style="color: #2d7d32;">🎯 Preview de la Solución</h3>
+                <p style="color: #333; margin-top: 0.5rem;">
+                    Convertiremos <code>A → A α | β</code> en <code>A → β A'</code> y <code>A' → α A' | ε</code>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide09.html" class="nav-btn">← Anterior</a>
+        <a href="slide11.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="syntax-highlighter.js"></script>
+    <script>
+        let demoStep = 0;
+        let demoInterval;
+        let stackCount = 0;
+
+        const startBtn = document.getElementById('startDemo');
+        const resetBtn = document.getElementById('resetDemo');
+        const stepBtn = document.getElementById('stepDemo');
+        const stackContainer = document.getElementById('stackContainer');
+        const flowContainer = document.getElementById('flowContainer');
+
+        const parsingSteps = [
+            { text: 'parseExpression() llamada inicial', recursive: false },
+            { text: 'Ve: Expression → Expression + Term', recursive: false },
+            { text: 'Necesita parsear Expression primero', recursive: true },
+            { text: 'parseExpression() llamada recursiva #1', recursive: true },
+            { text: 'Ve: Expression → Expression + Term', recursive: true },
+            { text: 'Necesita parsear Expression otra vez', recursive: true },
+            { text: 'parseExpression() llamada recursiva #2', recursive: true },
+            { text: '... y así infinitamente ...', recursive: true }
+        ];
+
+        function addStackFrame() {
+            stackCount++;
+            const frame = document.createElement('div');
+            frame.className = 'stack-frame';
+            if (stackCount > 3) {
+                frame.classList.add('error');
+            }
+            frame.innerHTML = `
+                parseExpression() #${stackCount}
+                ${stackCount > 3 ? '<span class="infinite-indicator">∞</span>' : ''}
+            `;
+            stackContainer.appendChild(frame);
+            
+            // Limit stack visualization to prevent page overflow
+            if (stackCount > 8) {
+                const frames = stackContainer.querySelectorAll('.stack-frame');
+                frames[0].remove();
+            }
+        }
+
+        function addFlowStep(index) {
+            const step = parsingSteps[index];
+            if (!step) return;
+            
+            const flowStep = document.createElement('div');
+            flowStep.className = `flow-step ${step.recursive ? 'recursive' : ''}`;
+            flowStep.innerHTML = `
+                <span class="step-number ${step.recursive ? 'error' : ''}">${index + 1}</span>
+                ${step.text}
+            `;
+            flowContainer.appendChild(flowStep);
+        }
+
+        function startDemo() {
+            startBtn.disabled = true;
+            stepBtn.disabled = false;
+            resetBtn.disabled = false;
+            
+            stackContainer.innerHTML = '';
+            flowContainer.innerHTML = '';
+            stackCount = 0;
+            demoStep = 0;
+            
+            // Automatic demo
+            demoInterval = setInterval(() => {
+                if (demoStep < parsingSteps.length) {
+                    addFlowStep(demoStep);
+                    if (demoStep >= 2) { // Start adding stack frames when recursion begins
+                        addStackFrame();
+                    }
+                    demoStep++;
+                } else {
+                    // Continue adding stack frames to show infinite growth
+                    addStackFrame();
+                    if (stackCount > 15) {
+                        clearInterval(demoInterval);
+                        alert('🚨 Stack Overflow! El parser ha sido terminado para evitar que la página se cuelgue.');
+                        resetDemo();
+                    }
+                }
+            }, 1000);
+        }
+
+        function stepDemo() {
+            if (demoStep < parsingSteps.length) {
+                addFlowStep(demoStep);
+                if (demoStep >= 2) {
+                    addStackFrame();
+                }
+                demoStep++;
+            } else {
+                addStackFrame();
+            }
+        }
+
+        function resetDemo() {
+            clearInterval(demoInterval);
+            startBtn.disabled = false;
+            stepBtn.disabled = true;
+            resetBtn.disabled = true;
+            
+            stackContainer.innerHTML = '<p style="text-align: center; color: #999; margin-top: 2rem;">Presiona "Iniciar Demostración" para ver el bucle infinito</p>';
+            flowContainer.innerHTML = '<p style="text-align: center; color: #999; margin-top: 2rem;">El flujo de llamadas aparecerá aquí</p>';
+            
+            stackCount = 0;
+            demoStep = 0;
+        }
+
+        startBtn.addEventListener('click', startDemo);
+        resetBtn.addEventListener('click', resetDemo);
+        stepBtn.addEventListener('click', stepDemo);
+
+        // Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide11.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide09.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipos de Nodos del AST - Sistema Completo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: #FFD700;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.08);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .section-title {
+            color: #FFD700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .node-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .category-card {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 3px solid transparent;
+            background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), 
+                              linear-gradient(45deg, #667eea, #764ba2);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+        }
+
+        .category-title {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .node-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .node-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .node-name {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .node-purpose {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 0.3rem;
+        }
+
+        .node-attributes {
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .explanation-section {
+            background: rgba(255,215,0,0.1);
+            border: 2px solid #FFD700;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .explanation-title {
+            color: #FFD700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .attribute-explanations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .attribute-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .attribute-card h4 {
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        pre[class*="language-"] {
+            margin: 1.5rem 0;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .implementation-showcase {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .node-categories, .attribute-explanations {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Tipos de Nodos del AST</h1>
+        <div class="subtitle">Sistema Completo para Nuestro Lenguaje de Programación</div>
+
+        <!-- Categorías de Nodos -->
+        <div class="section">
+            <div class="section-title">
+                🏗️ Categorías de Nodos del AST
+            </div>
+            
+            <div class="node-categories">
+                <div class="category-card">
+                    <div class="category-title">📊 Nodos de Expresión</div>
+                    <p style="text-align: center; margin-bottom: 1rem; color: #666;">
+                        Representan valores que pueden ser evaluados
+                    </p>
+                    <ul class="node-list">
+                        <li class="node-item">
+                            <div class="node-name">LiteralNode</div>
+                            <div class="node-purpose">Valores constantes: números, strings, booleanos</div>
+                            <div class="node-attributes">Atributos: Object value</div>
+                        </li>
+                        <li class="node-item">
+                            <div class="node-name">VariableNode</div>
+                            <div class="node-purpose">Referencias a variables definidas</div>
+                            <div class="node-attributes">Atributos: String name</div>
+                        </li>
+                        <li class="node-item">
+                            <div class="node-name">BinaryOperationNode</div>
+                            <div class="node-purpose">Operaciones con dos operandos: +, -, *, /, >, <, ==</div>
+                            <div class="node-attributes">Atributos: String operator, ExpressionNode left, ExpressionNode right</div>
+                        </li>
+                        <li class="node-item">
+                            <div class="node-name">UnaryOperationNode</div>
+                            <div class="node-purpose">Operaciones con un operando: -, !, ++, --</div>
+                            <div class="node-attributes">Atributos: String operator, ExpressionNode operand</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-title">⚙️ Nodos de Statement</div>
+                    <p style="text-align: center; margin-bottom: 1rem; color: #666;">
+                        Representan acciones que se ejecutan
+                    </p>
+                    <ul class="node-list">
+                        <li class="node-item">
+                            <div class="node-name">AssignmentNode</div>
+                            <div class="node-purpose">Asignación de valores a variables</div>
+                            <div class="node-attributes">Atributos: String variableName, ExpressionNode value</div>
+                        </li>
+                        <li class="node-item">
+                            <div class="node-name">IfStatementNode</div>
+                            <div class="node-purpose">Estructuras condicionales if-else</div>
+                            <div class="node-attributes">Atributos: ExpressionNode condition, StatementNode thenStmt, StatementNode elseStmt</div>
+                        </li>
+                        <li class="node-item">
+                            <div class="node-name">WhileStatementNode</div>
+                            <div class="node-purpose">Bucles while con condición</div>
+                            <div class="node-attributes">Atributos: ExpressionNode condition, StatementNode body</div>
+                        </li>
+                        <li class="node-item">
+                            <div class="node-name">BlockNode</div>
+                            <div class="node-purpose">Agrupación de múltiples statements</div>
+                            <div class="node-attributes">Atributos: List&lt;StatementNode&gt; statements</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-title">🌟 Nodo Raíz</div>
+                    <p style="text-align: center; margin-bottom: 1rem; color: #666;">
+                        Representa el programa completo
+                    </p>
+                    <ul class="node-list">
+                        <li class="node-item">
+                            <div class="node-name">ProgramNode</div>
+                            <div class="node-purpose">Punto de entrada del programa, contiene todos los statements principales</div>
+                            <div class="node-attributes">Atributos: List&lt;StatementNode&gt; statements</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explicación de Atributos -->
+        <div class="explanation-section">
+            <div class="explanation-title">💡 ¿Por qué cada nodo tiene estos atributos específicos?</div>
+            
+            <div class="attribute-explanations">
+                <div class="attribute-card">
+                    <h4>LiteralNode → Object value</h4>
+                    <p>Usa Object para ser flexible: puede almacenar Integer, Double, String, Boolean. Esto permite al lenguaje manejar diferentes tipos de literales sin crear subclases específicas.</p>
+                </div>
+                
+                <div class="attribute-card">
+                    <h4>VariableNode → String name</h4>
+                    <p>Solo necesita el nombre para buscar el valor en la tabla de símbolos durante la evaluación. El tipo y valor se resuelven en tiempo de ejecución.</p>
+                </div>
+                
+                <div class="attribute-card">
+                    <h4>BinaryOperationNode → operator, left, right</h4>
+                    <p>El operador determina qué operación realizar. Left y right son ExpressionNode porque las operaciones binarias siempre trabajan con valores evaluables.</p>
+                </div>
+                
+                <div class="attribute-card">
+                    <h4>AssignmentNode → variableName, value</h4>
+                    <p>El nombre identifica dónde almacenar, value es una expresión que se evalúa primero. Separar nombre y valor permite validaciones y optimizaciones.</p>
+                </div>
+                
+                <div class="attribute-card">
+                    <h4>IfStatementNode → condition, thenStmt, elseStmt</h4>
+                    <p>Condition debe ser ExpressionNode (evalúa a boolean). thenStmt y elseStmt son StatementNode porque pueden ser cualquier acción ejecutable.</p>
+                </div>
+                
+                <div class="attribute-card">
+                    <h4>BlockNode → List&lt;StatementNode&gt;</h4>
+                    <p>Una lista permite ejecutar múltiples statements en secuencia. Usar List mantiene el orden de ejecución y permite bloques vacíos o con muchos statements.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementación Completa -->
+        <div class="implementation-showcase">
+            <div class="section-title">🔧 Implementación Completa en Java</div>
+            
+            <pre><code class="language-java">// ===============================================================================
+// CLASE BASE - Contrato común para todos los nodos
+// ===============================================================================
+public abstract class ASTNode {
+    // Información de debugging
+    protected int line = -1;
+    protected int column = -1;
+    
+    public void setLocation(int line, int column) {
+        this.line = line;
+        this.column = column;
+    }
+    
+    public int getLine() { return line; }
+    public int getColumn() { return column; }
+    
+    // Método para pretty printing
+    public abstract String toString();
+}
+
+// ===============================================================================
+// NODOS DE EXPRESIÓN - Producen valores
+// ===============================================================================
+public abstract class ExpressionNode extends ASTNode {
+    // Método para evaluación (implementado por intérprete)
+    public abstract Object evaluate(Environment env);
+}
+
+public class LiteralNode extends ExpressionNode {
+    private final Object value;
+    
+    public LiteralNode(Object value) {
+        this.value = value;
+    }
+    
+    public Object getValue() { return value; }
+    
+    @Override
+    public Object evaluate(Environment env) {
+        return value; // Los literales se evalúan a sí mismos
+    }
+    
+    @Override
+    public String toString() {
+        if (value instanceof String) {
+            return "\"" + value + "\"";
+        }
+        return String.valueOf(value);
+    }
+}
+
+public class VariableNode extends ExpressionNode {
+    private final String name;
+    
+    public VariableNode(String name) {
+        this.name = name;
+    }
+    
+    public String getName() { return name; }
+    
+    @Override
+    public Object evaluate(Environment env) {
+        if (!env.isDefined(name)) {
+            throw new RuntimeException("Variable no definida: " + name + 
+                " en línea " + getLine());
+        }
+        return env.get(name);
+    }
+    
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+
+public class BinaryOperationNode extends ExpressionNode {
+    private final String operator;
+    private final ExpressionNode left;
+    private final ExpressionNode right;
+    
+    public BinaryOperationNode(String operator, ExpressionNode left, ExpressionNode right) {
+        this.operator = operator;
+        this.left = left;
+        this.right = right;
+    }
+    
+    public String getOperator() { return operator; }
+    public ExpressionNode getLeft() { return left; }
+    public ExpressionNode getRight() { return right; }
+    
+    @Override
+    public Object evaluate(Environment env) {
+        Object leftVal = left.evaluate(env);
+        Object rightVal = right.evaluate(env);
+        
+        switch (operator) {
+            case "+":
+                return ((Number) leftVal).doubleValue() + ((Number) rightVal).doubleValue();
+            case "-":
+                return ((Number) leftVal).doubleValue() - ((Number) rightVal).doubleValue();
+            case "*":
+                return ((Number) leftVal).doubleValue() * ((Number) rightVal).doubleValue();
+            case "/":
+                double rightDouble = ((Number) rightVal).doubleValue();
+                if (rightDouble == 0) {
+                    throw new RuntimeException("División por cero en línea " + getLine());
+                }
+                return ((Number) leftVal).doubleValue() / rightDouble;
+            case ">":
+                return ((Number) leftVal).doubleValue() > ((Number) rightVal).doubleValue();
+            case "<":
+                return ((Number) leftVal).doubleValue() < ((Number) rightVal).doubleValue();
+            case "==":
+                return Objects.equals(leftVal, rightVal);
+            case "!=":
+                return !Objects.equals(leftVal, rightVal);
+            default:
+                throw new RuntimeException("Operador desconocido: " + operator);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return "(" + left + " " + operator + " " + right + ")";
+    }
+}
+
+public class UnaryOperationNode extends ExpressionNode {
+    private final String operator;
+    private final ExpressionNode operand;
+    
+    public UnaryOperationNode(String operator, ExpressionNode operand) {
+        this.operator = operator;
+        this.operand = operand;
+    }
+    
+    public String getOperator() { return operator; }
+    public ExpressionNode getOperand() { return operand; }
+    
+    @Override
+    public Object evaluate(Environment env) {
+        Object value = operand.evaluate(env);
+        
+        switch (operator) {
+            case "-":
+                return -((Number) value).doubleValue();
+            case "!":
+                return !((Boolean) value);
+            default:
+                throw new RuntimeException("Operador unario desconocido: " + operator);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return operator + operand;
+    }
+}
+
+// ===============================================================================
+// NODOS DE STATEMENT - Ejecutan acciones
+// ===============================================================================
+public abstract class StatementNode extends ASTNode {
+    // Método para ejecución (implementado por intérprete)
+    public abstract void execute(Environment env);
+}
+
+public class AssignmentNode extends StatementNode {
+    private final String variableName;
+    private final ExpressionNode value;
+    
+    public AssignmentNode(String variableName, ExpressionNode value) {
+        this.variableName = variableName;
+        this.value = value;
+    }
+    
+    public String getVariableName() { return variableName; }
+    public ExpressionNode getValue() { return value; }
+    
+    @Override
+    public void execute(Environment env) {
+        Object evaluatedValue = value.evaluate(env);
+        env.set(variableName, evaluatedValue);
+    }
+    
+    @Override
+    public String toString() {
+        return variableName + " = " + value + ";";
+    }
+}
+
+public class IfStatementNode extends StatementNode {
+    private final ExpressionNode condition;
+    private final StatementNode thenStatement;
+    private final StatementNode elseStatement; // puede ser null
+    
+    public IfStatementNode(ExpressionNode condition, StatementNode thenStatement, 
+                          StatementNode elseStatement) {
+        this.condition = condition;
+        this.thenStatement = thenStatement;
+        this.elseStatement = elseStatement;
+    }
+    
+    public ExpressionNode getCondition() { return condition; }
+    public StatementNode getThenStatement() { return thenStatement; }
+    public StatementNode getElseStatement() { return elseStatement; }
+    public boolean hasElse() { return elseStatement != null; }
+    
+    @Override
+    public void execute(Environment env) {
+        Object conditionValue = condition.evaluate(env);
+        if (!(conditionValue instanceof Boolean)) {
+            throw new RuntimeException("La condición del if debe ser boolean en línea " + getLine());
+        }
+        
+        if ((Boolean) conditionValue) {
+            thenStatement.execute(env);
+        } else if (hasElse()) {
+            elseStatement.execute(env);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        String result = "if (" + condition + ") " + thenStatement;
+        if (hasElse()) {
+            result += " else " + elseStatement;
+        }
+        return result;
+    }
+}
+
+public class WhileStatementNode extends StatementNode {
+    private final ExpressionNode condition;
+    private final StatementNode body;
+    
+    public WhileStatementNode(ExpressionNode condition, StatementNode body) {
+        this.condition = condition;
+        this.body = body;
+    }
+    
+    public ExpressionNode getCondition() { return condition; }
+    public StatementNode getBody() { return body; }
+    
+    @Override
+    public void execute(Environment env) {
+        while (true) {
+            Object conditionValue = condition.evaluate(env);
+            if (!(conditionValue instanceof Boolean)) {
+                throw new RuntimeException("La condición del while debe ser boolean en línea " + getLine());
+            }
+            
+            if (!(Boolean) conditionValue) {
+                break;
+            }
+            
+            body.execute(env);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return "while (" + condition + ") " + body;
+    }
+}
+
+public class BlockNode extends StatementNode {
+    private final List<StatementNode> statements;
+    
+    public BlockNode(List<StatementNode> statements) {
+        this.statements = new ArrayList<>(statements);
+    }
+    
+    public List<StatementNode> getStatements() { 
+        return new ArrayList<>(statements); 
+    }
+    
+    public int getStatementCount() { return statements.size(); }
+    public boolean isEmpty() { return statements.isEmpty(); }
+    
+    @Override
+    public void execute(Environment env) {
+        // Crear nuevo scope para el bloque
+        env.enterScope();
+        try {
+            for (StatementNode statement : statements) {
+                statement.execute(env);
+            }
+        } finally {
+            env.exitScope();
+        }
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{\n");
+        for (StatementNode stmt : statements) {
+            sb.append("  ").append(stmt).append("\n");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+}
+
+public class ProgramNode extends ASTNode {
+    private final List<StatementNode> statements;
+    
+    public ProgramNode(List<StatementNode> statements) {
+        this.statements = new ArrayList<>(statements);
+    }
+    
+    public List<StatementNode> getStatements() { 
+        return new ArrayList<>(statements); 
+    }
+    
+    public int getStatementCount() { return statements.size(); }
+    
+    public void execute(Environment env) {
+        for (StatementNode statement : statements) {
+            statement.execute(env);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Program:\n");
+        for (StatementNode stmt : statements) {
+            sb.append(stmt).append("\n");
+        }
+        return sb.toString();
+    }
+}
+
+// ===============================================================================
+// ENVIRONMENT - Manejo de variables y scopes
+// ===============================================================================
+public class Environment {
+    private Stack<Map<String, Object>> scopes = new Stack<>();
+    
+    public Environment() {
+        enterScope(); // Scope global
+    }
+    
+    public void enterScope() {
+        scopes.push(new HashMap<>());
+    }
+    
+    public void exitScope() {
+        if (scopes.size() > 1) {
+            scopes.pop();
+        }
+    }
+    
+    public void set(String name, Object value) {
+        scopes.peek().put(name, value);
+    }
+    
+    public Object get(String name) {
+        for (int i = scopes.size() - 1; i >= 0; i--) {
+            Map<String, Object> scope = scopes.get(i);
+            if (scope.containsKey(name)) {
+                return scope.get(name);
+            }
+        }
+        throw new RuntimeException("Variable no definida: " + name);
+    }
+    
+    public boolean isDefined(String name) {
+        for (Map<String, Object> scope : scopes) {
+            if (scope.containsKey(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide15.html" class="nav-btn">← Anterior</a>
+        <a href="slide17.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide17.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide15.html';
+            }
+        });
+
+        // Auto-highlight code when page loads
+        document.addEventListener('DOMContentLoaded', (event) => {
+            Prism.highlightAll();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Cómo Definimos las Reglas del Lenguaje?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .intro-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .intro-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .intro-list li {
+            padding: 0.8rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .intro-list li:before {
+            content: "🔸 ";
+            margin-right: 0.5rem;
+        }
+
+        .grammar-section {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        .grammar-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .grammar-section p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .rule-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 2px solid #4a5568;
+        }
+
+        .explanation {
+            background: #f7f7f7;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .concept-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .concept-card:nth-child(1) { animation-delay: 0.4s; }
+        .concept-card:nth-child(2) { animation-delay: 0.6s; }
+
+        .concept-card h4 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .concept-card p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>¿Cómo Definimos las Reglas del Lenguaje?</h1>
+
+        <div class="intro-section">
+            <ul class="intro-list">
+                <li>Necesitamos <strong>reglas formales</strong> que definan qué es válido</li>
+                <li>Ejemplo informal: "Un if-statement tiene una condición entre paréntesis seguida de un bloque"</li>
+                <li>Estas reglas se formalizan usando <strong>Gramáticas Libres de Contexto</strong></li>
+            </ul>
+        </div>
+
+        <div class="grammar-section">
+            <h3>🤔 ¿Qué es una gramática?</h3>
+            <p>• Es como las reglas gramaticales del español, pero para programación</p>
+            <p>• Define qué combinaciones de tokens son válidas</p>
+            <p>• Nos permite construir el árbol paso a paso</p>
+
+            <h3>📝 Ejemplo de regla:</h3>
+            <div class="rule-example">Statement → if ( Expression ) Block</div>
+            
+            <div class="explanation">
+                <strong>Significa:</strong> "Un Statement puede ser la palabra 'if', seguida de '(', 
+                seguida de una Expression, seguida de ')', seguida de un Block"
+                <br><br>
+                <strong>Como receta de cocina:</strong> ingredientes + orden = resultado válido
+            </div>
+        </div>
+
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <h4>🎯 Analogía con Cocina</h4>
+                <p>Las gramáticas son como recetas de cocina:<br>
+                • <strong>Ingredientes:</strong> tokens del código<br>
+                • <strong>Orden:</strong> secuencia correcta<br>
+                • <strong>Resultado:</strong> programa válido</p>
+            </div>
+
+            <div class="concept-card">
+                <h4>🧩 Analogía con LEGO</h4>
+                <p>También como instrucciones de LEGO:<br>
+                • <strong>Piezas básicas:</strong> tokens<br>
+                • <strong>Instrucciones:</strong> reglas de gramática<br>
+                • <strong>Construcción final:</strong> programa completo</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide04.html" class="nav-btn">← Anterior</a>
+        <a href="slide06.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide06.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide04.html';
+            }
+        });
+    </script>
+</body>
+</html>

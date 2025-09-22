@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo Práctico: Parseando Código Real</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: #FFD700;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .section-title {
+            color: #FFD700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .source-code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 1rem;
+            border-left: 4px solid #4CAF50;
+            margin: 1rem 0;
+        }
+
+        .tokens-display {
+            background: #f8f9fa;
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            border-left: 4px solid #667eea;
+            margin: 1rem 0;
+            word-break: break-all;
+        }
+
+        .trace-container {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            color: #e2e8f0;
+        }
+
+        .trace-step {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .trace-step:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(10px);
+        }
+
+        .step-level-0 { padding-left: 1rem; background: rgba(76, 175, 80, 0.1); border-left: 3px solid #4CAF50; }
+        .step-level-1 { padding-left: 2rem; background: rgba(103, 126, 234, 0.1); border-left: 3px solid #667eea; }
+        .step-level-2 { padding-left: 3rem; background: rgba(255, 215, 0, 0.1); border-left: 3px solid #FFD700; }
+        .step-level-3 { padding-left: 4rem; background: rgba(255, 107, 107, 0.1); border-left: 3px solid #FF6B6B; }
+        .step-level-4 { padding-left: 5rem; background: rgba(255, 165, 0, 0.1); border-left: 3px solid #FFA500; }
+
+        .ast-visualization {
+            background: #f8f9fa;
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border-left: 4px solid #28a745;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .ast-node {
+            margin: 0.3rem 0;
+        }
+
+        .ast-node.program { color: #dc3545; font-weight: bold; }
+        .ast-node.statement { color: #667eea; font-weight: bold; }
+        .ast-node.expression { color: #28a745; }
+        .ast-node.literal { color: #6f42c1; }
+        .ast-node.variable { color: #fd7e14; }
+        .ast-node.operator { color: #e83e8c; font-weight: bold; }
+
+        .interactive-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .demo-button {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: white;
+            color: #f093fb;
+            transform: translateY(-2px);
+        }
+
+        .demo-button.active {
+            background: white;
+            color: #f093fb;
+        }
+
+        .execution-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 140px;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .flow-step:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #FFD700;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+
+        .highlight-info {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-info h4 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .execution-flow {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">15 / 20</div>
+    
+    <div class="container">
+        <h1>🎯 Ejemplo Práctico: Parseando Código Real</h1>
+        <div class="subtitle">Demostración Completa del Proceso de Parsing</div>
+
+        <!-- Flujo de Ejecución -->
+        <div class="section">
+            <div class="section-title">
+                🔄 Flujo Completo de Análisis
+            </div>
+            
+            <div class="execution-flow">
+                <div class="flow-step">📝 Código Fuente</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🪙 Tokenización</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🔍 Análisis Sintáctico</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🌳 AST Final</div>
+            </div>
+
+            <div class="highlight-info">
+                <h4>🎯 Objetivo de esta Demostración</h4>
+                <p>
+                    Veremos paso a paso cómo nuestro parser recursivo descendente procesa un ejemplo
+                    real de código, desde el código fuente hasta la construcción completa del AST.
+                </p>
+            </div>
+        </div>
+
+        <!-- Código de Entrada -->
+        <div class="section">
+            <div class="section-title">
+                📝 Código de Entrada y Tokenización
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">💻 Código Fuente Original</div>
+                    <div class="source-code">
+                        if (x > 5) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;y = x * 2 + 1;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;z = y - 3;<br>
+                        } else {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;y = 0;<br>
+                        }
+                    </div>
+                    
+                    <h4 style="color: #667eea; margin: 1rem 0 0.5rem 0;">📊 Características del Código:</h4>
+                    <ul style="color: #666; padding-left: 1.5rem;">
+                        <li>Estructura de control <code>if-else</code></li>
+                        <li>Expresiones aritméticas complejas</li>
+                        <li>Bloques anidados con múltiples statements</li>
+                        <li>Precedencia de operadores (*  antes que +)</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">🪙 Tokens Generados</div>
+                    <div class="tokens-display">
+                        <strong>Secuencia de 27 tokens:</strong><br><br>
+                        <span style="color: #667eea;">IF</span>, 
+                        <span style="color: #dc3545;">LPAREN</span>, 
+                        <span style="color: #28a745;">IDENTIFIER(x)</span>, 
+                        <span style="color: #fd7e14;">GT</span>, 
+                        <span style="color: #6f42c1;">NUMBER(5)</span>, 
+                        <span style="color: #dc3545;">RPAREN</span>, 
+                        <span style="color: #dc3545;">LBRACE</span>,<br>
+                        <span style="color: #28a745;">IDENTIFIER(y)</span>, 
+                        <span style="color: #fd7e14;">ASSIGN</span>, 
+                        <span style="color: #28a745;">IDENTIFIER(x)</span>, 
+                        <span style="color: #fd7e14;">MULTIPLY</span>, 
+                        <span style="color: #6f42c1;">NUMBER(2)</span>, 
+                        <span style="color: #fd7e14;">PLUS</span>, 
+                        <span style="color: #6f42c1;">NUMBER(1)</span>, 
+                        <span style="color: #dc3545;">SEMICOLON</span>,<br>
+                        <span style="color: #28a745;">IDENTIFIER(z)</span>, 
+                        <span style="color: #fd7e14;">ASSIGN</span>, 
+                        <span style="color: #28a745;">IDENTIFIER(y)</span>, 
+                        <span style="color: #fd7e14;">MINUS</span>, 
+                        <span style="color: #6f42c1;">NUMBER(3)</span>, 
+                        <span style="color: #dc3545;">SEMICOLON</span>,<br>
+                        <span style="color: #dc3545;">RBRACE</span>, 
+                        <span style="color: #667eea;">ELSE</span>, 
+                        <span style="color: #dc3545;">LBRACE</span>, 
+                        <span style="color: #28a745;">IDENTIFIER(y)</span>, 
+                        <span style="color: #fd7e14;">ASSIGN</span>, 
+                        <span style="color: #6f42c1;">NUMBER(0)</span>, 
+                        <span style="color: #dc3545;">SEMICOLON</span>, 
+                        <span style="color: #dc3545;">RBRACE</span>, 
+                        <span style="color: #e83e8c;">EOF</span>
+                    </div>
+                    
+                    <h4 style="color: #667eea; margin: 1rem 0 0.5rem 0;">🏷️ Tipos de Tokens:</h4>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; color: #333; font-size: 0.9rem;">
+                        • <strong>Palabras clave:</strong> IF, ELSE<br>
+                        • <strong>Identificadores:</strong> x, y, z<br>
+                        • <strong>Números:</strong> 5, 2, 1, 3, 0<br>
+                        • <strong>Operadores:</strong> &gt;, =, *, +, -<br>
+                        • <strong>Delimitadores:</strong> (, ), {, }, ;
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traza del Parsing -->
+        <div class="section">
+            <div class="section-title">
+                🔍 Traza Detallada del Proceso de Parsing
+            </div>
+            
+            <div class="trace-container">
+                <h4 style="color: #FFD700; margin-bottom: 1rem;">📞 Secuencia de Llamadas a Métodos</h4>
+                
+                <div class="trace-step step-level-0">
+                    <strong>1. parseProgram()</strong> → Inicia el análisis del programa completo
+                </div>
+                <div class="trace-step step-level-1">
+                    <strong>2. parseStatement()</strong> → Token actual: IF, identificar tipo de statement
+                </div>
+                <div class="trace-step step-level-2">
+                    <strong>3. parseIfStatement()</strong> → Procesar estructura if-else
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>4. consume(IF)</strong> → Verificar y consumir token 'if'
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>5. consume(LPAREN)</strong> → Verificar y consumir '('
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>6. parseExpression()</strong> → Analizar condición 'x > 5'
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>7. parseTerm()</strong> → Procesar lado izquierdo 'x'
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>8. parseFactor()</strong> → IDENTIFIER(x) → crear VariableNode('x')
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>9. parseExpressionPrime()</strong> → Detectar operador '>', procesar lado derecho
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>10. parseTerm()</strong> → Procesar lado derecho '5'
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>11. parseFactor()</strong> → NUMBER(5) → crear LiteralNode(5)
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>12. [Crear BinaryOperationNode('>', VariableNode('x'), LiteralNode(5))]</strong>
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>13. consume(RPAREN)</strong> → Verificar y consumir ')'
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>14. parseStatement()</strong> → Procesar then-statement (bloque)
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>15. parseBlock()</strong> → Token LBRACE detectado
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>16. consume(LBRACE)</strong> → Verificar y consumir '{'
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>17. parseStatement()</strong> → Primera asignación: y = x * 2 + 1;
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>18. parseAssignmentStatement()</strong> → Procesar asignación compleja
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>19. parseExpression()</strong> → Analizar 'x * 2 + 1' (respetando precedencia)
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>20. parseStatement()</strong> → Segunda asignación: z = y - 3;
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>21. consume(RBRACE)</strong> → Cerrar bloque then
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>22. match(ELSE)</strong> → Token ELSE detectado, procesar else-statement
+                </div>
+                <div class="trace-step step-level-3">
+                    <strong>23. parseStatement()</strong> → Procesar else-statement (bloque)
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>24. parseBlock()</strong> → Procesar bloque else
+                </div>
+                <div class="trace-step step-level-4">
+                    <strong>25. parseAssignmentStatement()</strong> → y = 0;
+                </div>
+                <div class="trace-step step-level-2">
+                    <strong>26. [Crear IfStatementNode completo con condition, thenStatement, elseStatement]</strong>
+                </div>
+                <div class="trace-step step-level-1">
+                    <strong>27. [Agregar IfStatementNode al ProgramNode]</strong>
+                </div>
+                <div class="trace-step step-level-0">
+                    <strong>28. return ProgramNode</strong> → AST completo generado ✅
+                </div>
+            </div>
+
+            <div style="background: rgba(40, 167, 69, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-left: 4px solid #28a745;">
+                <h4 style="color: #28a745; margin-bottom: 0.5rem;">📊 Estadísticas del Parsing:</h4>
+                <ul style="color: white; padding-left: 1.5rem;">
+                    <li><strong>Total de llamadas:</strong> 28 invocaciones de métodos</li>
+                    <li><strong>Tokens procesados:</strong> 27 tokens + EOF</li>
+                    <li><strong>Nodos AST creados:</strong> 15 nodos diferentes</li>
+                    <li><strong>Tiempo estimado:</strong> ~2ms en hardware moderno</li>
+                    <li><strong>Memoria utilizada:</strong> ~500 bytes para el AST</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- AST Resultante -->
+        <div class="section">
+            <div class="section-title">
+                🌳 Árbol de Sintaxis Abstracta (AST) Resultante
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">🏗️ Estructura del AST</div>
+                    <div class="ast-visualization">
+<span class="ast-node program">ProgramNode</span>
+<span class="ast-node statement">└── IfStatementNode</span>
+<span class="ast-node expression">    ├── condition: BinaryOperationNode</span>
+<span class="ast-node operator">    │   ├── operator: ">"</span>
+<span class="ast-node variable">    │   ├── left: VariableNode("x")</span>
+<span class="ast-node literal">    │   └── right: LiteralNode(5)</span>
+<span class="ast-node statement">    ├── thenStatement: BlockNode</span>
+<span class="ast-node statement">    │   ├── AssignmentNode</span>
+<span class="ast-node variable">    │   │   ├── variable: "y"</span>
+<span class="ast-node expression">    │   │   └── value: BinaryOperationNode</span>
+<span class="ast-node operator">    │   │       ├── operator: "+"</span>
+<span class="ast-node expression">    │   │       ├── left: BinaryOperationNode</span>
+<span class="ast-node operator">    │   │       │   ├── operator: "*"</span>
+<span class="ast-node variable">    │   │       │   ├── left: VariableNode("x")</span>
+<span class="ast-node literal">    │   │       │   └── right: LiteralNode(2)</span>
+<span class="ast-node literal">    │   │       └── right: LiteralNode(1)</span>
+<span class="ast-node statement">    │   └── AssignmentNode</span>
+<span class="ast-node variable">    │       ├── variable: "z"</span>
+<span class="ast-node expression">    │       └── value: BinaryOperationNode</span>
+<span class="ast-node operator">    │           ├── operator: "-"</span>
+<span class="ast-node variable">    │           ├── left: VariableNode("y")</span>
+<span class="ast-node literal">    │           └── right: LiteralNode(3)</span>
+<span class="ast-node statement">    └── elseStatement: BlockNode</span>
+<span class="ast-node statement">        └── AssignmentNode</span>
+<span class="ast-node variable">            ├── variable: "y"</span>
+<span class="ast-node literal">            └── value: LiteralNode(0)</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">🔍 Análisis del AST</div>
+                    
+                    <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Composición:</h4>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                        <strong>Tipos de Nodos Creados:</strong><br>
+                        • 1 ProgramNode (raíz)<br>
+                        • 1 IfStatementNode<br>
+                        • 2 BlockNode (then y else)<br>
+                        • 3 AssignmentNode<br>
+                        • 3 BinaryOperationNode<br>
+                        • 4 VariableNode<br>
+                        • 5 LiteralNode<br>
+                        <strong>Total: 19 nodos</strong>
+                    </div>
+                    
+                    <h4 style="color: #667eea; margin-bottom: 1rem;">✅ Verificaciones Exitosas:</h4>
+                    <ul style="color: #333; padding-left: 1.5rem;">
+                        <li><strong>Precedencia:</strong> * evaluado antes que +</li>
+                        <li><strong>Asociatividad:</strong> Operadores de izquierda a derecha</li>
+                        <li><strong>Bloques:</strong> Estructura anidada preservada</li>
+                        <li><strong>Variables:</strong> Todas las referencias capturadas</li>
+                        <li><strong>Tipos:</strong> Literales y variables diferenciados</li>
+                    </ul>
+                    
+                    <div style="background: rgba(40, 167, 69, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1.5rem; border-left: 4px solid #28a745;">
+                        <h4 style="color: #28a745; margin-bottom: 0.5rem;">🎯 AST Listo Para:</h4>
+                        <ul style="color: #333; padding-left: 1.5rem;">
+                            <li>Análisis semántico</li>
+                            <li>Generación de código</li>
+                            <li>Interpretación directa</li>
+                            <li>Optimizaciones</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demostración Interactiva -->
+        <div class="interactive-section">
+            <h3 style="margin-bottom: 1rem;">🎮 Explorador Interactivo del AST</h3>
+            <p style="margin-bottom: 1.5rem;">
+                Haz clic en diferentes partes del código para ver cómo se mapean a nodos del AST:
+            </p>
+            
+            <button class="demo-button" onclick="highlightASTSection('condition')">
+                Condición (x > 5)
+            </button>
+            <button class="demo-button" onclick="highlightASTSection('assignment1')">
+                Primera Asignación
+            </button>
+            <button class="demo-button" onclick="highlightASTSection('assignment2')">
+                Segunda Asignación
+            </button>
+            <button class="demo-button" onclick="highlightASTSection('else')">
+                Bloque Else
+            </button>
+            
+            <div id="ast-highlight" style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; display: none;">
+                <!-- El contenido se mostrará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide14.html" class="nav-btn">← Anterior</a>
+        <a href="slide16.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        // Datos para la demostración interactiva
+        const astSections = {
+            condition: {
+                title: "🔍 Análisis de la Condición (x > 5)",
+                description: "Esta parte del código se convierte en un BinaryOperationNode",
+                details: `
+<strong>Código:</strong> if (x > 5)
+<strong>Tokens:</strong> IF, LPAREN, IDENTIFIER(x), GT, NUMBER(5), RPAREN
+
+<strong>AST Generado:</strong>
+BinaryOperationNode
+├── operator: ">"
+├── left: VariableNode("x")
+└── right: LiteralNode(5)
+
+<strong>Proceso:</strong>
+1. parseExpression() identifica operador binario
+2. parseTerm() procesa lado izquierdo 'x'
+3. parseExpressionPrime() detecta '>' y procesa lado derecho '5'
+4. Se crea BinaryOperationNode con precedencia correcta`
+            },
+            
+            assignment1: {
+                title: "📝 Primera Asignación (y = x * 2 + 1)",
+                description: "Asignación con expresión aritmética compleja",
+                details: `
+<strong>Código:</strong> y = x * 2 + 1;
+<strong>Tokens:</strong> IDENTIFIER(y), ASSIGN, IDENTIFIER(x), MULTIPLY, NUMBER(2), PLUS, NUMBER(1), SEMICOLON
+
+<strong>AST Generado:</strong>
+AssignmentNode
+├── variable: "y"
+└── value: BinaryOperationNode("+")
+    ├── left: BinaryOperationNode("*")
+    │   ├── left: VariableNode("x")
+    │   └── right: LiteralNode(2)
+    └── right: LiteralNode(1)
+
+<strong>Precedencia Respetada:</strong>
+• Primero: x * 2 (multiplicación)
+• Segundo: resultado + 1 (suma)`
+            },
+            
+            assignment2: {
+                title: "📝 Segunda Asignación (z = y - 3)",
+                description: "Asignación simple con operación aritmética",
+                details: `
+<strong>Código:</strong> z = y - 3;
+<strong>Tokens:</strong> IDENTIFIER(z), ASSIGN, IDENTIFIER(y), MINUS, NUMBER(3), SEMICOLON
+
+<strong>AST Generado:</strong>
+AssignmentNode
+├── variable: "z"
+└── value: BinaryOperationNode("-")
+    ├── left: VariableNode("y")
+    └── right: LiteralNode(3)
+
+<strong>Características:</strong>
+• Operación binaria simple
+• Variable como operando izquierdo
+• Literal como operando derecho`
+            },
+            
+            else: {
+                title: "🔄 Bloque Else (y = 0)",
+                description: "Bloque alternativo con asignación simple",
+                details: `
+<strong>Código:</strong> } else { y = 0; }
+<strong>Tokens:</strong> RBRACE, ELSE, LBRACE, IDENTIFIER(y), ASSIGN, NUMBER(0), SEMICOLON, RBRACE
+
+<strong>AST Generado:</strong>
+BlockNode (elseStatement)
+└── AssignmentNode
+    ├── variable: "y"
+    └── value: LiteralNode(0)
+
+<strong>Estructura:</strong>
+• Bloque con un solo statement
+• Asignación de valor literal
+• Alternativa al bloque then`
+            }
+        };
+
+        function highlightASTSection(section) {
+            const data = astSections[section];
+            const output = document.getElementById('ast-highlight');
+            
+            // Limpiar botones activos
+            document.querySelectorAll('.demo-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activar botón seleccionado
+            event.target.classList.add('active');
+            
+            output.innerHTML = `
+                <h4 style="color: #FFD700; margin-bottom: 1rem;">${data.title}</h4>
+                <p style="margin-bottom: 1rem; font-style: italic;">${data.description}</p>
+                <pre style="background: #2d3748; padding: 1rem; border-radius: 8px; color: #e2e8f0; white-space: pre-line; font-family: monospace; font-size: 0.9rem;">${data.details}</pre>
+            `;
+            
+            output.style.display = 'block';
+            output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide16.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide14.html';
+            }
+        });
+    </script>
+</body>
+</html>

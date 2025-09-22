@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manejo de Errores Sintácticos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: #FFD700;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .section-title {
+            color: #FFD700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .step-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .error-demo {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border-left: 5px solid #e53e3e;
+        }
+
+        .error-demo-title {
+            color: #fed7d7;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .code-title {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0 0 8px 8px;
+            background: #2d3748 !important;
+        }
+
+        pre code {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            color: #333;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .pros {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .cons {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .recovery-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 140px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        .flow-step:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #FFD700;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .demo-button {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: white;
+            color: #f093fb;
+            transform: translateY(-2px);
+        }
+
+        .error-output {
+            background: #2d3748;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-family: monospace;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+        .section:nth-child(5) { animation-delay: 0.5s; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .recovery-flow {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">13 / 20</div>
+    
+    <div class="container">
+        <h1>🚨 Manejo de Errores Sintácticos</h1>
+        <div class="subtitle">Detección, Reportes y Recuperación - Guía Completa</div>
+
+        <!-- Introducción al Problema -->
+        <div class="section">
+            <div class="section-title">
+                🎯 ¿Por qué es Crítico el Manejo de Errores?
+            </div>
+            <div class="grid-2">
+                <div>
+                    <h3 style="color: #FFD700; margin-bottom: 1rem;">🔍 Realidad del Desarrollo</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 1rem 0; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            📊 <strong>90% del código</strong> tiene errores en su primera compilación
+                        </li>
+                        <li style="margin: 1rem 0; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            🎯 <strong>Mensajes claros</strong> reducen tiempo de depuración en 70%
+                        </li>
+                        <li style="margin: 1rem 0; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            🚀 <strong>Recuperación inteligente</strong> encuentra múltiples errores por pasada
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: #FFD700; margin-bottom: 1rem;">⚠️ Consecuencias de Mal Manejo</h3>
+                    <div class="error-demo">
+                        <div class="error-demo-title">
+                            ❌ Mensaje Inútil
+                        </div>
+                        <div class="error-output">
+                            Error: Unexpected token at line 5
+                        </div>
+                    </div>
+                    <div style="background: #28a745; color: white; padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">✅ Mensaje Útil</div>
+                        <div style="font-family: monospace; font-size: 0.9rem;">
+                            Error en línea 5, columna 12:<br>
+                            Se esperaba ';' después de la declaración<br>
+                            │ int x = 10<br>
+                            │           ^<br>
+                            Sugerencia: Agregar ';' al final
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proceso de Detección de Errores -->
+        <div class="section">
+            <div class="section-title">
+                🔍 Proceso de Detección de Errores
+            </div>
+            
+            <div class="recovery-flow">
+                <div class="flow-step">1. Parseando</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">2. Error Detectado</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">3. Reporte</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">4. Recuperación</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">5. Continuar</div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-title">🎯 Implementación Java - Detector de Errores</div>
+                <pre><code class="language-java">public class SyntaxErrorHandler {
+    private List&lt;SyntaxError&gt; errors = new ArrayList&lt;&gt;();
+    private TokenStream tokens;
+    
+    // PASO 1: Detectar error durante parsing
+    public StatementNode parseStatement() throws ParseException {
+        Token current = tokens.current();
+        
+        try {
+            switch (current.getType()) {
+                case IF:
+                    return parseIfStatement();
+                case WHILE:
+                    return parseWhileStatement();
+                case IDENTIFIER:
+                    return parseAssignment();
+                default:
+                    // ERROR DETECTADO AQUÍ
+                    throw new ParseException(
+                        createDetailedError(current, "statement")
+                    );
+            }
+        } catch (ParseException e) {
+            // PASO 2: Registrar error
+            recordError(e);
+            
+            // PASO 3: Intentar recuperación
+            return recoverFromError();
+        }
+    }
+    
+    // PASO 2: Crear reporte detallado
+    private SyntaxError createDetailedError(Token token, String expected) {
+        return new SyntaxError.Builder()
+            .setLocation(token.getLine(), token.getColumn())
+            .setMessage(String.format(
+                "Se esperaba %s pero se encontró '%s'", 
+                expected, token.getLexeme()))
+            .setSourceLine(getSourceLine(token.getLine()))
+            .setContext(getParsingContext())
+            .setSuggestion(generateSuggestion(token, expected))
+            .build();
+    }
+    
+    // PASO 4: Estrategias de recuperación
+    private StatementNode recoverFromError() {
+        // Estrategia 1: Panic Mode
+        syncToNextStatement();
+        
+        // Estrategia 2: Insertion Recovery
+        if (canInsertSemicolon()) {
+            insertVirtualSemicolon();
+            return parseNextStatement();
+        }
+        
+        // Estrategia 3: Skip and Continue
+        return new ErrorStatementNode();
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Estrategias de Recuperación -->
+        <div class="section">
+            <div class="section-title">
+                🛠️ Estrategias de Recuperación con Ejemplos Didácticos
+            </div>
+            
+            <!-- Panic Mode Recovery -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="font-size: 2.5rem;">🚨</div>
+                    <div>
+                        <div class="card-title" style="margin: 0; text-align: left;">Estrategia 1: Panic Mode Recovery</div>
+                        <div style="color: #666; font-style: italic;">Descartar tokens hasta encontrar un punto de sincronización</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📝 Ejemplo Problemático:</h4>
+                        <div style="background: #2d3748; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: monospace; margin-bottom: 1rem;">
+                            <div style="color: #f56565;">// Error: 'xyz' no es válido aquí</div>
+                            if (x > 5) xyz print("mayor");<br>
+                            while (i < 10) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;i++;<br>
+                            }
+                        </div>
+                        
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">⚡ Proceso de Recuperación:</h4>
+                        <div class="step-container">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Error Detectado</div>
+                                <div class="step-description">Token 'xyz' inesperado después de ')'</div>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Descartar Tokens</div>
+                                <div class="step-description">Eliminar 'xyz' y 'print' hasta encontrar ';'</div>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Reanudar</div>
+                                <div class="step-description">Continuar parsing desde 'while'</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">🔍 Visualización del Proceso:</h4>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="font-family: monospace; color: #333;">
+                                <div style="margin: 0.5rem 0;">
+                                    <span style="color: #28a745;">✓ if (x > 5)</span> 
+                                    <span style="color: #dc3545; text-decoration: line-through;">xyz print</span>
+                                    <span style="color: #ffc107;">;</span> ← Punto de sincronización
+                                </div>
+                                <div style="margin: 0.5rem 0; color: #28a745;">
+                                    ✓ while (i < 10) { i++; }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(40, 167, 69, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <h5 style="color: #28a745; margin-bottom: 0.5rem;">✅ Resultado:</h5>
+                            <p style="color: #333; margin: 0;">
+                                Se reporta 1 error, pero el parser puede continuar y encontrar el resto del código correcto.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-title">🎯 Implementación Panic Mode</div>
+                    <pre><code class="language-java">private void panicModeRecover() {
+    System.out.println("🚨 Error detectado - Iniciando Panic Mode");
+    
+    // Puntos de sincronización comunes
+    Set&lt;TokenType&gt; syncTokens = Set.of(
+        TokenType.SEMICOLON,    // ; - fin de statement
+        TokenType.RBRACE,       // } - fin de bloque
+        TokenType.IF,           // if - inicio de nuevo statement
+        TokenType.WHILE,        // while - inicio de loop
+        TokenType.FOR,          // for - inicio de loop
+        TokenType.RETURN        // return - statement de retorno
+    );
+    
+    int tokensDiscarded = 0;
+    
+    // Descartar tokens hasta encontrar sincronización
+    while (!tokens.isAtEnd() && 
+           !syncTokens.contains(tokens.current().getType())) {
+        
+        Token discarded = tokens.advance();
+        tokensDiscarded++;
+        System.out.println("🗑️ Descartando: " + discarded.getLexeme());
+    }
+    
+    System.out.println("📍 Punto de sincronización encontrado: " + 
+                      tokens.current().getLexeme());
+    System.out.println("📊 Tokens descartados: " + tokensDiscarded);
+    
+    // Si encontramos ';', lo consumimos para estar en estado limpio
+    if (tokens.check(TokenType.SEMICOLON)) {
+        tokens.advance();
+        System.out.println("✅ Semicolon consumido - Estado limpio");
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Insertion Recovery -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="font-size: 2.5rem;">🔧</div>
+                    <div>
+                        <div class="card-title" style="margin: 0; text-align: left;">Estrategia 2: Insertion Recovery</div>
+                        <div style="color: #666; font-style: italic;">Insertar tokens faltantes automáticamente</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📝 Ejemplo Problemático:</h4>
+                        <div style="background: #2d3748; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: monospace; margin-bottom: 1rem;">
+                            <div style="color: #f56565;">// Error: Falta punto y coma</div>
+                            int x = 10<br>
+                            <div style="color: #f56565;">// Error: Falta paréntesis de cierre</div>
+                            if (y > 5 {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;print("mayor");<br>
+                            }
+                        </div>
+                        
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">⚡ Proceso de Recuperación:</h4>
+                        <div class="step-container">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Analizar Contexto</div>
+                                <div class="step-description">¿Qué token debería estar aquí?</div>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Insertar Token Virtual</div>
+                                <div class="step-description">Agregar ';' y ')' donde faltan</div>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Continuar Normal</div>
+                                <div class="step-description">Parsear como si estuviera correcto</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">🔧 Código Corregido Automáticamente:</h4>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="font-family: monospace; color: #333;">
+                                <div style="margin: 0.5rem 0;">
+                                    int x = 10<span style="color: #28a745; font-weight: bold;">;</span> ← Insertado
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    if (y > 5<span style="color: #28a745; font-weight: bold;">)</span> { ← Insertado
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;print("mayor");
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(40, 167, 69, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <h5 style="color: #28a745; margin-bottom: 0.5rem;">✅ Ventajas:</h5>
+                            <ul style="color: #333; margin: 0; padding-left: 1.5rem;">
+                                <li>Parsing continúa sin interrupciones</li>
+                                <li>Se detectan errores adicionales</li>
+                                <li>Experiencia de usuario mejorada</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-title">🎯 Implementación Insertion Recovery</div>
+                    <pre><code class="language-java">private boolean attemptInsertionRecovery() {
+    Token current = tokens.current();
+    System.out.println("🔧 Analizando contexto para inserción...");
+    
+    // Caso 1: Falta punto y coma después de declaración
+    if (isEndOfStatement() && !tokens.check(TokenType.SEMICOLON)) {
+        System.out.println("📍 Detectado: Falta ';' después de statement");
+        
+        // Crear token virtual
+        Token virtualSemi = new Token(
+            TokenType.SEMICOLON, ";",
+            current.getLine(), current.getColumn()
+        );
+        
+        // Insertar en el stream
+        tokens.insertVirtual(virtualSemi);
+        
+        System.out.println("✅ Punto y coma insertado automáticamente");
+        reportRecovery("Se insertó ';' automáticamente en línea " + 
+                      current.getLine());
+        return true;
+    }
+    
+    // Caso 2: Falta paréntesis de cierre
+    if (isInParenthesesContext() && 
+        (tokens.check(TokenType.LBRACE) || tokens.check(TokenType.SEMICOLON))) {
+        
+        System.out.println("📍 Detectado: Falta ')' antes de " + 
+                          current.getLexeme());
+        
+        tokens.insertVirtual(new Token(
+            TokenType.RPAREN, ")",
+            current.getLine(), current.getColumn()
+        ));
+        
+        System.out.println("✅ Paréntesis de cierre insertado");
+        reportRecovery("Se insertó ')' automáticamente");
+        return true;
+    }
+    
+    // Caso 3: Falta llave de apertura en bloque
+    if (expectingBlockStart() && !tokens.check(TokenType.LBRACE)) {
+        System.out.println("📍 Detectado: Falta '{' para iniciar bloque");
+        
+        tokens.insertVirtual(new Token(
+            TokenType.LBRACE, "{",
+            current.getLine(), current.getColumn()
+        ));
+        
+        System.out.println("✅ Llave de apertura insertada");
+        return true;
+    }
+    
+    System.out.println("❌ No se pudo realizar inserción automática");
+    return false;
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Deletion Recovery -->
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="font-size: 2.5rem;">✂️</div>
+                    <div>
+                        <div class="card-title" style="margin: 0; text-align: left;">Estrategia 3: Deletion Recovery</div>
+                        <div style="color: #666; font-style: italic;">Eliminar tokens extra o duplicados</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">📝 Ejemplo Problemático:</h4>
+                        <div style="background: #2d3748; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: monospace; margin-bottom: 1rem;">
+                            <div style="color: #f56565;">// Error: Punto y coma extra</div>
+                            int x = 10;;<br>
+                            <div style="color: #f56565;">// Error: Operador duplicado</div>
+                            if (y >> 5) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;print("mayor");<br>
+                            }<br>
+                            <div style="color: #f56565;">// Error: Paréntesis extra</div>
+                            while ((i < 10)) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;i++;<br>
+                            }
+                        </div>
+                        
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">⚡ Proceso de Recuperación:</h4>
+                        <div class="step-container">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Detectar Extra</div>
+                                <div class="step-description">Identificar tokens duplicados o innecesarios</div>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Eliminar Token</div>
+                                <div class="step-description">Saltar el token problemático</div>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Re-intentar</div>
+                                <div class="step-description">Continuar parsing sin el token extra</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">✂️ Código Limpiado Automáticamente:</h4>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="font-family: monospace; color: #333;">
+                                <div style="margin: 0.5rem 0;">
+                                    int x = 10; <span style="color: #dc3545; text-decoration: line-through;">;</span> ← Eliminado
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    if (y > <span style="color: #dc3545; text-decoration: line-through;">></span> 5) { ← Eliminado
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;print("mayor");
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    }
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    while <span style="color: #dc3545; text-decoration: line-through;">(</span>(i < 10)<span style="color: #dc3545; text-decoration: line-through;">)</span> { ← Eliminados
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;i++;
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(40, 167, 69, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <h5 style="color: #28a745; margin-bottom: 0.5rem;">✅ Casos Comunes:</h5>
+                            <ul style="color: #333; margin: 0; padding-left: 1.5rem;">
+                                <li>Puntos y comas duplicados</li>
+                                <li>Operadores repetidos (&gt;&gt;, ++, --)</li>
+                                <li>Paréntesis extras innecesarios</li>
+                                <li>Llaves redundantes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-title">🎯 Implementación Deletion Recovery</div>
+                    <pre><code class="language-java">private boolean attemptDeletionRecovery() {
+    Token current = tokens.current();
+    Token next = tokens.peek(1);
+    
+    System.out.println("✂️ Analizando tokens para eliminación...");
+    
+    // Caso 1: Punto y coma duplicado
+    if (current.getType() == TokenType.SEMICOLON && 
+        next.getType() == TokenType.SEMICOLON) {
+        
+        System.out.println("📍 Detectado: Punto y coma duplicado");
+        tokens.advance(); // Saltar el extra
+        
+        System.out.println("✅ Punto y coma extra eliminado");
+        reportRecovery("Se eliminó ';' duplicado en línea " + 
+                      current.getLine());
+        return true;
+    }
+    
+    // Caso 2: Operadores duplicados
+    if (isOperator(current) && 
+        current.getLexeme().equals(next.getLexeme())) {
+        
+        System.out.println("📍 Detectado: Operador duplicado '" + 
+                          current.getLexeme() + "'");
+        tokens.advance(); // Saltar el duplicado
+        
+        System.out.println("✅ Operador duplicado eliminado");
+        reportRecovery("Se eliminó operador duplicado '" + 
+                      current.getLexeme() + "'");
+        return true;
+    }
+    
+    // Caso 3: Paréntesis extra innecesario
+    if (current.getType() == TokenType.LPAREN) {
+        // Verificar si hay paréntesis anidados innecesarios
+        if (next.getType() == TokenType.LPAREN && 
+            !isValidNestedParentheses()) {
+            
+            System.out.println("📍 Detectado: Paréntesis extra innecesario");
+            tokens.advance(); // Saltar el extra
+            
+            System.out.println("✅ Paréntesis extra eliminado");
+            return true;
+        }
+    }
+    
+    // Caso 4: Punto y coma antes de llave de cierre
+    if (current.getType() == TokenType.SEMICOLON && 
+        next.getType() == TokenType.RBRACE) {
+        
+        System.out.println("📍 Detectado: ';' innecesario antes de '}'");
+        tokens.advance(); // Saltar el semicolon
+        
+        System.out.println("✅ Semicolon innecesario eliminado");
+        return true;
+    }
+    
+    System.out.println("❌ No se detectaron tokens para eliminar");
+    return false;
+}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparación de Estrategias -->
+        <div class="section">
+            <div class="section-title">
+                ⚖️ Comparación de Estrategias de Recuperación
+            </div>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Estrategia</th>
+                        <th>Velocidad</th>
+                        <th>Precisión</th>
+                        <th>Errores Adicionales</th>
+                        <th>Casos de Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Panic Mode</strong></td>
+                        <td class="pros">Muy Rápida</td>
+                        <td class="cons">Baja</td>
+                        <td class="cons">Puede perder muchos</td>
+                        <td>Errores graves, parsing rápido</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Insertion Recovery</strong></td>
+                        <td class="cons">Lenta</td>
+                        <td class="pros">Alta</td>
+                        <td class="pros">Mínimos</td>
+                        <td>Tokens faltantes comunes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Deletion Recovery</strong></td>
+                        <td class="pros">Rápida</td>
+                        <td class="pros">Media-Alta</td>
+                        <td class="pros">Pocos</td>
+                        <td>Tokens extra, duplicados</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Híbrida</strong></td>
+                        <td class="pros">Media</td>
+                        <td class="pros">Muy Alta</td>
+                        <td class="pros">Mínimos</td>
+                        <td>Compiladores modernos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Implementación Completa -->
+        <div class="section">
+            <div class="section-title">
+                🏗️ Sistema Completo de Manejo de Errores
+            </div>
+            
+            <div class="code-container">
+                <div class="code-title">🎯 Parser con Manejo Robusto de Errores</div>
+                <pre><code class="language-java">public class RobustParser {
+    private TokenStream tokens;
+    private List&lt;SyntaxError&gt; errors;
+    private RecoveryStrategy currentStrategy;
+    
+    public ParseResult parse() {
+        errors = new ArrayList&lt;&gt;();
+        
+        try {
+            ProgramNode program = parseProgram();
+            return new ParseResult(program, errors);
+        } catch (FatalParseException e) {
+            // Error irrecuperable
+            errors.add(e.getError());
+            return new ParseResult(null, errors);
+        }
+    }
+    
+    private StatementNode parseStatement() {
+        int errorsBefore = errors.size();
+        
+        try {
+            return parseStatementInternal();
+        } catch (ParseException e) {
+            // Registrar error
+            SyntaxError error = createDetailedError(e);
+            errors.add(error);
+            
+            // Intentar recuperación múltiple
+            return attemptMultipleRecoveries(e);
+        }
+    }
+    
+    private StatementNode attemptMultipleRecoveries(ParseException e) {
+        // Estrategia 1: Insertion Recovery
+        if (attemptInsertionRecovery()) {
+            try {
+                return parseStatementInternal();
+            } catch (ParseException nested) {
+                // Falló, intentar siguiente estrategia
+            }
+        }
+        
+        // Estrategia 2: Deletion Recovery
+        if (attemptDeletionRecovery()) {
+            try {
+                return parseStatementInternal();
+            } catch (ParseException nested) {
+                // Falló, intentar siguiente estrategia
+            }
+        }
+        
+        // Estrategia 3: Panic Mode (último recurso)
+        panicModeRecover();
+        return new ErrorStatementNode(e.getMessage());
+    }
+    
+    private SyntaxError createDetailedError(ParseException e) {
+        Token errorToken = e.getToken();
+        
+        return new SyntaxError.Builder()
+            .setLocation(errorToken.getLine(), errorToken.getColumn())
+            .setMessage(generateUserFriendlyMessage(e))
+            .setSourceLine(getSourceLine(errorToken.getLine()))
+            .setErrorSpan(calculateErrorSpan(errorToken))
+            .setContext(getCurrentParsingContext())
+            .setSuggestion(generateSmartSuggestion(e))
+            .setSeverity(calculateSeverity(e))
+            .build();
+    }
+    
+    private String generateSmartSuggestion(ParseException e) {
+        TokenType expected = e.getExpectedType();
+        Token found = e.getToken();
+        
+        switch (expected) {
+            case SEMICOLON:
+                return "Agregar ';' al final de la declaración";
+            case RPAREN:
+                return "Cerrar paréntesis con ')'";
+            case RBRACE:
+                return "Cerrar bloque con '}'";
+            case IDENTIFIER:
+                if (isKeyword(found.getLexeme())) {
+                    return String.format("'%s' es palabra reservada, usar otro nombre", 
+                                       found.getLexeme());
+                }
+                return "Se esperaba un identificador (nombre de variable)";
+            default:
+                return String.format("Reemplazar '%s' con '%s'", 
+                                   found.getLexeme(), expected.getDisplayName());
+        }
+    }
+    
+    // Métricas de calidad del manejo de errores
+    public ErrorStatistics getErrorStatistics() {
+        return new ErrorStatistics.Builder()
+            .setTotalErrors(errors.size())
+            .setRecoveredErrors(countRecoveredErrors())
+            .setFalsePositives(countFalsePositives())
+            .setMostCommonErrors(findMostCommonErrors())
+            .build();
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Demo Interactivo -->
+        <div class="interactive-demo">
+            <h3 style="margin-bottom: 1rem;">🎮 Simulador de Errores Sintácticos</h3>
+            <p style="margin-bottom: 1.5rem;">Haz clic en los botones para ver diferentes tipos de errores y su manejo:</p>
+            
+            <button class="demo-button" onclick="showErrorExample('missing_semicolon')">
+                Punto y Coma Faltante
+            </button>
+            <button class="demo-button" onclick="showErrorExample('unbalanced_parens')">
+                Paréntesis Desbalanceados
+            </button>
+            <button class="demo-button" onclick="showErrorExample('unexpected_token')">
+                Token Inesperado
+            </button>
+            <button class="demo-button" onclick="showErrorExample('premature_eof')">
+                Final de Archivo Prematuro
+            </button>
+            
+            <div id="error-demo-output" class="error-output" style="display: none;">
+                <!-- El contenido se mostrará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide12.html" class="nav-btn">← Anterior</a>
+        <a href="slide14.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        // Ejemplos de errores interactivos
+        const errorExamples = {
+            missing_semicolon: {
+                title: "🚨 Error: Punto y Coma Faltante",
+                code: `int x = 10  // ← Falta ';'
+if (x > 5) {
+    print("mayor");
+}`,
+                error: `Error en línea 1, columna 11:
+Se esperaba ';' después de la declaración
+│ int x = 10
+│           ^
+Sugerencia: Agregar ';' al final`,
+                recovery: `✅ Recuperación: Insertion Recovery
+→ Insertar ';' virtualmente
+→ Continuar parsing normalmente
+→ 1 error encontrado, 0 errores adicionales`
+            },
+            
+            unbalanced_parens: {
+                title: "🚨 Error: Paréntesis Desbalanceados",
+                code: `if (x > 5 && (y < 10) {  // ← Falta ')'
+    print("condición verdadera");
+}`,
+                error: `Error en línea 1, columna 21:
+Se esperaba ')' para cerrar expresión
+│ if (x > 5 && (y < 10) {
+│                     ^
+Sugerencia: Agregar ')' antes de '{'`,
+                recovery: `✅ Recuperación: Insertion Recovery
+→ Insertar ')' antes de '{'
+→ Continuar parsing del bloque if
+→ 1 error encontrado, parsing exitoso`
+            },
+            
+            unexpected_token: {
+                title: "🚨 Error: Token Inesperado",
+                code: `int x = 10;
+else {  // ← 'else' sin 'if'
+    print("error");
+}`,
+                error: `Error en línea 2, columna 1:
+'else' inesperado - no hay 'if' correspondiente
+│ else {
+│ ^
+Sugerencia: Agregar 'if' antes o remover 'else'`,
+                recovery: `✅ Recuperación: Panic Mode
+→ Descartar 'else' problemático
+→ Sincronizar en siguiente statement
+→ 1 error encontrado, continuar parsing`
+            },
+            
+            premature_eof: {
+                title: "🚨 Error: Final de Archivo Prematuro",
+                code: `if (x > 5) {
+    print("mayor");
+    // ← Falta '}'`,
+                error: `Error: Final de archivo inesperado
+Se esperaba '}' para cerrar el bloque 'if'
+│ if (x > 5) {
+│            ^
+Último '{' abierto en línea 1
+Sugerencia: Agregar '}' al final`,
+                recovery: `✅ Recuperación: Insertion Recovery
+→ Insertar '}' virtualmente al final
+→ Cerrar bloques abiertos automáticamente
+→ 1 error encontrado, AST completado`
+            }
+        };
+
+        function showErrorExample(type) {
+            const example = errorExamples[type];
+            const output = document.getElementById('error-demo-output');
+            
+            output.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="color: #fed7d7; margin-bottom: 0.5rem;">${example.title}</h4>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <h5 style="color: #bee3f8; margin-bottom: 0.5rem;">📝 Código Problemático:</h5>
+                    <pre style="background: #1a202c; padding: 1rem; border-radius: 5px; margin: 0;"><code>${example.code}</code></pre>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <h5 style="color: #feb2b2; margin-bottom: 0.5rem;">⚠️ Mensaje de Error:</h5>
+                    <pre style="background: #742a2a; padding: 1rem; border-radius: 5px; margin: 0; border-left: 4px solid #e53e3e;"><code>${example.error}</code></pre>
+                </div>
+                
+                <div>
+                    <h5 style="color: #9ae6b4; margin-bottom: 0.5rem;">🔧 Proceso de Recuperación:</h5>
+                    <pre style="background: #22543d; padding: 1rem; border-radius: 5px; margin: 0; border-left: 4px solid #38a169;"><code>${example.recovery}</code></pre>
+                </div>
+            `;
+            
+            output.style.display = 'block';
+            output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide14.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide12.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gramáticas Libres de Contexto y BNF</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-card {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .section-card:nth-child(1) { animation-delay: 0.2s; }
+        .section-card:nth-child(2) { animation-delay: 0.4s; }
+
+        .section-card h3 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        /* BNF Visualization */
+        .bnf-diagram {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bnf-rule {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 1.1rem;
+            animation: fadeInRule 0.5s ease-out both;
+        }
+
+        .bnf-rule:nth-child(1) { animation-delay: 0.1s; }
+        .bnf-rule:nth-child(2) { animation-delay: 0.3s; }
+        .bnf-rule:nth-child(3) { animation-delay: 0.5s; }
+        .bnf-rule:nth-child(4) { animation-delay: 0.7s; }
+
+        .bnf-lhs {
+            color: #4ec9b0;
+            font-weight: bold;
+            min-width: 150px;
+        }
+
+        .bnf-arrow {
+            color: #FFD700;
+            margin: 0 1rem;
+            font-size: 1.3rem;
+        }
+
+        .bnf-rhs {
+            color: #d4d4d4;
+            flex: 1;
+        }
+
+        .bnf-terminal {
+            color: #ce9178;
+            font-weight: bold;
+        }
+
+        .bnf-nonterminal {
+            color: #dcdcaa;
+            font-style: italic;
+        }
+
+        .bnf-operator {
+            color: #569cd6;
+            font-weight: bold;
+            margin: 0 0.5rem;
+        }
+
+        /* Visual BNF Diagram */
+        .visual-bnf {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .railroad-diagram {
+            width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+
+        /* CFG Components */
+        .cfg-components {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .component-box {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .component-box:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        .component-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .component-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .component-example {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Comparison Section */
+        .comparison-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-top: 2rem;
+            animation: slideUp 0.8s ease-out 0.6s both;
+        }
+
+        .comparison-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .comparison-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .comparison-title {
+            color: #FFD700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Derivation Animation */
+        .derivation-example {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-top: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out 0.8s both;
+        }
+
+        .derivation-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            opacity: 0;
+            animation: fadeInStep 0.5s ease-out forwards;
+        }
+
+        .derivation-step:nth-child(1) { animation-delay: 1s; }
+        .derivation-step:nth-child(2) { animation-delay: 1.5s; }
+        .derivation-step:nth-child(3) { animation-delay: 2s; }
+        .derivation-step:nth-child(4) { animation-delay: 2.5s; }
+
+        .step-arrow {
+            color: #667eea;
+            margin: 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInRule {
+            from { 
+                opacity: 0; 
+                transform: translateX(-20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInStep {
+            from { 
+                opacity: 0; 
+                transform: scale(0.9);
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .legend {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin-right: 1.5rem;
+        }
+
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 10px;
+            margin-right: 0.5rem;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gramáticas Libres de Contexto (CFG) y BNF</h1>
+
+        <div class="main-grid">
+            <!-- CFG Section -->
+            <div class="section-card">
+                <h3>📚 Gramática Formal CFG</h3>
+                
+                <p style="margin-bottom: 1rem;">Una gramática G = (V, T, P, S) donde:</p>
+                
+                <div class="cfg-components">
+                    <div class="component-box">
+                        <div class="component-icon">🏷️</div>
+                        <div class="component-label">V: No-terminales</div>
+                        <div class="component-example">Expression, Statement</div>
+                    </div>
+                    
+                    <div class="component-box">
+                        <div class="component-icon">🔤</div>
+                        <div class="component-label">T: Terminales</div>
+                        <div class="component-example">"if", "+", ID, NUM</div>
+                    </div>
+                    
+                    <div class="component-box">
+                        <div class="component-icon">📋</div>
+                        <div class="component-label">P: Producciones</div>
+                        <div class="component-example">A → α</div>
+                    </div>
+                    
+                    <div class="component-box">
+                        <div class="component-icon">🎯</div>
+                        <div class="component-label">S: Símbolo inicial</div>
+                        <div class="component-example">Program</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <span class="legend-item">
+                        <span class="legend-color" style="background: #4ec9b0;"></span>No-terminal
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color" style="background: #ce9178;"></span>Terminal
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color" style="background: #569cd6;"></span>Operador
+                    </span>
+                </div>
+            </div>
+
+            <!-- BNF Section -->
+            <div class="section-card">
+                <h3>📝 Notación BNF (Backus-Naur Form)</h3>
+                
+                <p style="margin-bottom: 1rem;">Forma estándar de escribir gramáticas:</p>
+                
+                <div class="bnf-diagram">
+                    <div class="bnf-rule">
+                        <span class="bnf-lhs">Program</span>
+                        <span class="bnf-arrow">::=</span>
+                        <span class="bnf-rhs">
+                            <span class="bnf-nonterminal">Statement</span>
+                            <span class="bnf-operator">*</span>
+                        </span>
+                    </div>
+                    
+                    <div class="bnf-rule">
+                        <span class="bnf-lhs">Statement</span>
+                        <span class="bnf-arrow">::=</span>
+                        <span class="bnf-rhs">
+                            <span class="bnf-nonterminal">IfStmt</span>
+                            <span class="bnf-operator">|</span>
+                            <span class="bnf-nonterminal">WhileStmt</span>
+                            <span class="bnf-operator">|</span>
+                            <span class="bnf-nonterminal">Assignment</span>
+                        </span>
+                    </div>
+                    
+                    <div class="bnf-rule">
+                        <span class="bnf-lhs">IfStmt</span>
+                        <span class="bnf-arrow">::=</span>
+                        <span class="bnf-rhs">
+                            <span class="bnf-terminal">"if"</span>
+                            <span class="bnf-terminal">"("</span>
+                            <span class="bnf-nonterminal">Expr</span>
+                            <span class="bnf-terminal">")"</span>
+                            <span class="bnf-nonterminal">Block</span>
+                        </span>
+                    </div>
+                    
+                    <div class="bnf-rule">
+                        <span class="bnf-lhs">Expr</span>
+                        <span class="bnf-arrow">::=</span>
+                        <span class="bnf-rhs">
+                            <span class="bnf-nonterminal">Term</span>
+                            <span class="bnf-operator">(</span>
+                            <span class="bnf-terminal">"+"</span>
+                            <span class="bnf-nonterminal">Term</span>
+                            <span class="bnf-operator">)*</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual BNF Railroad Diagram -->
+        <div class="section-card" style="animation-delay: 0.6s;">
+            <h3 style="text-align: center; color: #667eea; margin-bottom: 2rem;">
+                🚂 Diagrama de Vías (Railroad Diagram) - Visualización BNF
+            </h3>
+            
+            <svg class="railroad-diagram" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1200" height="400" fill="white" rx="12"/>
+                
+                <!-- Title -->
+                <text x="600" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#667eea">
+                    IfStmt ::= "if" "(" Expr ")" Block
+                </text>
+                
+                <!-- Main track -->
+                <g transform="translate(100, 100)">
+                    <!-- Start -->
+                    <circle cx="0" cy="0" r="8" fill="#667eea"/>
+                    
+                    <!-- Track to "if" -->
+                    <line x1="8" y1="0" x2="50" y2="0" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- "if" terminal -->
+                    <rect x="50" y="-25" width="80" height="50" rx="25" fill="#ce9178" stroke="#a0522d" stroke-width="2"/>
+                    <text x="90" y="5" text-anchor="middle" font-weight="bold" fill="white">"if"</text>
+                    
+                    <!-- Track to "(" -->
+                    <line x1="130" y1="0" x2="180" y2="0" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- "(" terminal -->
+                    <rect x="180" y="-25" width="60" height="50" rx="25" fill="#ce9178" stroke="#a0522d" stroke-width="2"/>
+                    <text x="210" y="5" text-anchor="middle" font-weight="bold" fill="white">"("</text>
+                    
+                    <!-- Track to Expr -->
+                    <line x1="240" y1="0" x2="300" y2="0" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- Expr non-terminal -->
+                    <rect x="300" y="-25" width="100" height="50" rx="10" fill="#dcdcaa" stroke="#9a8c43" stroke-width="2"/>
+                    <text x="350" y="5" text-anchor="middle" font-weight="bold" fill="#333">Expr</text>
+                    
+                    <!-- Track to ")" -->
+                    <line x1="400" y1="0" x2="450" y2="0" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- ")" terminal -->
+                    <rect x="450" y="-25" width="60" height="50" rx="25" fill="#ce9178" stroke="#a0522d" stroke-width="2"/>
+                    <text x="480" y="5" text-anchor="middle" font-weight="bold" fill="white">")"</text>
+                    
+                    <!-- Track to Block -->
+                    <line x1="510" y1="0" x2="570" y2="0" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- Block non-terminal -->
+                    <rect x="570" y="-25" width="100" height="50" rx="10" fill="#dcdcaa" stroke="#9a8c43" stroke-width="2"/>
+                    <text x="620" y="5" text-anchor="middle" font-weight="bold" fill="#333">Block</text>
+                    
+                    <!-- Track to End -->
+                    <line x1="670" y1="0" x2="720" y2="0" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- End -->
+                    <circle cx="720" cy="0" r="8" fill="#667eea"/>
+                </g>
+                
+                <!-- Expression expansion -->
+                <g transform="translate(100, 250)">
+                    <text x="0" y="-20" font-size="16" font-weight="bold" fill="#667eea">
+                        Expr ::= Term ( "+" Term )*
+                    </text>
+                    
+                    <!-- Start -->
+                    <circle cx="0" cy="30" r="6" fill="#4ec9b0"/>
+                    
+                    <!-- Track to Term -->
+                    <line x1="6" y1="30" x2="50" y2="30" stroke="#4ec9b0" stroke-width="2"/>
+                    
+                    <!-- Term -->
+                    <rect x="50" y="10" width="80" height="40" rx="8" fill="#dcdcaa" stroke="#9a8c43" stroke-width="2"/>
+                    <text x="90" y="33" text-anchor="middle" font-weight="bold" fill="#333">Term</text>
+                    
+                    <!-- Main track continues -->
+                    <line x1="130" y1="30" x2="200" y2="30" stroke="#4ec9b0" stroke-width="2"/>
+                    
+                    <!-- Loop back path -->
+                    <path d="M 200 30 Q 250 30 250 70 L 250 70 Q 250 110 200 110 L 100 110 Q 50 110 50 70 Q 50 30 90 30" 
+                          stroke="#569cd6" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+                    
+                    <!-- "+" in loop -->
+                    <rect x="140" y="90" width="50" height="40" rx="20" fill="#ce9178" stroke="#a0522d" stroke-width="2"/>
+                    <text x="165" y="113" text-anchor="middle" font-weight="bold" fill="white">"+"</text>
+                    
+                    <!-- End -->
+                    <circle cx="200" cy="30" r="6" fill="#4ec9b0"/>
+                    
+                    <!-- Asterisk notation -->
+                    <text x="260" y="35" font-size="24" fill="#569cd6" font-weight="bold">*</text>
+                    <text x="290" y="35" font-size="14" fill="#666">(0 o más veces)</text>
+                </g>
+            </svg>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-section">
+            <h3 style="color: #FFD700; text-align: center; font-size: 1.5rem;">
+                🔄 CFG vs BNF - Son lo mismo, diferente notación
+            </h3>
+            
+            <div class="comparison-table">
+                <div class="comparison-item">
+                    <div class="comparison-title">Matemática (CFG)</div>
+                    <div style="font-family: 'Courier New', monospace; text-align: center;">
+                        <p>S → aSb | ε</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            Flecha simple (→)<br>
+                            Epsilon para vacío (ε)
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="comparison-item">
+                    <div class="comparison-title">Programación (BNF)</div>
+                    <div style="font-family: 'Courier New', monospace; text-align: center;">
+                        <p>S ::= "a" S "b" | empty</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            Doble dos puntos igual (::=)<br>
+                            Comillas para literales<br>
+                            "empty" o nada para vacío
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Derivation Example -->
+        <div class="derivation-example">
+            <h3 style="color: #667eea; text-align: center; margin-bottom: 1.5rem;">
+                📊 Ejemplo de Derivación usando BNF
+            </h3>
+            
+            <div class="derivation-step">
+                <span style="color: #4ec9b0;">IfStmt</span>
+            </div>
+            
+            <div class="derivation-step">
+                <span class="step-arrow">⇒</span>
+                <span><span style="color: #ce9178;">"if"</span> <span style="color: #ce9178;">"("</span> <span style="color: #dcdcaa;">Expr</span> <span style="color: #ce9178;">")"</span> <span style="color: #dcdcaa;">Block</span></span>
+            </div>
+            
+            <div class="derivation-step">
+                <span class="step-arrow">⇒</span>
+                <span><span style="color: #ce9178;">"if"</span> <span style="color: #ce9178;">"("</span> <span style="color: #dcdcaa;">Term</span> <span style="color: #ce9178;">">"</span> <span style="color: #dcdcaa;">Term</span> <span style="color: #ce9178;">")"</span> <span style="color: #dcdcaa;">Block</span></span>
+            </div>
+            
+            <div class="derivation-step">
+                <span class="step-arrow">⇒</span>
+                <span><span style="color: #ce9178;">"if"</span> <span style="color: #ce9178;">"("</span> <span style="color: #9cdcfe;">x</span> <span style="color: #ce9178;">">"</span> <span style="color: #b5cea8;">5</span> <span style="color: #ce9178;">")"</span> <span style="color: #ce9178;">"{...}"</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide05.html" class="nav-btn">← Anterior</a>
+        <a href="slide07.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="syntax-highlighter.js"></script>
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide07.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide05.html';
+            }
+        });
+    </script>
+</body>
+</html>

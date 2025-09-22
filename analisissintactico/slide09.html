@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño del AST: Jerarquía de Nodos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .section {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+
+        .motivation-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .motivation-section h2 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+        }
+
+        .tree-container {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .tree-container h2 {
+            color: #FFD700;
+            margin-bottom: 2rem;
+            font-size: 1.6rem;
+        }
+
+        #tree-svg {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .node-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .node-card {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .node-card:nth-child(1) { animation-delay: 0.2s; }
+        .node-card:nth-child(2) { animation-delay: 0.4s; }
+        .node-card:nth-child(3) { animation-delay: 0.6s; }
+
+        .node-card h3 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .node-card .icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .code-implementation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .code-column {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .code-column h3 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .benefits-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 0.8s both;
+        }
+
+        .benefits-section h2 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .benefit-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .benefit-item h4 {
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+        }
+
+        .examples-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin: 2rem 0;
+        }
+
+        .examples-section h2 {
+            color: #FFD700;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+        .example-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: #FFD700;
+            color: #333;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .example-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .example-input {
+            background: #2d3748;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            border: 2px solid #FFD700;
+        }
+
+        .example-tree {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            text-align: center;
+        }
+
+        /* D3.js Tree Styles */
+        .node circle {
+            fill: #fff;
+            stroke: #FFD700;
+            stroke-width: 3px;
+            cursor: pointer;
+        }
+
+        .node.expression circle {
+            fill: #4ade80;
+        }
+
+        .node.statement circle {
+            fill: #f59e0b;
+        }
+
+        .node.literal circle {
+            fill: #06b6d4;
+        }
+
+        .node text {
+            font: 12px sans-serif;
+            fill: white;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+
+        .link {
+            fill: none;
+            stroke: #FFD700;
+            stroke-width: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Custom code styling to integrate with Prism.js */
+        pre[class*="language-"] {
+            margin: 1rem 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .code-implementation {
+                grid-template-columns: 1fr;
+            }
+            
+            .example-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Diseño del AST: Jerarquía de Nodos</h1>
+
+        <div class="motivation-section">
+            <h2>🎯 Responsabilidades de los Nodos del AST</h2>
+            <p>Un <strong>AST (Abstract Syntax Tree)</strong> representa la estructura sintáctica del código como un árbol. Cada nodo tiene una <strong>responsabilidad específica</strong>:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #FFD700;">
+                    <h3 style="color: #FFD700; margin-bottom: 1rem;">🏗️ ASTNode (Base)</h3>
+                    <p><strong>Responsabilidad:</strong> Definir la interfaz común para todos los nodos del árbol.</p>
+                    <ul style="margin-top: 0.5rem; line-height: 1.6;">
+                        <li>✓ Proporciona métodos básicos compartidos</li>
+                        <li>✓ Establece el contrato para todos los nodos</li>
+                        <li>✓ Permite polimorfismo</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #4ade80;">
+                    <h3 style="color: #4ade80; margin-bottom: 1rem;">🧮 ExpressionNode</h3>
+                    <p><strong>Responsabilidad:</strong> Representar elementos que <strong>producen valores</strong>.</p>
+                    <ul style="margin-top: 0.5rem; line-height: 1.6;">
+                        <li>✓ Operaciones matemáticas (3 + 5)</li>
+                        <li>✓ Variables (x, nombre)</li>
+                        <li>✓ Literales (42, "hello")</li>
+                        <li>✓ Llamadas a funciones que retornan valor</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #ff6b6b;">
+                    <h3 style="color: #ff6b6b; margin-bottom: 1rem;">⚡ StatementNode</h3>
+                    <p><strong>Responsabilidad:</strong> Representar elementos que <strong>ejecutan acciones</strong>.</p>
+                    <ul style="margin-top: 0.5rem; line-height: 1.6;">
+                        <li>✓ Asignaciones (x = 5)</li>
+                        <li>✓ Estructuras de control (if, while)</li>
+                        <li>✓ Llamadas a procedimientos</li>
+                        <li>✓ Declaraciones de variables</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tree-container">
+            <h2>🌳 Jerarquía Visual Interactiva</h2>
+            <div id="tree-svg"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Implementación en Java</h2>
+            
+            <div class="code-implementation">
+                <div class="code-column">
+                    <h3>🔧 Clases Base</h3>
+                    <pre><code class="language-java">// CLASE BASE: Contrato común para todos los nodos
+public abstract class ASTNode {
+    // Método para obtener representación textual
+    public abstract String toString();
+    
+    // Método para verificar tipo de nodo
+    public boolean isExpression() { return this instanceof ExpressionNode; }
+    public boolean isStatement() { return this instanceof StatementNode; }
+}
+
+// EXPRESIONES: Nodos que PRODUCEN valores
+public abstract class ExpressionNode extends ASTNode {
+    // Responsabilidad: calcular y retornar un valor
+    public abstract Object evaluate();
+}
+
+// DECLARACIONES: Nodos que EJECUTAN acciones
+public abstract class StatementNode extends ASTNode {
+    // Responsabilidad: realizar una acción
+    public abstract void execute();
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-column">
+                    <h3>🎯 Nodos Específicos</h3>
+                    <pre><code class="language-java">// LITERAL: Representa valores constantes
+public class LiteralNode extends ExpressionNode {
+    private Object value;
+    
+    public LiteralNode(Object value) {
+        this.value = value;
+    }
+    
+    @Override
+    public Object evaluate() {
+        // Responsabilidad: retornar el valor constante
+        return this.value;
+    }
+    
+    @Override
+    public String toString() {
+        return "Literal(" + value + ")";
+    }
+}
+
+// VARIABLE: Representa identificadores
+public class VariableNode extends ExpressionNode {
+    private String name;
+    
+    public VariableNode(String name) {
+        this.name = name;
+    }
+    
+    @Override
+    public Object evaluate() {
+        // Responsabilidad: buscar valor de la variable
+        // (por simplicidad, retornamos el nombre)
+        return name + "_value";
+    }
+    
+    @Override
+    public String toString() {
+        return "Variable(" + name + ")";
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>⚡ Operaciones Binarias</h3>
+            <pre><code class="language-java">// OPERACIÓN BINARIA: Combina dos expresiones con un operador
+public class BinaryOpNode extends ExpressionNode {
+    private String operator;
+    private ExpressionNode left;
+    private ExpressionNode right;
+    
+    public BinaryOpNode(String operator, ExpressionNode left, ExpressionNode right) {
+        this.operator = operator;
+        this.left = left;
+        this.right = right;
+    }
+    
+    @Override
+    public Object evaluate() {
+        // Responsabilidad: 
+        // 1. Evaluar lado izquierdo
+        // 2. Evaluar lado derecho  
+        // 3. Aplicar operación
+        // 4. Retornar resultado
+        
+        Double leftVal = (Double) this.left.evaluate();
+        Double rightVal = (Double) this.right.evaluate();
+        
+        switch (this.operator) {
+            case "+": return leftVal + rightVal;
+            case "-": return leftVal - rightVal;
+            case "*": return leftVal * rightVal;
+            case "/": return leftVal / rightVal;
+            default:
+                throw new RuntimeException("Operador desconocido: " + this.operator);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return "(" + left + " " + operator + " " + right + ")";
+    }
+}</code></pre>
+            </div>
+
+            <h3>📋 Ejemplo de StatementNode</h3>
+            <pre><code class="language-java">// ASIGNACIÓN: Ejecuta la acción de asignar valor a variable
+public class AssignmentNode extends StatementNode {
+    private String variable;
+    private ExpressionNode value;
+    
+    public AssignmentNode(String variable, ExpressionNode value) {
+        this.variable = variable;
+        this.value = value;
+    }
+    
+    @Override
+    public void execute() {
+        // Responsabilidad:
+        // 1. Evaluar la expresión del lado derecho
+        // 2. Asignar el resultado a la variable
+        // (por simplicidad, solo mostramos el concepto)
+        
+        Object result = value.evaluate();
+        System.out.println("Asignando " + result + " a variable " + variable);
+    }
+    
+    @Override
+    public String toString() {
+        return variable + " = " + value;
+    }
+}</code></pre>
+
+            <h3>💡 Ejemplo: Responsabilidades en Acción</h3>
+            <pre><code class="language-java">// Demostración de responsabilidades para: x = 5 + 3 * 2
+public class ASTExample {
+    public static void main(String[] args) {
+        // PASO 1: Crear expresiones (producen valores)
+        LiteralNode five = new LiteralNode(5.0);      // Responsabilidad: retornar 5.0
+        LiteralNode three = new LiteralNode(3.0);     // Responsabilidad: retornar 3.0
+        LiteralNode two = new LiteralNode(2.0);       // Responsabilidad: retornar 2.0
+        
+        // PASO 2: Combinar expresiones
+        BinaryOpNode multiply = new BinaryOpNode("*", three, two);  // 3.0 * 2.0 = 6.0
+        BinaryOpNode addition = new BinaryOpNode("+", five, multiply); // 5.0 + 6.0 = 11.0
+        
+        // PASO 3: Crear declaración (ejecuta acción)
+        AssignmentNode assignment = new AssignmentNode("x", addition);
+        
+        // DEMOSTRACIÓN DE RESPONSABILIDADES:
+        
+        // Las expresiones EVALÚAN y RETORNAN valores
+        System.out.println("3 * 2 = " + multiply.evaluate());    // Salida: 6.0
+        System.out.println("5 + (3*2) = " + addition.evaluate()); // Salida: 11.0
+        
+        // Los statements EJECUTAN acciones
+        assignment.execute();  // Salida: Asignando 11.0 a variable x
+        
+        // Mostrar estructura del AST
+        System.out.println("AST: " + assignment);  // Salida: x = (Literal(5.0) + (Literal(3.0) * Literal(2.0)))
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="node-types">
+            <div class="node-card">
+                <div class="icon">🏗️</div>
+                <h3>ASTNode (Base)</h3>
+                <p><strong>Responsabilidad Principal:</strong></p>
+                <ul style="margin-top: 0.5rem;">
+                    <li>✓ Definir interfaz común</li>
+                    <li>✓ Permitir polimorfismo</li>
+                    <li>✓ Proporcionar toString()</li>
+                    <li>✓ Identificar tipo de nodo</li>
+                </ul>
+            </div>
+
+            <div class="node-card">
+                <div class="icon">🧮</div>
+                <h3>ExpressionNode</h3>
+                <p><strong>Responsabilidad: PRODUCIR valores</strong></p>
+                <ul style="margin-top: 0.5rem;">
+                    <li>✓ Implementar evaluate()</li>
+                    <li>✓ Retornar un resultado</li>
+                    <li>✓ Representar cálculos</li>
+                    <li>✓ Ejemplo: 3 + 5 = 8</li>
+                </ul>
+            </div>
+
+            <div class="node-card">
+                <div class="icon">⚡</div>
+                <h3>StatementNode</h3>
+                <p><strong>Responsabilidad: EJECUTAR acciones</strong></p>
+                <ul style="margin-top: 0.5rem;">
+                    <li>✓ Implementar execute()</li>
+                    <li>✓ Realizar una acción</li>
+                    <li>✓ Cambiar estado del programa</li>
+                    <li>✓ Ejemplo: x = 5 (asigna valor)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="examples-section">
+            <h2>🔍 Ejemplos Interactivos</h2>
+            
+            <div class="example-tabs">
+                <button class="tab-button active" data-tab="simple">Expresión Simple</button>
+                <button class="tab-button" data-tab="complex">Expresión Compleja</button>
+                <button class="tab-button" data-tab="statement">Declaración</button>
+            </div>
+
+            <div class="tab-content active" id="simple">
+                <div class="example-container">
+                    <div class="example-input">
+                        <h4>Código: 3 + 5</h4>
+                        <p>Tokens: [3] [+] [5]</p>
+                    </div>
+                    <div class="example-tree">
+                        <h4>AST Generado:</h4>
+                        <div id="simple-tree"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="complex">
+                <div class="example-container">
+                    <div class="example-input">
+                        <h4>Código: (x + 3) * 2</h4>
+                        <p>Tokens: [(] [x] [+] [3] [)] [*] [2]</p>
+                    </div>
+                    <div class="example-tree">
+                        <h4>AST Generado:</h4>
+                        <div id="complex-tree"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="statement">
+                <div class="example-container">
+                    <div class="example-input">
+                        <h4>Código: x = y + 1</h4>
+                        <p>Tokens: [x] [=] [y] [+] [1]</p>
+                    </div>
+                    <div class="example-tree">
+                        <h4>AST Generado:</h4>
+                        <div id="statement-tree"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="benefits-section">
+            <h2>🎯 Beneficios de esta Arquitectura</h2>
+            
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <h4>🎯 Responsabilidades Claras</h4>
+                    <p>Cada tipo de nodo tiene una responsabilidad específica y bien definida</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>🔧 Separación de Conceptos</h4>
+                    <p>Distinción clara entre "calcular valores" vs "ejecutar acciones"</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>🏗️ Polimorfismo Natural</h4>
+                    <p>ASTNode permite tratar todos los nodos uniformemente</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>📈 Extensible por Diseño</h4>
+                    <p>Fácil agregar nuevos tipos siguiendo las responsabilidades establecidas</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>💡 Fácil de Entender</h4>
+                    <p>La jerarquía refleja conceptos naturales del lenguaje de programación</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>🧪 Código Mantenible</h4>
+                    <p>Cada nodo encapsula su comportamiento específico</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide08.html" class="nav-btn">← Anterior</a>
+        <a href="slide10.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+
+        // D3.js Tree Visualization
+        function createTree(containerId, data) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const width = 400;
+            const height = 250;
+            
+            const svg = d3.select(`#${containerId}`)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+                
+            const g = svg.append('g')
+                .attr('transform', 'translate(40, 20)');
+                
+            const treeLayout = d3.tree().size([width - 80, height - 40]);
+            const root = d3.hierarchy(data);
+            treeLayout(root);
+            
+            // Links
+            g.selectAll('.link')
+                .data(root.links())
+                .enter()
+                .append('path')
+                .attr('class', 'link')
+                .attr('d', d3.linkVertical()
+                    .x(d => d.x)
+                    .y(d => d.y));
+            
+            // Nodes
+            const node = g.selectAll('.node')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('class', d => `node ${d.data.type}`)
+                .attr('transform', d => `translate(${d.x}, ${d.y})`);
+            
+            node.append('circle')
+                .attr('r', 25);
+            
+            node.append('text')
+                .attr('dy', '0.35em')
+                .text(d => d.data.name);
+        }
+
+        // Create main hierarchy tree
+        function createMainTree() {
+            const data = {
+                name: 'ASTNode',
+                type: 'base',
+                children: [
+                    {
+                        name: 'Expression',
+                        type: 'expression',
+                        children: [
+                            { name: 'Literal', type: 'literal' },
+                            { name: 'Variable', type: 'literal' },
+                            { name: 'BinaryOp', type: 'expression' }
+                        ]
+                    },
+                    {
+                        name: 'Statement',
+                        type: 'statement',
+                        children: [
+                            { name: 'Assignment', type: 'statement' },
+                            { name: 'If', type: 'statement' },
+                            { name: 'While', type: 'statement' }
+                        ]
+                    }
+                ]
+            };
+            
+            const width = 600;
+            const height = 400;
+            
+            const svg = d3.select('#tree-svg')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+                
+            const g = svg.append('g')
+                .attr('transform', 'translate(60, 40)');
+                
+            const treeLayout = d3.tree().size([width - 120, height - 80]);
+            const root = d3.hierarchy(data);
+            treeLayout(root);
+            
+            // Links with animation
+            g.selectAll('.link')
+                .data(root.links())
+                .enter()
+                .append('path')
+                .attr('class', 'link')
+                .attr('d', d3.linkVertical()
+                    .x(d => d.x)
+                    .y(d => d.y))
+                .style('opacity', 0)
+                .transition()
+                .duration(1000)
+                .delay((d, i) => i * 100)
+                .style('opacity', 1);
+            
+            // Nodes with animation
+            const node = g.selectAll('.node')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('class', d => `node ${d.data.type}`)
+                .attr('transform', d => `translate(${d.x}, ${d.y})`)
+                .style('opacity', 0);
+            
+            node.append('circle')
+                .attr('r', 0)
+                .transition()
+                .duration(500)
+                .delay((d, i) => i * 100)
+                .attr('r', 30)
+                .on('end', function() {
+                    d3.select(this.parentNode).style('opacity', 1);
+                });
+            
+            node.append('text')
+                .attr('dy', '0.35em')
+                .style('font-size', '11px')
+                .text(d => d.data.name);
+        }
+
+        // Example trees
+        document.addEventListener('DOMContentLoaded', () => {
+            createMainTree();
+            
+            // Simple expression: 3 + 5
+            createTree('simple-tree', {
+                name: '+',
+                type: 'expression',
+                children: [
+                    { name: '3', type: 'literal' },
+                    { name: '5', type: 'literal' }
+                ]
+            });
+            
+            // Complex expression: (x + 3) * 2
+            createTree('complex-tree', {
+                name: '*',
+                type: 'expression',
+                children: [
+                    {
+                        name: '+',
+                        type: 'expression',
+                        children: [
+                            { name: 'x', type: 'literal' },
+                            { name: '3', type: 'literal' }
+                        ]
+                    },
+                    { name: '2', type: 'literal' }
+                ]
+            });
+            
+            // Statement: x = y + 1
+            createTree('statement-tree', {
+                name: '=',
+                type: 'statement',
+                children: [
+                    { name: 'x', type: 'literal' },
+                    {
+                        name: '+',
+                        type: 'expression',
+                        children: [
+                            { name: 'y', type: 'literal' },
+                            { name: '1', type: 'literal' }
+                        ]
+                    }
+                ]
+            });
+        });
+
+        // Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide10.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide08.html';
+            }
+        });
+    </script>
+</body>
+</html>

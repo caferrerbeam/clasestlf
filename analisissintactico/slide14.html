@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parser Completo: Implementación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: #FFD700;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out both;
+        }
+
+        .section-title {
+            color: #FFD700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .grammar-visual {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            border-left: 4px solid #667eea;
+        }
+
+        .grammar-rule {
+            margin: 0.8rem 0;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .grammar-rule .non-terminal {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .grammar-rule .terminal {
+            color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .grammar-rule .operator {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .code-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .code-title {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0 0 8px 8px;
+            background: #2d3748 !important;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        pre code {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .architecture-diagram {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 140px;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #FFD700;
+        }
+
+        .example-section {
+            background: rgba(40, 167, 69, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 5px solid #28a745;
+        }
+
+        .example-title {
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .trace-step {
+            background: #f8f9fa;
+            color: #333;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            font-family: monospace;
+            border-left: 4px solid #667eea;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        .highlight-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">14 / 20</div>
+    
+    <div class="container">
+        <h1>🏗️ Parser Completo: Implementación</h1>
+        <div class="subtitle">Integración de Todos los Componentes en un Sistema Funcional</div>
+
+        <!-- Arquitectura del Sistema -->
+        <div class="section">
+            <div class="section-title">
+                🏛️ Arquitectura del Sistema Completo
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">📝 Código Fuente</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🔤 Análisis Léxico</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🪙 Stream de Tokens</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🌳 Parser Sintáctico</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">📊 AST</div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>🎯 Objetivo Principal</h4>
+                <p>
+                    Construir un parser recursivo descendente que transforme código fuente en un 
+                    Árbol de Sintaxis Abstracta (AST), manejando errores de manera robusta y 
+                    proporcionando mensajes informativos al programador.
+                </p>
+            </div>
+        </div>
+
+        <!-- Gramática Utilizada -->
+        <div class="section">
+            <div class="section-title">
+                📐 Gramática Libre de Contexto (Sin Recursión Izquierda)
+            </div>
+            
+            <div class="grammar-visual">
+                <div class="grammar-rule">
+                    <span class="non-terminal">Program</span> 
+                    <span class="operator">→</span> 
+                    <span class="non-terminal">Statement</span><span class="operator">*</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Statement</span> 
+                    <span class="operator">→</span> 
+                    <span class="non-terminal">IfStatement</span> <span class="operator">|</span> 
+                    <span class="non-terminal">WhileStatement</span> <span class="operator">|</span> 
+                    <span class="non-terminal">AssignmentStatement</span> <span class="operator">|</span> 
+                    <span class="non-terminal">Block</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">IfStatement</span> 
+                    <span class="operator">→</span> 
+                    <span class="terminal">"if"</span> <span class="terminal">"("</span> <span class="non-terminal">Expression</span> <span class="terminal">")"</span> <span class="non-terminal">Statement</span> (<span class="terminal">"else"</span> <span class="non-terminal">Statement</span>)<span class="operator">?</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">WhileStatement</span> 
+                    <span class="operator">→</span> 
+                    <span class="terminal">"while"</span> <span class="terminal">"("</span> <span class="non-terminal">Expression</span> <span class="terminal">")"</span> <span class="non-terminal">Statement</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">AssignmentStatement</span> 
+                    <span class="operator">→</span> 
+                    <span class="terminal">ID</span> <span class="terminal">"="</span> <span class="non-terminal">Expression</span> <span class="terminal">";"</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Block</span> 
+                    <span class="operator">→</span> 
+                    <span class="terminal">"{"</span> <span class="non-terminal">Statement</span><span class="operator">*</span> <span class="terminal">"}"</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Expression</span> 
+                    <span class="operator">→</span> 
+                    <span class="non-terminal">Term</span> <span class="non-terminal">Expression'</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Expression'</span> 
+                    <span class="operator">→</span> 
+                    (<span class="terminal">"+"</span> <span class="operator">|</span> <span class="terminal">"-"</span>) <span class="non-terminal">Term</span> <span class="non-terminal">Expression'</span> <span class="operator">|</span> <span class="operator">ε</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Term</span> 
+                    <span class="operator">→</span> 
+                    <span class="non-terminal">Factor</span> <span class="non-terminal">Term'</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Term'</span> 
+                    <span class="operator">→</span> 
+                    (<span class="terminal">"*"</span> <span class="operator">|</span> <span class="terminal">"/"</span>) <span class="non-terminal">Factor</span> <span class="non-terminal">Term'</span> <span class="operator">|</span> <span class="operator">ε</span>
+                </div>
+                <div class="grammar-rule">
+                    <span class="non-terminal">Factor</span> 
+                    <span class="operator">→</span> 
+                    <span class="terminal">NUMBER</span> <span class="operator">|</span> <span class="terminal">ID</span> <span class="operator">|</span> <span class="terminal">"("</span> <span class="non-terminal">Expression</span> <span class="terminal">")"</span>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>🔧 Características Clave</h4>
+                <ul style="color: white; padding-left: 1.5rem;">
+                    <li><strong>Sin Recursión Izquierda:</strong> Permite parsing recursivo descendente</li>
+                    <li><strong>Precedencia de Operadores:</strong> Multiplicación/división antes que suma/resta</li>
+                    <li><strong>Asociatividad Izquierda:</strong> Manejada por las reglas X'</li>
+                    <li><strong>Bloques Anidados:</strong> Soporte para estructuras de control complejas</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Implementación Principal -->
+        <div class="section">
+            <div class="section-title">
+                💻 Implementación del Parser Recursivo Descendente
+            </div>
+            
+            <div class="code-container">
+                <div class="code-title">🎯 Clase Principal del Parser</div>
+                <pre><code class="language-java">public class RecursiveDescentParser {
+    private TokenStream tokenStream;
+    private List&lt;SyntaxError&gt; errors;
+    
+    public RecursiveDescentParser(List&lt;Token&gt; tokens) {
+        this.tokenStream = new TokenStream(tokens);
+        this.errors = new ArrayList&lt;&gt;();
+    }
+    
+    /**
+     * Punto de entrada principal - parsea todo el programa
+     * Program → Statement*
+     */
+    public ProgramNode parseProgram() {
+        List&lt;StatementNode&gt; statements = new ArrayList&lt;&gt;();
+        
+        while (!tokenStream.isAtEnd()) {
+            try {
+                StatementNode stmt = parseStatement();
+                statements.add(stmt);
+            } catch (ParseException e) {
+                errors.add(e.getError());
+                // Recuperación de errores - sincronizar al siguiente statement
+                recoverToNextStatement();
+            }
+        }
+        
+        return new ProgramNode(statements);
+    }
+    
+    /**
+     * Statement → IfStatement | WhileStatement | AssignmentStatement | Block
+     */
+    private StatementNode parseStatement() throws ParseException {
+        Token current = tokenStream.current();
+        
+        switch (current.getType()) {
+            case IF:
+                return parseIfStatement();
+            case WHILE:
+                return parseWhileStatement();
+            case LBRACE:
+                return parseBlock();
+            case IDENTIFIER:
+                return parseAssignmentStatement();
+            default:
+                throw new ParseException(
+                    "Token inesperado: " + current.getLexeme() + 
+                    ". Se esperaba 'if', 'while', '{' o un identificador",
+                    current
+                );
+        }
+    }
+    
+    /**
+     * IfStatement → "if" "(" Expression ")" Statement ("else" Statement)?
+     */
+    private IfStatementNode parseIfStatement() throws ParseException {
+        tokenStream.consume(TokenType.IF, "Se esperaba 'if'");
+        tokenStream.consume(TokenType.LPAREN, "Se esperaba '(' después de 'if'");
+        
+        ExpressionNode condition = parseExpression();
+        
+        tokenStream.consume(TokenType.RPAREN, "Se esperaba ')' después de la condición");
+        
+        StatementNode thenStatement = parseStatement();
+        StatementNode elseStatement = null;
+        
+        // Parte opcional del else
+        if (tokenStream.match(TokenType.ELSE)) {
+            elseStatement = parseStatement();
+        }
+        
+        return new IfStatementNode(condition, thenStatement, elseStatement);
+    }
+    
+    /**
+     * WhileStatement → "while" "(" Expression ")" Statement
+     */
+    private WhileStatementNode parseWhileStatement() throws ParseException {
+        tokenStream.consume(TokenType.WHILE, "Se esperaba 'while'");
+        tokenStream.consume(TokenType.LPAREN, "Se esperaba '(' después de 'while'");
+        
+        ExpressionNode condition = parseExpression();
+        
+        tokenStream.consume(TokenType.RPAREN, "Se esperaba ')' después de la condición");
+        
+        StatementNode body = parseStatement();
+        
+        return new WhileStatementNode(condition, body);
+    }
+    
+    /**
+     * AssignmentStatement → ID "=" Expression ";"
+     */
+    private AssignmentNode parseAssignmentStatement() throws ParseException {
+        Token identifier = tokenStream.consume(TokenType.IDENTIFIER, 
+                                              "Se esperaba un identificador");
+        
+        tokenStream.consume(TokenType.ASSIGN, "Se esperaba '=' después del identificador");
+        
+        ExpressionNode value = parseExpression();
+        
+        tokenStream.consume(TokenType.SEMICOLON, 
+                           "Se esperaba ';' al final de la asignación");
+        
+        return new AssignmentNode(identifier.getLexeme(), value);
+    }
+    
+    /**
+     * Block → "{" Statement* "}"
+     */
+    private BlockNode parseBlock() throws ParseException {
+        tokenStream.consume(TokenType.LBRACE, "Se esperaba '{'");
+        
+        List&lt;StatementNode&gt; statements = new ArrayList&lt;&gt;();
+        
+        while (!tokenStream.check(TokenType.RBRACE) && !tokenStream.isAtEnd()) {
+            statements.add(parseStatement());
+        }
+        
+        tokenStream.consume(TokenType.RBRACE, "Se esperaba '}' para cerrar el bloque");
+        
+        return new BlockNode(statements);
+    }
+    
+    /**
+     * Expression → Term Expression'
+     */
+    private ExpressionNode parseExpression() throws ParseException {
+        ExpressionNode left = parseTerm();
+        return parseExpressionPrime(left);
+    }
+    
+    /**
+     * Expression' → ("+" | "-") Term Expression' | ε
+     */
+    private ExpressionNode parseExpressionPrime(ExpressionNode left) throws ParseException {
+        TokenType currentType = tokenStream.current().getType();
+        
+        if (currentType == TokenType.PLUS || currentType == TokenType.MINUS) {
+            Token operator = tokenStream.advance();
+            ExpressionNode right = parseTerm();
+            
+            // Crear nodo binario y continuar recursivamente
+            BinaryOperationNode binaryOp = new BinaryOperationNode(
+                operator.getLexeme(), left, right
+            );
+            
+            return parseExpressionPrime(binaryOp);
+        }
+        
+        // Caso ε (epsilon) - no hay más operadores
+        return left;
+    }
+    
+    /**
+     * Term → Factor Term'
+     */
+    private ExpressionNode parseTerm() throws ParseException {
+        ExpressionNode left = parseFactor();
+        return parseTermPrime(left);
+    }
+    
+    /**
+     * Term' → ("*" | "/") Factor Term' | ε
+     */
+    private ExpressionNode parseTermPrime(ExpressionNode left) throws ParseException {
+        TokenType currentType = tokenStream.current().getType();
+        
+        if (currentType == TokenType.MULTIPLY || currentType == TokenType.DIVIDE) {
+            Token operator = tokenStream.advance();
+            ExpressionNode right = parseFactor();
+            
+            BinaryOperationNode binaryOp = new BinaryOperationNode(
+                operator.getLexeme(), left, right
+            );
+            
+            return parseTermPrime(binaryOp);
+        }
+        
+        return left; // Caso ε
+    }
+    
+    /**
+     * Factor → NUMBER | ID | "(" Expression ")"
+     */
+    private ExpressionNode parseFactor() throws ParseException {
+        Token current = tokenStream.current();
+        
+        switch (current.getType()) {
+            case NUMBER:
+                tokenStream.advance();
+                return new LiteralNode(Double.parseDouble(current.getLexeme()));
+                
+            case IDENTIFIER:
+                tokenStream.advance();
+                return new VariableNode(current.getLexeme());
+                
+            case LPAREN:
+                tokenStream.advance(); // Consume '('
+                ExpressionNode expression = parseExpression();
+                tokenStream.consume(TokenType.RPAREN, 
+                                   "Se esperaba ')' después de la expresión");
+                return expression;
+                
+            default:
+                throw new ParseException(
+                    "Token inesperado en factor: " + current.getLexeme() + 
+                    ". Se esperaba un número, identificador o '('",
+                    current
+                );
+        }
+    }
+    
+    /**
+     * Recuperación de errores - sincronizar al siguiente statement
+     */
+    private void recoverToNextStatement() {
+        Set&lt;TokenType&gt; syncTokens = Set.of(
+            TokenType.SEMICOLON, TokenType.RBRACE,
+            TokenType.IF, TokenType.WHILE, TokenType.IDENTIFIER
+        );
+        
+        while (!tokenStream.isAtEnd() && 
+               !syncTokens.contains(tokenStream.current().getType())) {
+            tokenStream.advance();
+        }
+        
+        // Si encontramos ';', lo consumimos
+        if (tokenStream.check(TokenType.SEMICOLON)) {
+            tokenStream.advance();
+        }
+    }
+    
+    // Métodos de acceso
+    public List&lt;SyntaxError&gt; getErrors() { return errors; }
+    public boolean hasErrors() { return !errors.isEmpty(); }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Ejemplo de Ejecución -->
+        <div class="section">
+            <div class="section-title">
+                🎯 Ejemplo de Ejecución Paso a Paso
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">📝 Código de Entrada</div>
+                    <div style="background: #2d3748; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: monospace;">
+                        if (x > 5) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;y = x * 2;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;z = y + 1;<br>
+                        } else {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;y = 0;<br>
+                        }
+                    </div>
+                    
+                    <h4 style="color: #667eea; margin: 1rem 0 0.5rem 0;">🪙 Tokens Generados:</h4>
+                    <div style="background: #f8f9fa; color: #333; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.85rem;">
+                        IF, LPAREN, IDENTIFIER(x), GT, NUMBER(5), RPAREN, LBRACE, 
+                        IDENTIFIER(y), ASSIGN, IDENTIFIER(x), MULTIPLY, NUMBER(2), SEMICOLON,
+                        IDENTIFIER(z), ASSIGN, IDENTIFIER(y), PLUS, NUMBER(1), SEMICOLON,
+                        RBRACE, ELSE, LBRACE, IDENTIFIER(y), ASSIGN, NUMBER(0), SEMICOLON, RBRACE, EOF
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">🌳 AST Generado</div>
+                    <div style="background: #f8f9fa; color: #333; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem;">
+                        IfStatementNode<br>
+                        ├── condition: BinaryOperationNode('>')<br>
+                        │   ├── left: VariableNode('x')<br>
+                        │   └── right: LiteralNode(5)<br>
+                        ├── thenStatement: BlockNode<br>
+                        │   ├── AssignmentNode('y')<br>
+                        │   │   └── value: BinaryOperationNode('*')<br>
+                        │   │       ├── left: VariableNode('x')<br>
+                        │   │       └── right: LiteralNode(2)<br>
+                        │   └── AssignmentNode('z')<br>
+                        │       └── value: BinaryOperationNode('+')<br>
+                        │           ├── left: VariableNode('y')<br>
+                        │           └── right: LiteralNode(1)<br>
+                        └── elseStatement: BlockNode<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;└── AssignmentNode('y')<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── value: LiteralNode(0)
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <div class="example-title">🔍 Trace de Ejecución del Parser</div>
+                
+                <div class="trace-step">
+                    <strong>1.</strong> parseProgram() → Inicia parsing del programa completo
+                </div>
+                <div class="trace-step">
+                    <strong>2.</strong> parseStatement() → Token 'IF' detectado, llamar parseIfStatement()
+                </div>
+                <div class="trace-step">
+                    <strong>3.</strong> parseIfStatement() → Consume 'if', '(', parsea condición
+                </div>
+                <div class="trace-step">
+                    <strong>4.</strong> parseExpression() → Llama parseTerm() para 'x'
+                </div>
+                <div class="trace-step">
+                    <strong>5.</strong> parseExpressionPrime() → Detecta '>', parsea lado derecho
+                </div>
+                <div class="trace-step">
+                    <strong>6.</strong> Consume ')' y parsea then-statement como Block
+                </div>
+                <div class="trace-step">
+                    <strong>7.</strong> parseBlock() → Parsea las dos asignaciones dentro del bloque
+                </div>
+                <div class="trace-step">
+                    <strong>8.</strong> Detecta 'else', parsea else-statement como Block
+                </div>
+                <div class="trace-step">
+                    <strong>9.</strong> Construye IfStatementNode con todos los componentes
+                </div>
+                <div class="trace-step">
+                    <strong>10.</strong> Retorna AST completo y verificado
+                </div>
+            </div>
+        </div>
+
+        <!-- Manejo de Errores Integrado -->
+        <div class="architecture-diagram">
+            <h3 style="margin-bottom: 1rem;">🛡️ Sistema Integrado de Manejo de Errores</h3>
+            <p style="margin-bottom: 1.5rem;">
+                El parser incorpora todas las estrategias de recuperación vistas anteriormente,
+                permitiendo continuar el parsing incluso cuando se encuentran errores sintácticos.
+            </p>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">🚨 Error Detectado</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">📝 Reporte Detallado</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">🔧 Estrategia de Recuperación</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">✅ Continuar Parsing</div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                <strong>Beneficios:</strong> Un solo pase encuentra múltiples errores, 
+                mensajes informativos ayudan al programador, y el AST parcial puede ser útil 
+                para análisis adicionales.
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide13.html" class="nav-btn">← Anterior</a>
+        <a href="slide15.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                window.location.href = 'slide15.html';
+            } else if (e.key === 'ArrowLeft') {
+                window.location.href = 'slide13.html';
+            }
+        });
+    </script>
+</body>
+</html>
