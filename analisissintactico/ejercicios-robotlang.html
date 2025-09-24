@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios RobotLang - Análisis Sintáctico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            opacity: 0.95;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h2 {
+            color: #FFD700;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        h3 {
+            color: #FFE55C;
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .code-example {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 1.1rem;
+            border-left: 4px solid #FFD700;
+            overflow-x: auto;
+        }
+
+        .exercise {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .exercise h4 {
+            color: #FFD700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .grammar-rule {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            border-left: 3px solid #FFD700;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+        }
+
+        ul {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        .ast-nodes {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+
+        .nav-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            margin: 0 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .grammar-reference {
+            background: rgba(255, 215, 0, 0.15);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .grammar-reference h5 {
+            color: #FFD700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .bnf-rule {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .grammar-link {
+            color: #FFE55C;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .grammar-link:hover {
+            color: #FFD700;
+        }
+
+        .production-diagram {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .production-title {
+            color: #FFD700;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .note {
+            background: rgba(255, 165, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #FFA500;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.1rem; }
+            .section { padding: 1.5rem; }
+            .code-example { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ejercicios RobotLang</h1>
+        <div class="subtitle">Análisis Sintáctico y Construcción de AST</div>
+
+        <div class="section">
+            <h2>🤖 Introducción a RobotLang</h2>
+            <p>RobotLang es un lenguaje simple para controlar un robot que puede moverse en cuatro direcciones y controlar una pluma para dibujar. El lenguaje incluye comandos básicos, estructuras de control repetitivas y condicionales.</p>
+            
+            <h3>Comandos Básicos</h3>
+            <div class="grammar-rule">
+                <strong>Movimiento:</strong> UP, DOWN, LEFT, RIGHT<br>
+                <strong>Pluma:</strong> PENUP, PENDOWN<br>
+                <strong>Control:</strong> REPEAT n { ... }, IF (condición) { ... } ELSE { ... }, WHILE (condición) { ... }
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Instrucciones para los Ejercicios</h3>
+            <p><strong>Para cada ejemplo de código RobotLang:</strong></p>
+            <ol>
+                <li><strong>Construye el árbol de derivación</strong> paso a paso usando las reglas de la gramática BNF</li>
+                <li><strong>Diseña los nodos del AST</strong> que representarían este código</li>
+                <li><strong>Dibuja un diagrama de clases UML</strong> que muestre la jerarquía de nodos AST necesarios</li>
+                <li><strong>Define los atributos y métodos</strong> que debería tener cada clase de nodo</li>
+                <li><strong>Considera las relaciones</strong> entre los nodos (composición, herencia, etc.)</li>
+            </ol>
+            
+            <div class="note">
+                <strong>💡 Tips importantes:</strong>
+                <br>• El AST elimina tokens sintácticos innecesarios (';', '{', '}', '(', ')')
+                <br>• Cada clase de nodo debe tener los atributos necesarios para la ejecución
+                <br>• Usa herencia para agrupar nodos similares (ej: StatementNode, ExpressionNode)
+                <br>• El diagrama de clases debe mostrar claramente la estructura jerárquica
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Ejercicio 1: Comandos Simples</h2>
+            
+            <div class="production-diagram">
+                <div class="production-title">📋 Diagrama de Gramática - SimpleCommand</div>
+                <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22293%22%20height%3D%2281%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%40namespace%20%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3B%20.line%20%7Bfill%3A%20none%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20.bold-line%20%7Bstroke%3A%20%23141000%3B%20shape-rendering%3A%20crispEdges%3B%20stroke-width%3A%202%3B%7D%20.thin-line%20%7Bstroke%3A%20%231F1800%3B%20shape-rendering%3A%20crispEdges%7D%20.filled%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20none%3B%7D%20text.terminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%23141000%3B%20font-weight%3A%20bold%3B%20%7D%20text.nonterminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231A1400%3B%20font-weight%3A%20normal%3B%20%7D%20text.regexp%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231F1800%3B%20font-weight%3A%20normal%3B%20%7D%20rect%2C%20circle%2C%20polygon%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20%23332900%3B%7D%20rect.terminal%20%7Bfill%3A%20%23FFDB4D%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.nonterminal%20%7Bfill%3A%20%23FFEC9E%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.text%20%7Bfill%3A%20none%3B%20stroke%3A%20none%3B%7D%20polygon.regexp%20%7Bfill%3A%20%23FFF4C7%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cpolygon%20points%3D%229%2017%201%2013%201%2021%22%2F%3E%3Cpolygon%20points%3D%2217%2017%209%2013%209%2021%22%2F%3E%3Crect%20x%3D%2251%22%20y%3D%223%22%20width%3D%22150%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%2249%22%20y%3D%221%22%20width%3D%22150%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%2259%22%20y%3D%2221%22%3EMovementCommand%3C%2Ftext%3E%3Crect%20x%3D%2251%22%20y%3D%2247%22%20width%3D%22108%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%2249%22%20y%3D%2245%22%20width%3D%22108%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%2259%22%20y%3D%2265%22%3EPenCommand%3C%2Ftext%3E%3Crect%20x%3D%22241%22%20y%3D%223%22%20width%3D%2224%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%22239%22%20y%3D%221%22%20width%3D%2224%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%22249%22%20y%3D%2221%22%3E%3B%3C%2Ftext%3E%3Cpath%20class%3D%22line%22%20d%3D%22m17%2017%20h2%20m20%200%20h10%20m150%200%20h10%20m-190%200%20h20%20m170%200%20h20%20m-210%200%20q10%200%2010%2010%20m190%200%20q0%20-10%2010%20-10%20m-200%2010%20v24%20m190%200%20v-24%20m-190%2024%20q0%2010%2010%2010%20m170%200%20q10%200%2010%20-10%20m-180%2010%20h10%20m108%200%20h10%20m0%200%20h42%20m20%20-44%20h10%20m24%200%20h10%20m3%200%20h-3%22%2F%3E%3Cpolygon%20points%3D%22283%2017%20291%2013%20291%2021%22%2F%3E%3Cpolygon%20points%3D%22283%2017%20275%2013%20275%2021%22%2F%3E%3C%2Fsvg%3E" alt="Diagrama SimpleCommand" style="max-width: 100%; height: auto; background: white; padding: 10px; border-radius: 8px;">
+                <div class="bnf-rule">SimpleCommand ::= (MovementCommand | PenCommand) ';'</div>
+                <div class="bnf-rule">MovementCommand ::= 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'</div>
+                <div class="bnf-rule">PenCommand ::= 'PENUP' | 'PENDOWN'</div>
+                <p><a href="robotlangbnf.html#SimpleCommand" class="grammar-link" target="_blank">👀 Ver gramática completa de SimpleCommand</a></p>
+            </div>
+            
+            <div class="exercise">
+                <h4>Ejemplo 1.1 - Secuencia Básica</h4>
+                <div class="code-example">PENDOWN;
+UP;
+RIGHT;
+PENUP;</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• <a href="robotlangbnf.html#Program" class="grammar-link" target="_blank">Program</a> → <a href="robotlangbnf.html#StatementList" class="grammar-link" target="_blank">StatementList</a></p>
+                    <p>• <a href="robotlangbnf.html#StatementList" class="grammar-link" target="_blank">StatementList</a> → <a href="robotlangbnf.html#Statement" class="grammar-link" target="_blank">Statement</a>⁴</p>
+                    <p>• <a href="robotlangbnf.html#Statement" class="grammar-link" target="_blank">Statement</a> → <a href="robotlangbnf.html#SimpleCommand" class="grammar-link" target="_blank">SimpleCommand</a></p>
+                    <p>• <a href="robotlangbnf.html#SimpleCommand" class="grammar-link" target="_blank">SimpleCommand</a> → <a href="robotlangbnf.html#PenCommand" class="grammar-link" target="_blank">PenCommand</a> | <a href="robotlangbnf.html#MovementCommand" class="grammar-link" target="_blank">MovementCommand</a></p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Deriva este código paso a paso desde Program hasta los terminales</li>
+                    <li>¿Qué tipos de nodos AST necesitas para representar este programa?</li>
+                    <li>Dibuja un diagrama de clases UML con la jerarquía de nodos necesarios</li>
+                    <li>¿Qué atributos y métodos debe tener cada clase de nodo?</li>
+                    <li>¿Cómo organizarías la herencia entre las clases de nodos?</li>
+                </ul>
+            </div>
+
+            <div class="exercise">
+                <h4>Ejemplo 1.2 - Movimientos Direccionales</h4>
+                <div class="code-example">LEFT;
+LEFT;
+DOWN;
+RIGHT;</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• Cada comando usa: <a href="robotlangbnf.html#MovementCommand" class="grammar-link" target="_blank">MovementCommand</a> ::= 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'</p>
+                    <p>• Repetición de LEFT muestra StatementList con múltiples Statement del mismo tipo</p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Construye el árbol de derivación completo mostrando la repetición de Statement</li>
+                    <li>¿Cómo representarías múltiples comandos del mismo tipo en tu diagrama de clases?</li>
+                    <li>Dibuja las clases necesarias y sus relaciones</li>
+                    <li>¿Qué estrategias de diseño usarías para comandos repetidos?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Ejercicio 2: Estructuras de Repetición</h2>
+            
+            <div class="production-diagram">
+                <div class="production-title">📋 Diagrama de Gramática - RepeatStatement</div>
+                <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22361%22%20height%3D%2237%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%40namespace%20%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3B%20.line%20%7Bfill%3A%20none%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20.bold-line%20%7Bstroke%3A%20%23141000%3B%20shape-rendering%3A%20crispEdges%3B%20stroke-width%3A%202%3B%7D%20.thin-line%20%7Bstroke%3A%20%231F1800%3B%20shape-rendering%3A%20crispEdges%7D%20.filled%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20none%3B%7D%20text.terminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%23141000%3B%20font-weight%3A%20bold%3B%20%7D%20text.nonterminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231A1400%3B%20font-weight%3A%20normal%3B%20%7D%20text.regexp%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231F1800%3B%20font-weight%3A%20normal%3B%20%7D%20rect%2C%20circle%2C%20polygon%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20%23332900%3B%7D%20rect.terminal%20%7Bfill%3A%20%23FFDB4D%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.nonterminal%20%7Bfill%3A%20%23FFEC9E%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.text%20%7Bfill%3A%20none%3B%20stroke%3A%20none%3B%7D%20polygon.regexp%20%7Bfill%3A%20%23FFF4C7%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cpolygon%20points%3D%229%2017%201%2013%201%2021%22%2F%3E%3Cpolygon%20points%3D%2217%2017%209%2013%209%2021%22%2F%3E%3Crect%20x%3D%2231%22%20y%3D%223%22%20width%3D%2272%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%2229%22%20y%3D%221%22%20width%3D%2272%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%2239%22%20y%3D%2221%22%3EREPEAT%3C%2Ftext%3E%3Crect%20x%3D%22123%22%20y%3D%223%22%20width%3D%2270%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22121%22%20y%3D%221%22%20width%3D%2270%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22131%22%20y%3D%2221%22%3ENumber%3C%2Ftext%3E%3Crect%20x%3D%22213%22%20y%3D%223%22%20width%3D%22120%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22211%22%20y%3D%221%22%20width%3D%22120%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22221%22%20y%3D%2221%22%3EStatementBlock%3C%2Ftext%3E%3Cpath%20class%3D%22line%22%20d%3D%22m17%2017%20h2%20m0%200%20h10%20m72%200%20h10%20m0%200%20h10%20m70%200%20h10%20m0%200%20h10%20m120%200%20h10%20m3%200%20h-3%22%2F%3E%3Cpolygon%20points%3D%22351%2017%20359%2013%20359%2021%22%2F%3E%3Cpolygon%20points%3D%22351%2017%20343%2013%20343%2021%22%2F%3E%3C%2Fsvg%3E" alt="Diagrama RepeatStatement" style="max-width: 100%; height: auto; background: white; padding: 10px; border-radius: 8px;">
+                <div class="bnf-rule">RepeatStatement ::= 'REPEAT' Number StatementBlock</div>
+                <div class="bnf-rule">StatementBlock ::= '{' StatementList? '}'</div>
+                <div class="bnf-rule">Number ::= Digit+</div>
+                <p><a href="robotlangbnf.html#RepeatStatement" class="grammar-link" target="_blank">👀 Ver gramática completa de RepeatStatement</a></p>
+            </div>
+            
+            <div class="exercise">
+                <h4>Ejemplo 2.1 - REPEAT Simple</h4>
+                <div class="code-example">REPEAT 4 {
+    UP;
+    RIGHT;
+}</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• <a href="robotlangbnf.html#RepeatStatement" class="grammar-link" target="_blank">RepeatStatement</a> → 'REPEAT' <a href="robotlangbnf.html#Number" class="grammar-link" target="_blank">Number</a> <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a></p>
+                    <p>• <a href="robotlangbnf.html#Number" class="grammar-link" target="_blank">Number</a> → <a href="robotlangbnf.html#Digit" class="grammar-link" target="_blank">Digit</a>+ (para el '4')</p>
+                    <p>• <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a> → '{' <a href="robotlangbnf.html#StatementList" class="grammar-link" target="_blank">StatementList</a> '}'</p>
+                    <p>• Dentro del bloque: 2 <a href="robotlangbnf.html#SimpleCommand" class="grammar-link" target="_blank">SimpleCommand</a>s</p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Deriva desde Statement → RepeatStatement paso a paso</li>
+                    <li>¿Qué clases necesitas para representar estructuras de repetición?</li>
+                    <li>Dibuja un diagrama de clases que incluya la jerarquía de repetición</li>
+                    <li>¿Qué atributos y métodos debe tener cada clase?</li>
+                    <li>¿Cómo modelarías las relaciones entre el nodo de repetición y su contenido?</li>
+                </ul>
+            </div>
+
+            <div class="exercise">
+                <h4>Ejemplo 2.2 - REPEAT Anidado</h4>
+                <div class="code-example">REPEAT 3 {
+    PENDOWN;
+    REPEAT 2 {
+        UP;
+        RIGHT;
+    }
+    PENUP;
+}</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• REPEAT externo: <a href="robotlangbnf.html#RepeatStatement" class="grammar-link" target="_blank">RepeatStatement</a> con <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a> que contiene 3 <a href="robotlangbnf.html#Statement" class="grammar-link" target="_blank">Statement</a>s</p>
+                    <p>• REPEAT interno: Segundo Statement es otro <a href="robotlangbnf.html#RepeatStatement" class="grammar-link" target="_blank">RepeatStatement</a></p>
+                    <p>• Anidamiento: Statement → RepeatStatement → StatementBlock → StatementList → Statement → RepeatStatement</p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Construye el árbol de derivación completo mostrando el anidamiento</li>
+                    <li>¿Cómo manejarías el anidamiento en tu diseño de clases?</li>
+                    <li>Dibuja el diagrama de clases que soporte estructuras anidadas</li>
+                    <li>¿Qué patrones de diseño serían útiles para el anidamiento?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Ejercicio 3: Estructuras Condicionales</h2>
+            
+            <div class="production-diagram">
+                <div class="production-title">📋 Diagrama de Gramática - IfStatement</div>
+                <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22677%22%20height%3D%2269%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%40namespace%20%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3B%20.line%20%7Bfill%3A%20none%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20.bold-line%20%7Bstroke%3A%20%23141000%3B%20shape-rendering%3A%20crispEdges%3B%20stroke-width%3A%202%3B%7D%20.thin-line%20%7Bstroke%3A%20%231F1800%3B%20shape-rendering%3A%20crispEdges%7D%20.filled%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20none%3B%7D%20text.terminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%23141000%3B%20font-weight%3A%20bold%3B%20%7D%20text.nonterminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231A1400%3B%20font-weight%3A%20normal%3B%20%7D%20text.regexp%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231F1800%3B%20font-weight%3A%20normal%3B%20%7D%20rect%2C%20circle%2C%20polygon%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20%23332900%3B%7D%20rect.terminal%20%7Bfill%3A%20%23FFDB4D%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.nonterminal%20%7Bfill%3A%20%23FFEC9E%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.text%20%7Bfill%3A%20none%3B%20stroke%3A%20none%3B%7D%20polygon.regexp%20%7Bfill%3A%20%23FFF4C7%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cpolygon%20points%3D%229%2017%201%2013%201%2021%22%2F%3E%3Cpolygon%20points%3D%2217%2017%209%2013%209%2021%22%2F%3E%3Crect%20x%3D%2231%22%20y%3D%223%22%20width%3D%2234%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%2229%22%20y%3D%221%22%20width%3D%2234%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%2239%22%20y%3D%2221%22%3EIF%3C%2Ftext%3E%3Crect%20x%3D%2285%22%20y%3D%223%22%20width%3D%2226%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%2283%22%20y%3D%221%22%20width%3D%2226%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%2293%22%20y%3D%2221%22%3E%28%3C%2Ftext%3E%3Crect%20x%3D%22131%22%20y%3D%223%22%20width%3D%2280%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22129%22%20y%3D%221%22%20width%3D%2280%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22139%22%20y%3D%2221%22%3ECondition%3C%2Ftext%3E%3Crect%20x%3D%22231%22%20y%3D%223%22%20width%3D%2226%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%22229%22%20y%3D%221%22%20width%3D%2226%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%22239%22%20y%3D%2221%22%3E%29%3C%2Ftext%3E%3Crect%20x%3D%22277%22%20y%3D%223%22%20width%3D%22120%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22275%22%20y%3D%221%22%20width%3D%22120%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22285%22%20y%3D%2221%22%3EStatementBlock%3C%2Ftext%3E%3Crect%20x%3D%22437%22%20y%3D%2235%22%20width%3D%2252%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%22435%22%20y%3D%2233%22%20width%3D%2252%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%22445%22%20y%3D%2253%22%3EELSE%3C%2Ftext%3E%3Crect%20x%3D%22509%22%20y%3D%2235%22%20width%3D%22120%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22507%22%20y%3D%2233%22%20width%3D%22120%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22517%22%20y%3D%2253%22%3EStatementBlock%3C%2Ftext%3E%3Cpath%20class%3D%22line%22%20d%3D%22m17%2017%20h2%20m0%200%20h10%20m34%200%20h10%20m0%200%20h10%20m26%200%20h10%20m0%200%20h10%20m80%200%20h10%20m0%200%20h10%20m26%200%20h10%20m0%200%20h10%20m120%200%20h10%20m20%200%20h10%20m0%200%20h202%20m-232%200%20h20%20m212%200%20h20%20m-252%200%20q10%200%2010%2010%20m232%200%20q0%20-10%2010%20-10%20m-242%2010%20v12%20m232%200%20v-12%20m-232%2012%20q0%2010%2010%2010%20m212%200%20q10%200%2010%20-10%20m-222%2010%20h10%20m52%200%20h10%20m0%200%20h10%20m120%200%20h10%20m23%20-32%20h-3%22%2F%3E%3Cpolygon%20points%3D%22667%2017%20675%2013%20675%2021%22%2F%3E%3Cpolygon%20points%3D%22667%2017%20659%2013%20659%2021%22%2F%3E%3C%2Fsvg%3E" alt="Diagrama IfStatement" style="max-width: 100%; height: auto; background: white; padding: 10px; border-radius: 8px;">
+                <div class="bnf-rule">IfStatement ::= 'IF' '(' Condition ')' StatementBlock ('ELSE' StatementBlock)?</div>
+                <div class="bnf-rule">Condition ::= AndExpression ('OR' AndExpression)*</div>
+                <div class="bnf-rule">AndExpression ::= NotExpression ('AND' NotExpression)*</div>
+                <p><a href="robotlangbnf.html#IfStatement" class="grammar-link" target="_blank">👀 Ver gramática completa de IfStatement</a></p>
+            </div>
+            
+            <div class="exercise">
+                <h4>Ejemplo 3.1 - IF Simple</h4>
+                <div class="code-example">IF (OBSTACLE = false) {
+    UP;
+    PENDOWN;
+}</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• <a href="robotlangbnf.html#IfStatement" class="grammar-link" target="_blank">IfStatement</a> → 'IF' '(' <a href="robotlangbnf.html#Condition" class="grammar-link" target="_blank">Condition</a> ')' <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a></p>
+                    <p>• <a href="robotlangbnf.html#Condition" class="grammar-link" target="_blank">Condition</a> → <a href="robotlangbnf.html#AndExpression" class="grammar-link" target="_blank">AndExpression</a> (comparación OBSTACLE = false)</p>
+                    <p>• Comparación usa operador '=' entre sensor OBSTACLE y valor booleano false</p>
+                    <p>• OBSTACLE es un sensor booleano válido en RobotLang</p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Deriva la condición: OBSTACLE = false usando las reglas de expresiones</li>
+                    <li>¿Qué clases necesitas para representar condicionales?</li>
+                    <li>¿Cómo modelarías las expresiones booleanas en tu diagrama de clases?</li>
+                    <li>Dibuja las clases para sensores y operadores de comparación</li>
+                    <li>¿Qué jerarquía de herencia usarías para las expresiones?</li>
+                </ul>
+            </div>
+
+            <div class="exercise">
+                <h4>Ejemplo 3.2 - IF-ELSE Complejo</h4>
+                <div class="code-example">IF (DIST < 10 OR OBSTACLE = true) {
+    LEFT;
+    LEFT;
+} ELSE {
+    UP;
+    RIGHT;
+}</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• <a href="robotlangbnf.html#IfStatement" class="grammar-link" target="_blank">IfStatement</a> → 'IF' '(' <a href="robotlangbnf.html#Condition" class="grammar-link" target="_blank">Condition</a> ')' <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a> 'ELSE' <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a></p>
+                    <p>• <a href="robotlangbnf.html#Condition" class="grammar-link" target="_blank">Condition</a> → <a href="robotlangbnf.html#AndExpression" class="grammar-link" target="_blank">AndExpression</a> 'OR' <a href="robotlangbnf.html#AndExpression" class="grammar-link" target="_blank">AndExpression</a></p>
+                    <p>• Lado izquierdo: DIST < 10 (sensor numérico con operador de comparación)</p>
+                    <p>• Lado derecho: OBSTACLE = true (sensor booleano con operador de igualdad)</p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Deriva la expresión compleja: "DIST < 10 OR OBSTACLE = true" usando las reglas de Condition</li>
+                    <li>¿Cómo manejarías operadores lógicos (OR, AND) en tu diseño de clases?</li>
+                    <li>Dibuja las clases necesarias para expresiones complejas</li>
+                    <li>¿Cómo representarías la diferencia entre IF simple e IF-ELSE?</li>
+                    <li>¿Qué relaciones usarías entre las clases de condición y comparación?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Ejercicio 4: Bucles WHILE</h2>
+            
+            <div class="production-diagram">
+                <div class="production-title">📋 Diagrama de Gramática - WhileStatement</div>
+                <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22457%22%20height%3D%2237%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%40namespace%20%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3B%20.line%20%7Bfill%3A%20none%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20.bold-line%20%7Bstroke%3A%20%23141000%3B%20shape-rendering%3A%20crispEdges%3B%20stroke-width%3A%202%3B%7D%20.thin-line%20%7Bstroke%3A%20%231F1800%3B%20shape-rendering%3A%20crispEdges%7D%20.filled%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20none%3B%7D%20text.terminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%23141000%3B%20font-weight%3A%20bold%3B%20%7D%20text.nonterminal%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231A1400%3B%20font-weight%3A%20normal%3B%20%7D%20text.regexp%20%7Bfont-family%3A%20Verdana%2C%20Sans-serif%3B%20font-size%3A%2012px%3B%20fill%3A%20%231F1800%3B%20font-weight%3A%20normal%3B%20%7D%20rect%2C%20circle%2C%20polygon%20%7Bfill%3A%20%23332900%3B%20stroke%3A%20%23332900%3B%7D%20rect.terminal%20%7Bfill%3A%20%23FFDB4D%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.nonterminal%20%7Bfill%3A%20%23FFEC9E%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%20rect.text%20%7Bfill%3A%20none%3B%20stroke%3A%20none%3B%7D%20polygon.regexp%20%7Bfill%3A%20%23FFF4C7%3B%20stroke%3A%20%23332900%3B%20stroke-width%3A%201%3B%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cpolygon%20points%3D%229%2017%201%2013%201%2021%22%2F%3E%3Cpolygon%20points%3D%2217%2017%209%2013%209%2021%22%2F%3E%3Crect%20x%3D%2231%22%20y%3D%223%22%20width%3D%2266%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%2229%22%20y%3D%221%22%20width%3D%2266%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%2239%22%20y%3D%2221%22%3EWHILE%3C%2Ftext%3E%3Crect%20x%3D%22117%22%20y%3D%223%22%20width%3D%2226%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%22115%22%20y%3D%221%22%20width%3D%2226%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%22125%22%20y%3D%2221%22%3E%28%3C%2Ftext%3E%3Crect%20x%3D%22163%22%20y%3D%223%22%20width%3D%2280%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22161%22%20y%3D%221%22%20width%3D%2280%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22171%22%20y%3D%2221%22%3ECondition%3C%2Ftext%3E%3Crect%20x%3D%22263%22%20y%3D%223%22%20width%3D%2226%22%20height%3D%2232%22%20rx%3D%2210%22%2F%3E%3Crect%20x%3D%22261%22%20y%3D%221%22%20width%3D%2226%22%20height%3D%2232%22%20class%3D%22terminal%22%20rx%3D%2210%22%2F%3E%3Ctext%20class%3D%22terminal%22%20x%3D%22271%22%20y%3D%2221%22%3E%29%3C%2Ftext%3E%3Crect%20x%3D%22309%22%20y%3D%223%22%20width%3D%22120%22%20height%3D%2232%22%2F%3E%3Crect%20x%3D%22307%22%20y%3D%221%22%20width%3D%22120%22%20height%3D%2232%22%20class%3D%22nonterminal%22%2F%3E%3Ctext%20class%3D%22nonterminal%22%20x%3D%22317%22%20y%3D%2221%22%3EStatementBlock%3C%2Ftext%3E%3Cpath%20class%3D%22line%22%20d%3D%22m17%2017%20h2%20m0%200%20h10%20m66%200%20h10%20m0%200%20h10%20m26%200%20h10%20m0%200%20h10%20m80%200%20h10%20m0%200%20h10%20m26%200%20h10%20m0%200%20h10%20m120%200%20h10%20m3%200%20h-3%22%2F%3E%3Cpolygon%20points%3D%22447%2017%20455%2013%20455%2021%22%2F%3E%3Cpolygon%20points%3D%22447%2017%20439%2013%20439%2021%22%2F%3E%3C%2Fsvg%3E" alt="Diagrama WhileStatement" style="max-width: 100%; height: auto; background: white; padding: 10px; border-radius: 8px;">
+                <div class="bnf-rule">WhileStatement ::= 'WHILE' '(' Condition ')' StatementBlock</div>
+                <div class="bnf-rule">Condition ::= AndExpression ('OR' AndExpression)*</div>
+                <div class="bnf-rule">StatementBlock ::= '{' StatementList? '}'</div>
+                <p><a href="robotlangbnf.html#WhileStatement" class="grammar-link" target="_blank">👀 Ver gramática completa de WhileStatement</a></p>
+            </div>
+            
+            <div class="exercise">
+                <h4>Ejemplo 4.1 - WHILE con Condición Simple</h4>
+                <div class="code-example">WHILE (LIGHT < 90) {
+    UP;
+    IF (OBSTACLE = true) {
+        RIGHT;
+    }
+}</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• <a href="robotlangbnf.html#WhileStatement" class="grammar-link" target="_blank">WhileStatement</a> → 'WHILE' '(' <a href="robotlangbnf.html#Condition" class="grammar-link" target="_blank">Condition</a> ')' <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a></p>
+                    <p>• <a href="robotlangbnf.html#Condition" class="grammar-link" target="_blank">Condition</a> → Comparación LIGHT < 90 (sensor numérico con operador)</p>
+                    <p>• Cuerpo del WHILE: <a href="robotlangbnf.html#StatementList" class="grammar-link" target="_blank">StatementList</a> → <a href="robotlangbnf.html#SimpleCommand" class="grammar-link" target="_blank">SimpleCommand</a> + <a href="robotlangbnf.html#IfStatement" class="grammar-link" target="_blank">IfStatement</a></p>
+                    <p>• IF anidado: <a href="robotlangbnf.html#IfStatement" class="grammar-link" target="_blank">IfStatement</a> → 'IF' '(' OBSTACLE = true ')' <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a></p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Deriva la estructura WHILE completa desde Statement → WhileStatement</li>
+                    <li>¿Qué clases necesitas para representar bucles?</li>
+                    <li>¿Cómo manejarías estructuras anidadas (WHILE con IF interno)?</li>
+                    <li>Dibuja el diagrama de clases completo incluyendo bucles y condicionales</li>
+                    <li>¿Qué métodos comunes tendrían las clases de estructuras de control?</li>
+                </ul>
+            </div>
+
+            <div class="exercise">
+                <h4>Ejemplo 4.2 - Programa Completo</h4>
+                <div class="code-example">PENDOWN;
+REPEAT 3 {
+    WHILE (BATTERY > 20 AND NOT (OBSTACLE = true)) {
+        UP;
+        IF (DIST < 5) {
+            RIGHT;
+        }
+    }
+    LEFT;
+}
+PENUP;</div>
+                
+                <div class="grammar-reference">
+                    <h5>🔍 Referencias Gramaticales:</h5>
+                    <p>• <a href="robotlangbnf.html#Program" class="grammar-link" target="_blank">Program</a> → <a href="robotlangbnf.html#StatementList" class="grammar-link" target="_blank">StatementList</a> (3 statements: SimpleCommand + RepeatStatement + SimpleCommand)</p>
+                    <p>• <a href="robotlangbnf.html#RepeatStatement" class="grammar-link" target="_blank">RepeatStatement</a> contiene <a href="robotlangbnf.html#StatementBlock" class="grammar-link" target="_blank">StatementBlock</a> con <a href="robotlangbnf.html#WhileStatement" class="grammar-link" target="_blank">WhileStatement</a> + <a href="robotlangbnf.html#SimpleCommand" class="grammar-link" target="_blank">SimpleCommand</a></p>
+                    <p>• <a href="robotlangbnf.html#WhileStatement" class="grammar-link" target="_blank">WhileStatement</a> con condición compleja: BATTERY > 20 AND NOT (OBSTACLE = true)</p>
+                    <p>• Anidamiento: REPEAT → WHILE → IF (3 niveles de profundidad)</p>
+                </div>
+                
+                <p><strong>Tareas:</strong></p>
+                <ul>
+                    <li>Construye el árbol de derivación completo para todo el programa</li>
+                    <li>Diseña el diagrama de clases completo que soporte TODO el programa</li>
+                    <li>¿Cómo manejarías la condición compleja BATTERY > 20 AND NOT (OBSTACLE = true)?</li>
+                    <li>¿Qué clase base usarías para todos los nodos del AST?</li>
+                    <li>¿Cómo organizarías las responsabilidades entre diferentes clases?</li>
+                    <li>¿Qué métodos virtuales/abstractos definirías en la jerarquía?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="ast-nodes">
+            <h3>🎯 Guía para el Diseño de Clases AST</h3>
+            <p>Al diseñar tu diagrama de clases UML para el AST de RobotLang, considera estos aspectos:</p>
+            
+            <h3>🏗️ Principios de Diseño</h3>
+            <div class="grammar-rule">
+                <strong>Jerarquía Base:</strong> ¿Qué clase base común necesitas para todos los nodos?<br>
+                <strong>Categorización:</strong> ¿Cómo agruparías los nodos? (Statements, Expressions, etc.)<br>
+                <strong>Responsabilidades:</strong> ¿Qué métodos debe tener cada tipo de nodo?<br>
+                <strong>Relaciones:</strong> ¿Cómo se conectan los nodos entre sí?<br>
+                <strong>Extensibilidad:</strong> ¿Tu diseño permite agregar nuevos tipos fácilmente?
+            </div>
+            
+            <h3>📊 Elementos del Lenguaje RobotLang</h3>
+            <div class="grammar-rule">
+                <strong>Comandos:</strong> UP, DOWN, LEFT, RIGHT, PENUP, PENDOWN<br>
+                <strong>Sensores Numéricos:</strong> DIST, TEMP, LIGHT, BATTERY<br>
+                <strong>Sensor Booleano:</strong> OBSTACLE<br>
+                <strong>Estructuras de Control:</strong> REPEAT, IF/ELSE, WHILE<br>
+                <strong>Operadores:</strong> =, !=, &lt;, &lt;=, &gt;, &gt;=, NOT, AND, OR<br>
+                <strong>Precedencia:</strong> NOT &gt; AND &gt; OR
+            </div>
+            
+            <h3>🤔 Preguntas Clave para tu Diseño</h3>
+            <div class="note">
+                • ¿Usarías herencia, composición, o ambas?<br>
+                • ¿Cómo representarías la precedencia de operadores?<br>
+                • ¿Qué información necesita cada nodo para la ejecución?<br>
+                • ¿Cómo manejarías el polimorfismo en las expresiones?<br>
+                • ¿Qué patrones de diseño aplicarías?
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💡 Consideraciones para el Diseño del AST</h2>
+            <ul>
+                <li><strong>Simplicidad:</strong> El AST debe eliminar tokens sintácticos innecesarios (';', '{', '}', '(', ')')</li>
+                <li><strong>Jerarquía clara:</strong> Los nodos padre deben contener referencias a sus hijos</li>
+                <li><strong>Información semántica:</strong> Cada nodo debe tener los atributos necesarios para la ejecución</li>
+                <li><strong>Extensibilidad:</strong> El diseño debe permitir agregar nuevos tipos de comandos fácilmente</li>
+                <li><strong>Navegación:</strong> Debe ser fácil recorrer el árbol para interpretación o compilación</li>
+            </ul>
+        </div>
+
+        <div class="navigation">
+            <a href="../index.html" class="nav-button">← Regresar al Índice</a>
+            <a href="robotlangbnf.html" class="nav-button">Ver Gramática BNF</a>
+        </div>
+    </div>
+</body>
+</html>
