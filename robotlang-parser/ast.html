@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura y AST - RoboLang Parser | Universidad EAM</title>
+    <meta name="description" content="Fundamentos del Árbol de Sintaxis Abstracta (AST) y arquitectura del compilador RoboLang">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parser-implementation.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="section-header">
+        <nav class="section-nav">
+            <div class="nav-content">
+                <a href="index.html" class="nav-home">🏠 Inicio</a>
+                <div class="nav-sections">
+                    <a href="ast.html" class="nav-item active">🏗️ AST</a>
+                    <a href="parsers.html" class="nav-item">⚙️ Parsers</a>
+                    <a href="main-parser.html" class="nav-item">🎯 Parser Principal</a>
+                    <a href="testing.html" class="nav-item">🧪 Testing</a>
+                    <a href="gui.html" class="nav-item">🎨 GUI</a>
+                    <a href="implementation.html" class="nav-item">🎯 Implementación</a>
+                </div>
+            </div>
+        </nav>
+        <div class="section-title">
+            <h1>🏗️ Arquitectura y AST (Árbol de Sintaxis Abstracta)</h1>
+            <p class="section-subtitle">Fundamentos esenciales antes de implementar parsers</p>
+        </div>
+    </header>
+
+    <main class="section-content">
+        <div class="content-container">
+            
+            <!-- Introducción a RoboLang -->
+            <section class="content-section">
+                <h2>🤖 Introducción a RoboLang</h2>
+                <div class="intro-grid">
+                    <div class="intro-card">
+                        <h3>¿Qué es RoboLang?</h3>
+                        <p>
+                            RoboLang es un <strong>lenguaje de dominio específico (DSL)</strong> 
+                            diseñado para controlar robots de manera intuitiva. Permite 
+                            programar movimientos, sensores y estructuras de control.
+                        </p>
+                        <div class="example-code">
+                            <pre><code class="language-java">IF (BATTERY > 20) {
+    UP;
+    RIGHT;
+    PENDOWN;
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="intro-card">
+                        <h3>Objetivos del Proyecto</h3>
+                        <ul>
+                            <li>Comprender análisis sintáctico</li>
+                            <li>Implementar parsers recursivos</li>
+                            <li>Construir árboles AST</li>
+                            <li>Aplicar patrones de diseño</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="commands-overview">
+                    <h3>Comandos Básicos de RoboLang</h3>
+                    <div class="commands-grid">
+                        <div class="command-group">
+                            <h4>🚀 Movimiento</h4>
+                            <code>UP, DOWN, LEFT, RIGHT</code>
+                        </div>
+                        <div class="command-group">
+                            <h4>✏️ Lápiz</h4>
+                            <code>PENUP, PENDOWN</code>
+                        </div>
+                        <div class="command-group">
+                            <h4>📡 Sensores</h4>
+                            <code>BATTERY, LIGHT, TEMP, DIST, OBSTACLE, BLOCKED</code>
+                        </div>
+                        <div class="command-group">
+                            <h4>🔄 Control</h4>
+                            <code>IF, WHILE, REPEAT</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Arquitectura del Compilador -->
+            <section class="content-section">
+                <h2>🏛️ Arquitectura del Compilador</h2>
+                <div class="architecture-flow">
+                    <div class="flow-step">
+                        <div class="step-icon">📝</div>
+                        <h3>1. Código Fuente</h3>
+                        <p>Programa RoboLang escrito por el usuario</p>
+                        <div class="example-box">
+                            <code>IF (BATTERY > 20) { UP; }</code>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    
+                    <div class="flow-step">
+                        <div class="step-icon">🔤</div>
+                        <h3>2. Lexer (Analizador Léxico)</h3>
+                        <p>Convierte caracteres en tokens</p>
+                        <div class="example-box">
+                            <code>[IF, LPAREN, BATTERY, GT, NUMBER(20), RPAREN, LBRACE, UP, SEMICOLON, RBRACE]</code>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    
+                    <div class="flow-step highlighted">
+                        <div class="step-icon">🌳</div>
+                        <h3>3. Parser (Analizador Sintáctico)</h3>
+                        <p>Tokens → Árbol AST</p>
+                        <div class="example-box">
+                            <strong>¡AQUÍ TRABAJAREMOS!</strong>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    
+                    <div class="flow-step">
+                        <div class="step-icon">⚡</div>
+                        <h3>4. Intérprete</h3>
+                        <p>Ejecuta las instrucciones del AST</p>
+                        <div class="example-box">
+                            <code>Robot se mueve hacia arriba</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ¿Qué es un AST? -->
+            <section class="content-section">
+                <h2>🌳 ¿Qué es un AST (Árbol de Sintaxis Abstracta)?</h2>
+                
+                <div class="ast-explanation">
+                    <div class="concept-card">
+                        <h3>📖 Definición</h3>
+                        <p>
+                            Un <strong>Abstract Syntax Tree (AST)</strong> es una representación 
+                            en forma de árbol de la estructura sintáctica de un programa. 
+                            Cada nodo representa una construcción del lenguaje.
+                        </p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3>🎯 ¿Por qué "Abstracta"?</h3>
+                        <ul>
+                            <li><strong>Omite detalles innecesarios:</strong> puntuación, espacios</li>
+                            <li><strong>Mantiene estructura semántica:</strong> significado del programa</li>
+                            <li><strong>Facilita interpretación:</strong> fácil de recorrer</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="ast-analogy">
+                    <h3>🏗️ Analogía: Casa vs Planos</h3>
+                    <div class="analogy-comparison">
+                        <div class="analogy-side">
+                            <h4>Código Fuente = Casa Real</h4>
+                            <ul>
+                                <li>Todas las paredes, ventanas, puertas</li>
+                                <li>Detalles decorativos</li>
+                                <li>Colores y texturas</li>
+                            </ul>
+                        </div>
+                        <div class="analogy-arrow">≈</div>
+                        <div class="analogy-side">
+                            <h4>AST = Planos Arquitectónicos</h4>
+                            <ul>
+                                <li>Estructura esencial</li>
+                                <li>Relaciones entre componentes</li>
+                                <li>Sin detalles decorativos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ast-example">
+                    <h3>📋 Ejemplo Visual: Código → Gramática → AST</h3>
+                    <div class="transformation-example">
+                        <div class="code-side">
+                            <h4>Código RoboLang:</h4>
+                            <div class="code-block">
+                                <pre><code class="language-java">IF (BATTERY > 20) {
+    UP;
+    RIGHT;
+}</code></pre>
+                            </div>
+                            
+                            <h4>📝 Gramática Aplicada:</h4>
+                            <div class="bnf-breakdown">
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <strong>IF Statement:</strong> 
+                                        <code>&lt;if_stmt&gt; ::= "IF" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                    </div>
+                                    <div class="bnf-visual">
+                                        <a href="robotlangbnf.html#IfStatement" target="_blank" class="bnf-link">
+                                            📖 Ver diagrama visual
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <strong>Condition:</strong> 
+                                        <code>&lt;condition&gt; ::= &lt;comparison&gt;</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <strong>Comparison:</strong> 
+                                        <code>&lt;comparison&gt; ::= &lt;value&gt; &lt;operator&gt; &lt;value&gt;</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <strong>Block:</strong> 
+                                        <code>&lt;statement_block&gt; ::= "{" &lt;statement_list&gt; "}"</code>
+                                    </div>
+                                    <div class="bnf-visual">
+                                        <a href="robotlangbnf.html#StatementBlock" target="_blank" class="bnf-link">
+                                            📖 Ver diagrama visual
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ast-side">
+                            <h4>AST Resultante con Mapeo:</h4>
+                            <div class="ast-tree-mapped">
+<pre>
+<strong>IfStatementNode</strong> ← IF statement grammar
+├── <strong>condition:</strong> ConditionNode ← condition part
+│   └── ComparisonExpressionNode ← comparison 
+│       ├── <strong>left:</strong> NumericSensorNode(BATTERY) ← value
+│       ├── <strong>operator:</strong> ComparisonOperatorNode(>) ← operator
+│       └── <strong>right:</strong> NumberNode(20) ← value
+└── <strong>thenBlock:</strong> StatementBlockNode ← statement_block
+    └── <strong>statements:</strong> [
+        MovementCommandNode(UP),   ← simple command
+        MovementCommandNode(RIGHT) ← simple command
+    ]
+</pre>
+                            </div>
+                            
+                            <div class="mapping-explanation">
+                                <h5>🔗 Mapeo Gramática → Atributos del Nodo:</h5>
+                                <ul>
+                                    <li><code>&lt;condition&gt;</code> → campo <strong>condition</strong> en IfStatementNode</li>
+                                    <li><code>&lt;statement_block&gt;</code> → campo <strong>thenBlock</strong> en IfStatementNode</li>
+                                    <li><code>&lt;value&gt; &lt;operator&gt; &lt;value&gt;</code> → campos <strong>left</strong>, <strong>operator</strong>, <strong>right</strong></li>
+                                    <li><code>&lt;statement_list&gt;</code> → campo <strong>statements</strong> (lista)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bnf-reference">
+                    <div class="bnf-inline">
+                        <strong>📝 Gramática IF:</strong> 
+                        <code>&lt;if_stmt&gt; ::= "IF" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                    </div>
+                    <div class="bnf-visual">
+                        <a href="robotlangbnf.html#if_statement" target="_blank" class="bnf-link">
+                            📖 Ver diagrama visual de IF statement
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Jerarquía de Nodos Base -->
+            <section class="content-section">
+                <h2>🏛️ Jerarquía de Nodos Base</h2>
+                <p class="section-intro">
+                    Todos los nodos del AST heredan de una clase base común, 
+                    organizados en una jerarquía que refleja la estructura del lenguaje.
+                </p>
+
+                <div class="hierarchy-diagram">
+                    <div class="node-level level-0">
+                        <div class="base-node">
+                            <strong>ASTNode</strong>
+                            <p>Clase base abstracta</p>
+                        </div>
+                    </div>
+                    
+                    <div class="node-level level-1">
+                        <div class="derived-node expression">
+                            <strong>ExpressionNode</strong>
+                            <p>Expresiones y condiciones</p>
+                        </div>
+                        <div class="derived-node statement">
+                            <strong>StatementNode</strong>
+                            <p>Comandos y estructuras</p>
+                        </div>
+                        <div class="derived-node literal">
+                            <strong>LiteralNode</strong>
+                            <p>Valores primitivos</p>
+                        </div>
+                        <div class="derived-node command">
+                            <strong>CommandNode</strong>
+                            <p>Acciones del robot</p>
+                        </div>
+                    </div>
+                    
+                    <div class="node-level level-2">
+                        <div class="concrete-nodes">
+                            <div class="node-group">
+                                <h4>Expressions</h4>
+                                <ul>
+                                    <li>ComparisonExpressionNode</li>
+                                    <li>AndExpressionNode</li>
+                                    <li>OrExpressionNode</li>
+                                    <li>NotExpressionNode</li>
+                                </ul>
+                            </div>
+                            <div class="node-group">
+                                <h4>Statements</h4>
+                                <ul>
+                                    <li>IfStatementNode</li>
+                                    <li>WhileStatementNode</li>
+                                    <li>RepeatStatementNode</li>
+                                    <li>StatementBlockNode</li>
+                                </ul>
+                            </div>
+                            <div class="node-group">
+                                <h4>Literals</h4>
+                                <ul>
+                                    <li>NumberNode</li>
+                                    <li>BooleanNode</li>
+                                    <li>BooleanSensorNode</li>
+                                    <li>NumericSensorNode</li>
+                                </ul>
+                            </div>
+                            <div class="node-group">
+                                <h4>Commands</h4>
+                                <ul>
+                                    <li>MovementCommandNode</li>
+                                    <li>PenCommandNode</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hierarchy-benefits">
+                    <h3>🎯 Beneficios de esta Jerarquía</h3>
+                    <div class="benefits-grid">
+                        <div class="benefit-card">
+                            <h4>🧬 Reutilización</h4>
+                            <p>Comportamiento común en clase base</p>
+                        </div>
+                        <div class="benefit-card">
+                            <h4>🎨 Polimorfismo</h4>
+                            <p>Tratar todos los nodos de forma uniforme</p>
+                        </div>
+                        <div class="benefit-card">
+                            <h4>🔧 Mantenibilidad</h4>
+                            <p>Fácil agregar nuevos tipos de nodos</p>
+                        </div>
+                        <div class="benefit-card">
+                            <h4>🎪 Visitor Pattern</h4>
+                            <p>Operaciones sin modificar nodos</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mapeo Gramática → AST -->
+            <section class="content-section">
+                <h2>🔗 Mapeo: Gramática BNF → Atributos del AST</h2>
+                <p class="section-intro">
+                    Cada elemento de la gramática BNF se convierte en un atributo específico del nodo AST. 
+                    Esta es la clave para entender por qué los nodos tienen los campos que tienen.
+                </p>
+
+                <div class="mapping-examples">
+                    <div class="mapping-example">
+                        <h3>📊 Ejemplo 1: NumberNode</h3>
+                        <div class="mapping-pair">
+                            <div class="grammar-part">
+                                <h4>Gramática BNF:</h4>
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <code>&lt;number&gt; ::= [0-9]+</code>
+                                    </div>
+                                    <div class="bnf-visual">
+                                        <a href="robotlangbnf.html#Number" target="_blank" class="bnf-link">
+                                            📖 Ver diagrama visual
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="node-part">
+                                <h4>Nodo AST Resultante:</h4>
+                                <div class="node-structure">
+<pre><code class="language-java">class NumberNode extends LiteralNode {
+    private int <strong>value</strong>;  ← El valor numérico [0-9]+
+    
+    public NumberNode(int value) {
+        this.value = value;
+    }
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mapping-explanation">
+                            <p><strong>💡 Explicación:</strong> La gramática dice que un número es una secuencia de dígitos [0-9]+. 
+                            El AST almacena esta secuencia convertida a entero en el atributo <code>value</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="mapping-example">
+                        <h3>📊 Ejemplo 2: ComparisonExpressionNode</h3>
+                        <div class="mapping-pair">
+                            <div class="grammar-part">
+                                <h4>Gramática BNF:</h4>
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <code>&lt;comparison&gt; ::= &lt;value&gt; &lt;operator&gt; &lt;value&gt;</code>
+                                    </div>
+                                    <div class="bnf-visual">
+                                        <a href="robotlangbnf.html#Comparison" target="_blank" class="bnf-link">
+                                            📖 Ver diagrama visual
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="node-part">
+                                <h4>Nodo AST Resultante:</h4>
+                                <div class="node-structure">
+<pre><code class="language-java">class ComparisonExpressionNode extends ExpressionNode {
+    private ValueNode <strong>left</strong>;      ← Primer &lt;value&gt;
+    private ComparisonOperatorNode <strong>operator</strong>; ← &lt;operator&gt;
+    private ValueNode <strong>right</strong>;     ← Segundo &lt;value&gt;
+    
+    public ComparisonExpressionNode(ValueNode left, 
+                                   ComparisonOperatorNode operator,
+                                   ValueNode right) {
+        this.left = left;
+        this.operator = operator;
+        this.right = right;
+    }
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mapping-explanation">
+                            <p><strong>💡 Explicación:</strong> La gramática define una comparación como <code>valor operador valor</code>. 
+                            Cada parte de la gramática se convierte en un atributo del nodo AST: <code>left</code>, <code>operator</code>, <code>right</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="mapping-example">
+                        <h3>📊 Ejemplo 3: IfStatementNode</h3>
+                        <div class="mapping-pair">
+                            <div class="grammar-part">
+                                <h4>Gramática BNF:</h4>
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <code>&lt;if_stmt&gt; ::= "IF" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                    </div>
+                                    <div class="bnf-visual">
+                                        <a href="robotlangbnf.html#IfStatement" target="_blank" class="bnf-link">
+                                            📖 Ver diagrama visual
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="node-part">
+                                <h4>Nodo AST Resultante:</h4>
+                                <div class="node-structure">
+<pre><code class="language-java">class IfStatementNode extends StatementNode {
+    private ConditionNode <strong>condition</strong>;      ← &lt;condition&gt;
+    private StatementBlockNode <strong>thenBlock</strong>; ← &lt;statement_block&gt;
+    
+    public IfStatementNode(ConditionNode condition,
+                          StatementBlockNode thenBlock) {
+        this.condition = condition;
+        this.thenBlock = thenBlock;
+    }
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mapping-explanation">
+                            <p><strong>💡 Explicación:</strong> La gramática IF tiene partes variables: la condición entre paréntesis y el bloque de código. 
+                            Los tokens fijos ("IF", "(", ")") no se almacenan porque son predecibles. Solo se guardan las partes que pueden variar.</p>
+                        </div>
+                    </div>
+
+                    <div class="mapping-example">
+                        <h3>📊 Ejemplo 4: StatementBlockNode</h3>
+                        <div class="mapping-pair">
+                            <div class="grammar-part">
+                                <h4>Gramática BNF:</h4>
+                                <div class="bnf-reference">
+                                    <div class="bnf-inline">
+                                        <code>&lt;statement_block&gt; ::= "{" &lt;statement_list&gt; "}"</code>
+                                    </div>
+                                    <div class="bnf-visual">
+                                        <a href="robotlangbnf.html#StatementBlock" target="_blank" class="bnf-link">
+                                            📖 Ver diagrama visual
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="node-part">
+                                <h4>Nodo AST Resultante:</h4>
+                                <div class="node-structure">
+<pre><code class="language-java">class StatementBlockNode extends StatementNode {
+    private List&lt;StatementNode&gt; <strong>statements</strong>; ← &lt;statement_list&gt;
+    
+    public StatementBlockNode(List&lt;StatementNode&gt; statements) {
+        this.statements = statements;
+    }
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mapping-explanation">
+                            <p><strong>💡 Explicación:</strong> Las llaves "{" y "}" son tokens fijos que no se almacenan. 
+                            Solo se guarda la lista de statements que puede variar. Esto hace el AST más limpio y fácil de procesar.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mapping-rules">
+                    <h3>📋 Reglas de Mapeo Gramática → AST</h3>
+                    <div class="rules-grid">
+                        <div class="rule-card">
+                            <h4>🎯 Regla 1: Tokens Variables</h4>
+                            <p>Solo los elementos que <strong>pueden cambiar</strong> se almacenan como atributos.</p>
+                            <div class="rule-example">
+                                <code>&lt;number&gt;</code> → <code>int value</code> (el valor varía)<br>
+                                <code>"IF"</code> → no se almacena (siempre es "IF")
+                            </div>
+                        </div>
+                        
+                        <div class="rule-card">
+                            <h4>🔗 Regla 2: Sub-reglas</h4>
+                            <p>Cada <code>&lt;sub_regla&gt;</code> se convierte en un atributo del tipo correspondiente.</p>
+                            <div class="rule-example">
+                                <code>&lt;condition&gt;</code> → <code>ConditionNode condition</code><br>
+                                <code>&lt;statement_block&gt;</code> → <code>StatementBlockNode thenBlock</code>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-card">
+                            <h4>📝 Regla 3: Listas</h4>
+                            <p>Elementos repetidos (+, *) se almacenan como <code>List&lt;&gt;</code>.</p>
+                            <div class="rule-example">
+                                <code>&lt;statement&gt;+</code> → <code>List&lt;StatementNode&gt; statements</code>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-card">
+                            <h4>❓ Regla 4: Opcionales</h4>
+                            <p>Elementos opcionales (?) pueden ser <code>null</code> o usar Optional.</p>
+                            <div class="rule-example">
+                                <code>&lt;statement_list&gt;?</code> → <code>List&lt;&gt;</code> puede estar vacía
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ejemplo Completo de Construcción -->
+            <section class="content-section">
+                <h2>🛠️ Ejemplo Completo de Construcción AST</h2>
+                <p class="section-intro">
+                    Veamos paso a paso cómo se transforma el código 
+                    <code>IF (BATTERY > 20) { UP; }</code> en un árbol AST aplicando las reglas de mapeo.
+                </p>
+
+                <div class="construction-steps">
+                    <!-- Paso 1: Código Original -->
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">1</span>
+                            <h3>Código Original</h3>
+                        </div>
+                        <div class="step-content">
+                            <div class="code-display">
+                                <pre><code class="language-java">IF (BATTERY > 20) { UP; }</code></pre>
+                            </div>
+                            <p>Programa RoboLang que verifica batería antes de moverse.</p>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Tokens Generados -->
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <h3>Tokens Generados (Lexer)</h3>
+                        </div>
+                        <div class="step-content">
+                            <div class="tokens-display">
+                                <div class="token-display">IF</div>
+                                <div class="token-display">LPAREN</div>
+                                <div class="token-display">BATTERY</div>
+                                <div class="token-display">GT</div>
+                                <div class="token-display">NUMBER(20)</div>
+                                <div class="token-display">RPAREN</div>
+                                <div class="token-display">LBRACE</div>
+                                <div class="token-display">UP</div>
+                                <div class="token-display">SEMICOLON</div>
+                                <div class="token-display">RBRACE</div>
+                            </div>
+                            <p>El lexer convierte el texto en tokens individuales.</p>
+                        </div>
+                    </div>
+
+                    <!-- Paso 3: Parsing Paso a Paso -->
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                            <h3>Construcción del AST (Parser)</h3>
+                        </div>
+                        <div class="step-content">
+                            <div class="parsing-phases">
+                                <div class="phase">
+                                    <h4>3.1 - Reconocer IF Statement</h4>
+                                    <p>Parser ve token <code>IF</code> → crea <code>IfStatementNode</code></p>
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;if_stmt&gt; ::= "IF" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="phase">
+                                    <h4>3.2 - Parsear Condición</h4>
+                                    <p>Entre paréntesis: <code>BATTERY > 20</code> → <code>ComparisonExpressionNode</code></p>
+                                    <div class="sub-parsing">
+                                        <ul>
+                                            <li><code>BATTERY</code> → <code>NumericSensorNode</code></li>
+                                            <li><code>></code> → <code>ComparisonOperatorNode</code></li>
+                                            <li><code>20</code> → <code>NumberNode</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="phase">
+                                    <h4>3.3 - Parsear Bloque</h4>
+                                    <p>Entre llaves: <code>{ UP; }</code> → <code>StatementBlockNode</code></p>
+                                    <div class="sub-parsing">
+                                        <ul>
+                                            <li><code>UP</code> → <code>MovementCommandNode</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 4: AST Final -->
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">4</span>
+                            <h3>Árbol AST Final</h3>
+                        </div>
+                        <div class="step-content">
+                            <div class="final-ast">
+<pre class="ast-visualization">
+IfStatementNode
+├── condition: ComparisonExpressionNode
+│   ├── left: NumericSensorNode
+│   │   └── sensorType: "BATTERY"
+│   ├── operator: ComparisonOperatorNode
+│   │   └── operatorType: "GREATER_THAN"
+│   └── right: NumberNode
+│       └── value: 20
+└── thenBlock: StatementBlockNode
+    └── statements: [
+        MovementCommandNode
+        └── direction: "UP"
+    ]
+</pre>
+                            </div>
+                            <div class="ast-properties">
+                                <h4>✨ Propiedades del AST Resultante:</h4>
+                                <ul>
+                                    <li><strong>Jerárquico:</strong> Estructura de árbol clara</li>
+                                    <li><strong>Semánticamente correcto:</strong> Refleja la lógica del programa</li>
+                                    <li><strong>Navegable:</strong> Fácil de recorrer para interpretación</li>
+                                    <li><strong>Extensible:</strong> Puede crecer con más comandos</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nodos AST Implementados -->
+            <section class="content-section">
+                <h2>📁 Nodos AST Implementados</h2>
+                <p class="section-intro">
+                    Referencia completa de todos los nodos AST ya implementados 
+                    en el proyecto, organizados por categoría.
+                </p>
+
+                <div class="nodes-categories">
+                    <div class="category-section">
+                        <h3>🎭 Expression Nodes</h3>
+                        <div class="nodes-grid">
+                            <div class="node-card">
+                                <h4>ComparisonExpressionNode</h4>
+                                <p><code>src/main/java/parser/ast/expressions/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;comparison&gt; ::= &lt;value&gt; &lt;operator&gt; &lt;value&gt;</code>
+                                    <a href="robotlangbnf.html#comparison" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>AndExpressionNode</h4>
+                                <p><code>src/main/java/parser/ast/expressions/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;and_expr&gt; ::= &lt;not_expr&gt; ("AND" &lt;not_expr&gt;)*</code>
+                                    <a href="robotlangbnf.html#and_expression" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>OrExpressionNode</h4>
+                                <p><code>src/main/java/parser/ast/expressions/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;or_expr&gt; ::= &lt;and_expr&gt; ("OR" &lt;and_expr&gt;)*</code>
+                                    <a href="robotlangbnf.html#or_expression" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>NotExpressionNode</h4>
+                                <p><code>src/main/java/parser/ast/expressions/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;not_expr&gt; ::= "NOT" &lt;primary_expr&gt;</code>
+                                    <a href="robotlangbnf.html#not_expression" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>🎯 Statement Nodes</h3>
+                        <div class="nodes-grid">
+                            <div class="node-card">
+                                <h4>IfStatementNode</h4>
+                                <p><code>src/main/java/parser/ast/statements/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;if_stmt&gt; ::= "IF" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                    <a href="robotlangbnf.html#if_statement" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>WhileStatementNode</h4>
+                                <p><code>src/main/java/parser/ast/statements/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;while_stmt&gt; ::= "WHILE" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                    <a href="robotlangbnf.html#while_statement" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>RepeatStatementNode</h4>
+                                <p><code>src/main/java/parser/ast/statements/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;repeat_stmt&gt; ::= "REPEAT" "(" &lt;number&gt; ")" &lt;statement_block&gt;</code>
+                                    <a href="robotlangbnf.html#repeat_statement" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>💎 Literal Nodes</h3>
+                        <div class="nodes-grid">
+                            <div class="node-card">
+                                <h4>NumberNode</h4>
+                                <p><code>src/main/java/parser/ast/literals/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;number&gt; ::= [0-9]+</code>
+                                    <a href="robotlangbnf.html#number" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>BooleanNode</h4>
+                                <p><code>src/main/java/parser/ast/literals/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;boolean&gt; ::= "true" | "false"</code>
+                                    <a href="robotlangbnf.html#boolean" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>🤖 Command Nodes</h3>
+                        <div class="nodes-grid">
+                            <div class="node-card">
+                                <h4>MovementCommandNode</h4>
+                                <p><code>src/main/java/parser/ast/commands/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;movement_command&gt; ::= "UP" | "DOWN" | "LEFT" | "RIGHT"</code>
+                                    <a href="robotlangbnf.html#movement_command" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                            <div class="node-card">
+                                <h4>PenCommandNode</h4>
+                                <p><code>src/main/java/parser/ast/commands/</code></p>
+                                <div class="bnf-reference">
+                                    <code>&lt;pen_command&gt; ::= "PENUP" | "PENDOWN"</code>
+                                    <a href="robotlangbnf.html#pen_command" target="_blank" class="bnf-link">📖 Ver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patrón de Diseño Composite -->
+            <section class="content-section">
+                <h2>🎨 Patrón de Diseño: Composite Pattern</h2>
+                <p class="section-intro">
+                    El AST implementa el patrón Composite, permitiendo tratar 
+                    nodos individuales y compuestos de manera uniforme.
+                </p>
+
+                <div class="pattern-explanation">
+                    <div class="pattern-card">
+                        <h3>🎯 Concepto del Composite Pattern</h3>
+                        <p>
+                            Permite componer objetos en estructuras de árbol para 
+                            representar jerarquías parte-todo. Los clientes pueden 
+                            tratar objetos individuales y composiciones uniformemente.
+                        </p>
+                    </div>
+
+                    <div class="pattern-benefits">
+                        <h3>✨ Beneficios en el AST</h3>
+                        <ul>
+                            <li><strong>Uniformidad:</strong> Todos los nodos se comportan igual</li>
+                            <li><strong>Recursividad:</strong> Fácil navegación del árbol</li>
+                            <li><strong>Flexibilidad:</strong> Agregar nuevos tipos de nodos</li>
+                            <li><strong>Interpretación:</strong> Visitor pattern para operaciones</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pattern-example">
+                    <h3>💻 Implementación en RoboLang</h3>
+                    <div class="code-example">
+<pre><code class="language-java">// Clase base - Component
+public abstract class ASTNode {
+    public abstract void accept(ASTVisitor visitor);
+    public abstract &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor);
+}
+
+// Nodo hoja - Leaf
+public class NumberNode extends LiteralNode {
+    private int value;
+    
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
+    }
+}
+
+// Nodo compuesto - Composite
+public class IfStatementNode extends StatementNode {
+    private ConditionNode condition;
+    private StatementBlockNode thenBlock;
+    
+    public void accept(ASTVisitor visitor) {
+        condition.accept(visitor);  // Delega a hijos
+        thenBlock.accept(visitor);  // Delega a hijos
+        visitor.visit(this);
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navegación -->
+            <section class="navigation-section">
+                <div class="nav-card completed">
+                    <h3>✅ Has completado: Arquitectura y AST</h3>
+                    <p>
+                        Ahora comprendes los fundamentos del AST y la arquitectura 
+                        del compilador. Es momento de aprender cómo se construyen los parsers.
+                    </p>
+                </div>
+                <div class="nav-actions">
+                    <a href="index.html" class="btn btn-secondary">← Volver al Inicio</a>
+                    <a href="parsers.html" class="btn btn-primary">
+                        Siguiente: Parsers
+                        <span class="btn-arrow">→</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

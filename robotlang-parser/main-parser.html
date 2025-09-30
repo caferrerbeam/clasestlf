@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parser Principal - Coordinador del Proceso | RoboLang Parser</title>
+    <meta name="description" content="Comprende la clase Parser principal que coordina todo el proceso de parsing en RoboLang">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parser-implementation.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="section-header">
+        <nav class="section-nav">
+            <div class="nav-content">
+                <a href="index.html" class="nav-home">🏠 Inicio</a>
+                <div class="nav-sections">
+                    <a href="ast.html" class="nav-item">🏗️ AST</a>
+                    <a href="parsers.html" class="nav-item">⚙️ Parsers</a>
+                    <a href="main-parser.html" class="nav-item active">🎯 Parser Principal</a>
+                    <a href="testing.html" class="nav-item">🧪 Testing</a>
+                    <a href="gui.html" class="nav-item">🎨 GUI</a>
+                    <a href="implementation.html" class="nav-item">📝 Implementación</a>
+                </div>
+            </div>
+        </nav>
+        <div class="section-title">
+            <h1>🎯 Parser Principal</h1>
+            <p class="section-subtitle">El coordinador maestro del proceso de parsing</p>
+        </div>
+    </header>
+
+    <main class="section-content">
+        <div class="content-container">
+            
+            <!-- ¿Qué es y Para Qué Sirve? -->
+            <section class="content-section">
+                <h2>🤔 ¿Qué es el Parser Principal?</h2>
+                <p class="section-intro">
+                    Imagina que estás construyendo un automóvil. Tienes muchas piezas especializadas: motor, 
+                    transmisión, frenos, etc. Cada pieza hace su trabajo específico. Pero necesitas un 
+                    <strong>tablero de control</strong> que coordine todo. Eso es exactamente lo que hace 
+                    el Parser principal.
+                </p>
+
+                <div class="analogy-section">
+                    <h3>📚 Una Analogía Educativa</h3>
+                    <div class="analogy-cards">
+                        <div class="analogy-card">
+                            <h4>🍕 Como un Restaurante</h4>
+                            <p>El Parser principal es como el <strong>gerente del restaurante</strong>:</p>
+                            <ul>
+                                <li>No cocina la comida (eso lo hacen los parsers específicos)</li>
+                                <li>No sirve las mesas (eso lo hace el GUI)</li>
+                                <li>Pero coordina todo el proceso desde que llega el pedido hasta que sale el plato</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="analogy-card">
+                            <h4>🎭 Como un Director de Orquesta</h4>
+                            <p>El Parser principal es el <strong>director</strong> que:</p>
+                            <ul>
+                                <li>No toca ningún instrumento</li>
+                                <li>Pero sabe cuándo debe entrar cada músico</li>
+                                <li>Coordina para que todo suene en armonía</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ¿Por Qué Necesitamos un Coordinador? -->
+            <section class="content-section">
+                <h2>❓ ¿Por Qué Necesitamos un Coordinador?</h2>
+                <p class="section-intro">
+                    Podrías preguntarte: "¿Por qué no simplemente llamar directamente a los parsers específicos?" 
+                    Aquí te explicamos las razones fundamentales.
+                </p>
+
+                <div class="reasons-grid">
+                    <div class="reason-card">
+                        <h3>1️⃣ Simplificar la Complejidad</h3>
+                        <div class="complexity-comparison">
+                            <div class="without-coordinator">
+                                <h4>❌ Sin Coordinador</h4>
+                                <p>El usuario tendría que hacer todo esto:</p>
+                                <ol>
+                                    <li>Crear un Lexer manualmente</li>
+                                    <li>Tokenizar el código</li>
+                                    <li>Verificar si hay tokens</li>
+                                    <li>Crear un ParseContext</li>
+                                    <li>Crear un ProgramParser</li>
+                                    <li>Llamar al parser</li>
+                                    <li>Verificar que no sobren tokens</li>
+                                    <li>Manejar todos los errores posibles</li>
+                                </ol>
+                                <p class="complexity-note">😰 ¡Demasiado complejo para el usuario!</p>
+                            </div>
+                            
+                            <div class="with-coordinator">
+                                <h4>✅ Con Coordinador</h4>
+                                <p>El usuario solo hace:</p>
+                                <ol>
+                                    <li>Crear un Parser</li>
+                                    <li>Llamar a parse(código)</li>
+                                </ol>
+                                <p class="complexity-note">😊 ¡Simple y directo!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reason-card">
+                        <h3>2️⃣ Punto Único de Entrada</h3>
+                        <p>
+                            Todas las aplicaciones (GUI, tests, APIs) entran por el mismo lugar. 
+                            Esto significa que si necesitamos agregar validaciones o mejoras, 
+                            solo lo hacemos en un lugar.
+                        </p>
+                        <div class="entry-point-diagram">
+                            <div class="clients">
+                                <span>GUI 🖥️</span>
+                                <span>Tests 🧪</span>
+                                <span>API 🌐</span>
+                                <span>CLI 💻</span>
+                            </div>
+                            <div class="arrow-down">⬇️ Todos entran por aquí ⬇️</div>
+                            <div class="parser-main">Parser Principal 🎯</div>
+                            <div class="arrow-down">⬇️ Distribuye a ⬇️</div>
+                            <div class="sub-parsers">
+                                <span>ProgramParser</span>
+                                <span>IfParser</span>
+                                <span>NumberParser</span>
+                                <span>...más parsers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reason-card">
+                        <h3>3️⃣ Validación Centralizada</h3>
+                        <p>
+                            El Parser principal puede hacer validaciones globales que ningún 
+                            parser específico puede hacer solo:
+                        </p>
+                        <ul>
+                            <li>✓ Verificar que el input no esté vacío</li>
+                            <li>✓ Asegurar que se procesaron TODOS los tokens</li>
+                            <li>✓ Garantizar que el programa es completo</li>
+                            <li>✓ Manejar errores de manera consistente</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ¿Qué DEBE Hacer el Parser Principal? -->
+            <section class="content-section">
+                <h2>📋 ¿Qué DEBE Hacer el Parser Principal?</h2>
+                <p class="section-intro">
+                    El Parser principal tiene responsabilidades muy específicas. Veamos exactamente 
+                    qué debe hacer paso a paso.
+                </p>
+
+                <div class="responsibilities-flow">
+                    <h3>🔄 Flujo de Responsabilidades</h3>
+                    
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">1</span>
+                            <h4>Recibir el Código como String</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Entrada:</strong> Un String con código RoboLang</p>
+                            <div class="example-box">
+                                <strong>Ejemplo:</strong>
+                                <pre><code class="language-java">String codigo = "UP; RIGHT; PENDOWN;";</code></pre>
+                            </div>
+                            <p><strong>¿Qué hacer?</strong></p>
+                            <ul>
+                                <li>Recibir el String del usuario</li>
+                                <li>NO modificar ni "limpiar" el código</li>
+                                <li>Prepararlo para tokenización</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <h4>Tokenizar con el Lexer</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Proceso:</strong> Convertir String → Lista de Tokens</p>
+                            <div class="example-box">
+                                <strong>Transformación:</strong>
+                                <pre><code class="language-java">// Antes: "UP; RIGHT;"
+// Después: [UP_TOKEN, SEMICOLON_TOKEN, RIGHT_TOKEN, SEMICOLON_TOKEN]</code></pre>
+                            </div>
+                            <p><strong>¿Qué hacer?</strong></p>
+                            <ul>
+                                <li>Crear una instancia del Lexer</li>
+                                <li>Llamar a lexer.tokenize(input)</li>
+                                <li>Obtener la lista de tokens</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                            <h4>Validar que Hay Tokens</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Verificación:</strong> La lista no debe estar vacía</p>
+                            <div class="example-box">
+                                <strong>Casos a detectar:</strong>
+                                <pre><code class="language-java">// Entrada vacía: ""
+// Solo espacios: "   "
+// Solo comentarios: "// todo comentado"</code></pre>
+                            </div>
+                            <p><strong>¿Qué hacer?</strong></p>
+                            <ul>
+                                <li>Verificar: tokens.isEmpty()</li>
+                                <li>Si está vacía: lanzar ParseException</li>
+                                <li>Mensaje claro: "Input vacío - no hay tokens para parsear"</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">4</span>
+                            <h4>Crear el ParseContext</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Objetivo:</strong> Preparar el contexto de parsing</p>
+                            <div class="example-box">
+                                <strong>El ParseContext es como un "cursor inteligente" que:</strong>
+                                <ul>
+                                    <li>📋 Mantiene la lista completa de tokens</li>
+                                    <li>👆 Sabe en qué posición estamos (empieza en 0)</li>
+                                    <li>🔍 Nos permite ver el token actual sin "consumirlo"</li>
+                                    <li>➡️ Nos permite avanzar al siguiente token</li>
+                                    <li>❓ Nos dice si llegamos al final</li>
+                                </ul>
+                            </div>
+                            <p><strong>¿Qué hacer?</strong></p>
+                            <ul>
+                                <li>new ParseContext(tokens)</li>
+                                <li>Este contexto se pasará a TODOS los parsers</li>
+                                <li>Cada parser usa el MISMO contexto</li>
+                                <li>El contexto se va "moviendo" mientras parseamos</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">5</span>
+                            <h4>Delegar al ProgramParser</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Acción:</strong> Dejar que ProgramParser haga el trabajo real</p>
+                            <div class="example-box">
+                                <strong>Delegación:</strong>
+                                <pre><code class="language-java">ProgramNode ast = programParser.parse(context);</code></pre>
+                            </div>
+                            <p><strong>¿Qué hacer?</strong></p>
+                            <ul>
+                                <li>NO intentar parsear directamente</li>
+                                <li>Confiar en ProgramParser</li>
+                                <li>Recibir el AST resultante</li>
+                                <li>Dejar que los errores "burbujeen"</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-number">6</span>
+                            <h4>Validar Consumo Completo</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Verificación final:</strong> ¿Se consumieron TODOS los tokens?</p>
+                            <div class="example-box">
+                                <strong>Detectar código "basura" al final:</strong>
+                                <pre><code class="language-java">// Código válido: "UP; DOWN;"
+// Código con basura: "UP; DOWN; INVALID_STUFF"
+//                                ^^^^^^^^^^^^^^ Error aquí</code></pre>
+                            </div>
+                            <p><strong>¿Qué hacer?</strong></p>
+                            <ul>
+                                <li>Verificar: !context.isAtEnd()</li>
+                                <li>Si hay tokens sobrantes: ParseException</li>
+                                <li>Incluir el token problemático en el error</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-card success">
+                        <div class="step-header">
+                            <span class="step-number">✅</span>
+                            <h4>Retornar el AST</h4>
+                        </div>
+                        <div class="step-content">
+                            <p><strong>Resultado:</strong> ProgramNode completo y validado</p>
+                            <div class="example-box">
+                                <strong>El AST contiene:</strong>
+                                <ul>
+                                    <li>Árbol completo del programa</li>
+                                    <li>Todos los nodos correctamente conectados</li>
+                                    <li>Listo para ejecución o análisis</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ¿Cómo Implementarlo? Guía Paso a Paso -->
+            <section class="content-section">
+                <h2>🛠️ ¿Cómo Implementarlo? Guía Detallada</h2>
+                <p class="section-intro">
+                    Ahora que entiendes QUÉ debe hacer, veamos CÓMO implementarlo paso a paso.
+                </p>
+
+                <div class="implementation-guide">
+                    <h3>📝 Paso 1: Estructura de la Clase</h3>
+                    <div class="implementation-step">
+                        <p>Primero, define la estructura básica con las dependencias necesarias:</p>
+                        <pre><code class="language-java">package parser;
+
+import lexer.*;                          // Para Lexer y Token
+import parser.ast.ProgramNode;           // El nodo raíz del AST  
+import parser.parsers.literals.ProgramParser;  // El parser de programas
+import java.util.List;                   // Para List<Token>
+
+public class Parser {
+    // Dependencia: el parser que hace el trabajo real
+    private final ProgramParser programParser;
+    
+    // Constructor: inicializa las dependencias
+    public Parser() {
+        this.programParser = new ProgramParser();
+    }
+    
+    // Aquí vendrán los métodos...
+}</code></pre>
+                        <div class="tip-box">
+                            <strong>💡 Tip:</strong> Usa <code>final</code> para la dependencia porque no cambiará después de la construcción.
+                        </div>
+                    </div>
+
+                    <h3>📝 Paso 2: Método Principal parse(String)</h3>
+                    <div class="implementation-step">
+                        <p>Este es el método que usarán la mayoría de usuarios:</p>
+                        <pre><code class="language-java">public ProgramNode parse(String input) throws ParseException {
+    // PASO 2.1: Crear el lexer
+    Lexer lexer = new Lexer();
+    
+    // PASO 2.2: Tokenizar el input
+    List<Token> tokens = lexer.tokenize(input);
+    
+    // PASO 2.3: Validar que hay tokens
+    if (tokens.isEmpty()) {
+        throw new ParseException("Input vacío - no hay tokens para parsear");
+    }
+    
+    // PASO 2.4: Delegar al otro método parse
+    return parse(tokens);
+}</code></pre>
+                        <div class="tip-box">
+                            <strong>💡 Tip:</strong> Este método es una "conveniencia" - hace el trabajo tedioso por el usuario.
+                        </div>
+                    </div>
+
+                    <h3>📝 Paso 3: Método Sobrecargado parse(List&lt;Token&gt;)</h3>
+                    <div class="implementation-step">
+                        <p>Este método hace el trabajo real de coordinación:</p>
+                        <pre><code class="language-java">public ProgramNode parse(List<Token> tokens) throws ParseException {
+    // PASO 3.1: Validar entrada
+    if (tokens.isEmpty()) {
+        throw new ParseException("Lista de tokens vacía");
+    }
+    
+    // PASO 3.2: Crear el contexto de parsing
+    ParseContext context = new ParseContext(tokens);
+    
+    // PASO 3.3: Delegar al ProgramParser
+    ProgramNode program = programParser.parse(context);
+    
+    // PASO 3.4: Validar que se consumieron todos los tokens
+    if (!context.isAtEnd()) {
+        // Hay tokens sobrantes - esto es un error
+        throw new ParseException(
+            "Tokens adicionales después del final del programa", 
+            context.getCurrentToken()  // Incluir el token problemático
+        );
+    }
+    
+    // PASO 3.5: Retornar el AST completo
+    return program;
+}</code></pre>
+                        <div class="warning-box">
+                            <strong>⚠️ Importante:</strong> La validación del paso 3.4 es CRÍTICA. Sin ella, 
+                            el parser podría aceptar programas con "basura" al final.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ParseContext: El Cursor Compartido -->
+            <section class="content-section">
+                <h2>🎯 ParseContext: El Cursor Compartido</h2>
+                <p class="section-intro">
+                    El ParseContext es uno de los conceptos más importantes para entender cómo funciona 
+                    el sistema de parsing. Es como un "cursor inteligente" que se comparte entre todos los parsers.
+                </p>
+
+                <div class="context-explanation">
+                    <h3>🤔 ¿Qué es el ParseContext?</h3>
+                    <div class="context-analogy">
+                        <div class="analogy-card">
+                            <h4>📖 Como Leer un Libro</h4>
+                            <p>Imagina que estás leyendo un libro con varios amigos, turnándose para leer párrafos:</p>
+                            <ul>
+                                <li><strong>El libro:</strong> Es la lista de tokens</li>
+                                <li><strong>El marcador:</strong> Es la posición actual en ParseContext</li>
+                                <li><strong>Los amigos:</strong> Son los diferentes parsers</li>
+                                <li><strong>La regla:</strong> Cada uno mueve el marcador cuando termina de leer</li>
+                            </ul>
+                            <div class="reading-example">
+                                <p><strong>Ejemplo:</strong></p>
+                                <ul>
+                                    <li>Amigo 1 (NumberParser) lee "42", mueve el marcador</li>
+                                    <li>Amigo 2 (OperatorParser) lee "+", mueve el marcador</li>
+                                    <li>Amigo 3 (NumberParser) lee "8", mueve el marcador</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>⚙️ Cómo se Inicializa el ParseContext</h3>
+                    <div class="initialization-flow">
+                        <div class="init-step">
+                            <h4>Paso 1: En el Parser Principal</h4>
+                            <pre><code class="language-java">// El Parser principal crea el contexto con TODOS los tokens
+List<Token> tokens = lexer.tokenize(input);
+ParseContext context = new ParseContext(tokens);
+
+// Estado inicial del contexto:
+// position = 0
+// tokens = [IF_TOKEN, LPAREN_TOKEN, BATTERY_TOKEN, GT_TOKEN, NUMBER_TOKEN, ...]</code></pre>
+                        </div>
+
+                        <div class="init-step">
+                            <h4>Paso 2: Se Pasa a ProgramParser</h4>
+                            <pre><code class="language-java">// El contexto se pasa como referencia (no se copia)
+ProgramNode program = programParser.parse(context);
+
+// Todos los parsers que use ProgramParser recibirán 
+// el MISMO contexto, no copias diferentes</code></pre>
+                        </div>
+
+                        <div class="init-step">
+                            <h4>Paso 3: Cada Parser Modifica el Mismo Contexto</h4>
+                            <pre><code class="language-java">// En IfStatementParser:
+public IfStatementNode parse(ParseContext context) {
+    context.consume(TokenType.IF);     // position: 0 → 1
+    context.consume(TokenType.LPAREN); // position: 1 → 2
+    
+    // Delegar a ConditionParser con el MISMO contexto
+    ConditionNode condition = conditionParser.parse(context);
+    // Cuando regrese, el contexto ya estará en una nueva posición
+    
+    // Continuar desde donde ConditionParser lo dejó...
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>🔄 Flujo del ParseContext Entre Parsers</h3>
+                    <div class="context-flow-example">
+                        <h4>📝 Ejemplo: Parsing de "IF (BATTERY > 50) { UP; }"</h4>
+                        
+                        <div class="token-timeline">
+                            <div class="timeline-header">
+                                <strong>Tokens:</strong>
+                                <div class="tokens-list">
+                                    <span class="token-item" data-position="0">IF</span>
+                                    <span class="token-item" data-position="1">(</span>
+                                    <span class="token-item" data-position="2">BATTERY</span>
+                                    <span class="token-item" data-position="3">&gt;</span>
+                                    <span class="token-item" data-position="4">50</span>
+                                    <span class="token-item" data-position="5">)</span>
+                                    <span class="token-item" data-position="6">{</span>
+                                    <span class="token-item" data-position="7">UP</span>
+                                    <span class="token-item" data-position="8">;</span>
+                                    <span class="token-item" data-position="9">}</span>
+                                </div>
+                            </div>
+
+                            <div class="parsing-steps">
+                                <div class="parsing-step">
+                                    <div class="step-info">
+                                        <strong>IfStatementParser</strong> inicia
+                                        <div class="context-state">Posición: 0, Token actual: IF</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>context.consume(TokenType.IF)</code>
+                                        <div class="arrow">→</div>
+                                        <div class="context-state">Posición: 1, Token actual: (</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step">
+                                    <div class="step-info">
+                                        <strong>IfStatementParser</strong> continúa
+                                        <div class="context-state">Posición: 1, Token actual: (</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>context.consume(TokenType.LPAREN)</code>
+                                        <div class="arrow">→</div>
+                                        <div class="context-state">Posición: 2, Token actual: BATTERY</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step delegation">
+                                    <div class="step-info">
+                                        <strong>IfStatementParser</strong> delega a <strong>ConditionParser</strong>
+                                        <div class="context-state">Posición: 2, Token actual: BATTERY</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>conditionParser.parse(context)</code>
+                                        <div class="note">⚠️ Se pasa la MISMA referencia del contexto</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step nested">
+                                    <div class="step-info">
+                                        <strong>ConditionParser</strong> delega a <strong>ComparisonParser</strong>
+                                        <div class="context-state">Posición: 2, Token actual: BATTERY</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>comparisonParser.parse(context)</code>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step nested">
+                                    <div class="step-info">
+                                        <strong>ComparisonParser</strong> delega a <strong>NumericSensorParser</strong>
+                                        <div class="context-state">Posición: 2, Token actual: BATTERY</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>context.consume(TokenType.BATTERY)</code>
+                                        <div class="arrow">→</div>
+                                        <div class="context-state">Posición: 3, Token actual: &gt;</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step nested">
+                                    <div class="step-info">
+                                        <strong>ComparisonParser</strong> continúa
+                                        <div class="context-state">Posición: 3, Token actual: &gt;</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>context.consume(TokenType.GT)</code>
+                                        <div class="arrow">→</div>
+                                        <div class="context-state">Posición: 4, Token actual: 50</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step nested">
+                                    <div class="step-info">
+                                        <strong>ComparisonParser</strong> delega a <strong>NumberParser</strong>
+                                        <div class="context-state">Posición: 4, Token actual: 50</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>context.consume(TokenType.NUMBER)</code>
+                                        <div class="arrow">→</div>
+                                        <div class="context-state">Posición: 5, Token actual: )</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step return">
+                                    <div class="step-info">
+                                        <strong>ConditionParser</strong> regresa a <strong>IfStatementParser</strong>
+                                        <div class="context-state">Posición: 5, Token actual: )</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <div class="note">✅ ConditionParser terminó, contexto en posición 5</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step">
+                                    <div class="step-info">
+                                        <strong>IfStatementParser</strong> continúa
+                                        <div class="context-state">Posición: 5, Token actual: )</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <code>context.consume(TokenType.RPAREN)</code>
+                                        <div class="arrow">→</div>
+                                        <div class="context-state">Posición: 6, Token actual: {</div>
+                                    </div>
+                                </div>
+
+                                <div class="parsing-step">
+                                    <div class="step-info">
+                                        <strong>IfStatementParser</strong> delega a <strong>StatementBlockParser</strong>
+                                        <div class="context-state">Posición: 6, Token actual: {</div>
+                                    </div>
+                                    <div class="step-action">
+                                        <div class="note">🔄 El proceso continúa hasta consumir todos los tokens</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>🎯 Puntos Clave del ParseContext</h3>
+                    <div class="key-points">
+                        <div class="key-point">
+                            <h4>1️⃣ Un Solo Contexto para Todos</h4>
+                            <p>
+                                NO se crea un contexto nuevo para cada parser. Todos los parsers 
+                                reciben el MISMO contexto como referencia.
+                            </p>
+                            <div class="code-example">
+                                <h5>❌ INCORRECTO:</h5>
+                                <pre><code class="language-java">// NO hagas esto - crear contextos nuevos
+ParseContext subContext = new ParseContext(context.getRemainingTokens());
+subParser.parse(subContext);  // ❌ Mal!</code></pre>
+                                
+                                <h5>✅ CORRECTO:</h5>
+                                <pre><code class="language-java">// Pasa el mismo contexto
+subParser.parse(context);  // ✅ Bien!</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="key-point">
+                            <h4>2️⃣ El Contexto Mantiene Estado</h4>
+                            <p>
+                                La posición actual se mantiene entre llamadas a diferentes parsers. 
+                                Cuando un parser termina, el siguiente comienza donde el anterior terminó.
+                            </p>
+                            <div class="state-example">
+                                <pre><code class="language-java">// Parser A consume 3 tokens → context.position va de 0 a 3
+parserA.parse(context);  
+
+// Parser B empieza en posición 3 (donde A terminó)
+parserB.parse(context);  // NO empieza en 0</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="key-point">
+                            <h4>3️⃣ Métodos Principales del ParseContext</h4>
+                            <div class="methods-table">
+                                <div class="method-row">
+                                    <div class="method-name"><code>getCurrentToken()</code></div>
+                                    <div class="method-desc">Ve el token actual SIN consumirlo</div>
+                                </div>
+                                <div class="method-row">
+                                    <div class="method-name"><code>consume(TokenType)</code></div>
+                                    <div class="method-desc">Verifica tipo y avanza posición</div>
+                                </div>
+                                <div class="method-row">
+                                    <div class="method-name"><code>peek()</code></div>
+                                    <div class="method-desc">Ve el siguiente token sin consumir</div>
+                                </div>
+                                <div class="method-row">
+                                    <div class="method-name"><code>isAtEnd()</code></div>
+                                    <div class="method-desc">¿Llegamos al final de los tokens?</div>
+                                </div>
+                                <div class="method-row">
+                                    <div class="method-name"><code>advance()</code></div>
+                                    <div class="method-desc">Avanza sin verificar tipo</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="key-point">
+                            <h4>4️⃣ Validación en el Parser Principal</h4>
+                            <p>
+                                Al final, el Parser principal verifica que se consumieron TODOS los tokens:
+                            </p>
+                            <pre><code class="language-java">// Después de que todos los parsers terminaron
+if (!context.isAtEnd()) {
+    // Quedaron tokens sin consumir = ERROR
+    throw new ParseException("Tokens adicionales...", context.getCurrentToken());
+}
+
+// Si llegamos aquí: ✅ Todo el input fue procesado correctamente</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Errores Comunes y Cómo Evitarlos -->
+            <section class="content-section">
+                <h2>🚫 Errores Comunes de los Estudiantes</h2>
+                <p class="section-intro">
+                    Estos son los errores más frecuentes al implementar el Parser principal y cómo evitarlos.
+                </p>
+
+                <div class="common-errors">
+                    <div class="error-card">
+                        <h3>❌ Error 1: Olvidar Validar Tokens Vacíos</h3>
+                        <div class="error-example">
+                            <h4>Código Incorrecto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(String input) {
+    Lexer lexer = new Lexer();
+    List<Token> tokens = lexer.tokenize(input);
+    // ❌ No valida si tokens está vacío
+    return parse(tokens);
+}</code></pre>
+                            
+                            <h4>Código Correcto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(String input) {
+    Lexer lexer = new Lexer();
+    List<Token> tokens = lexer.tokenize(input);
+    
+    // ✅ Validación necesaria
+    if (tokens.isEmpty()) {
+        throw new ParseException("Input vacío - no hay tokens para parsear");
+    }
+    
+    return parse(tokens);
+}</code></pre>
+                            
+                            <div class="consequence">
+                                <strong>Consecuencia:</strong> Si no validas, obtendrás errores confusos 
+                                más adelante cuando ParseContext intente acceder al primer token.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="error-card">
+                        <h3>❌ Error 2: No Verificar Tokens Sobrantes</h3>
+                        <div class="error-example">
+                            <h4>Código Incorrecto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(List<Token> tokens) {
+    ParseContext context = new ParseContext(tokens);
+    ProgramNode program = programParser.parse(context);
+    
+    // ❌ No verifica si quedaron tokens sin consumir
+    return program;
+}</code></pre>
+                            
+                            <h4>Código Correcto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(List<Token> tokens) {
+    ParseContext context = new ParseContext(tokens);
+    ProgramNode program = programParser.parse(context);
+    
+    // ✅ Verificación crítica
+    if (!context.isAtEnd()) {
+        throw new ParseException(
+            "Tokens adicionales después del final del programa", 
+            context.getCurrentToken()
+        );
+    }
+    
+    return program;
+}</code></pre>
+                            
+                            <div class="consequence">
+                                <strong>Consecuencia:</strong> El parser aceptará programas inválidos como 
+                                "UP; DOWN; GARBAGE" sin reportar error.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="error-card">
+                        <h3>❌ Error 3: Intentar Parsear Directamente</h3>
+                        <div class="error-example">
+                            <h4>Código Incorrecto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(List<Token> tokens) {
+    ParseContext context = new ParseContext(tokens);
+    
+    // ❌ NO! El Parser principal no debe parsear directamente
+    List<StatementNode> statements = new ArrayList<>();
+    while (!context.isAtEnd()) {
+        // Intentar parsear statements aquí...
+    }
+    
+    return new ProgramNode(statements);
+}</code></pre>
+                            
+                            <h4>Código Correcto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(List<Token> tokens) {
+    ParseContext context = new ParseContext(tokens);
+    
+    // ✅ Delegar al parser especializado
+    ProgramNode program = programParser.parse(context);
+    
+    // Validaciones...
+    return program;
+}</code></pre>
+                            
+                            <div class="consequence">
+                                <strong>Consecuencia:</strong> Viola el principio de responsabilidad única. 
+                                El Parser principal debe coordinar, no parsear.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="error-card">
+                        <h3>❌ Error 4: Capturar y Ocultar Excepciones</h3>
+                        <div class="error-example">
+                            <h4>Código Incorrecto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(String input) {
+    try {
+        // ... código de parsing ...
+    } catch (Exception e) {
+        // ❌ NO! Esto oculta información valiosa
+        throw new ParseException("Error de parsing");
+    }
+}</code></pre>
+                            
+                            <h4>Código Correcto:</h4>
+                            <pre><code class="language-java">public ProgramNode parse(String input) throws ParseException {
+    // ✅ Dejar que las excepciones específicas fluyan
+    // No capturar a menos que puedas agregar información útil
+    
+    Lexer lexer = new Lexer();
+    List<Token> tokens = lexer.tokenize(input);
+    // ... resto del código ...
+}</code></pre>
+                            
+                            <div class="consequence">
+                                <strong>Consecuencia:</strong> Pierdes información valiosa sobre qué salió mal 
+                                y dónde (línea, columna, token específico).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testing del Parser Principal -->
+            <section class="content-section">
+                <h2>🧪 Cómo Testear el Parser Principal</h2>
+                <p class="section-intro">
+                    Es crucial testear el Parser principal adecuadamente. Aquí te mostramos qué casos de prueba son esenciales.
+                </p>
+
+                <div class="testing-guide">
+                    <div class="test-case">
+                        <h3>Test 1: Programa Válido Simple</h3>
+                        <pre><code class="language-java">@Test
+public void testProgramaValido() throws ParseException {
+    // Arrange
+    Parser parser = new Parser();
+    String codigo = "UP; RIGHT; DOWN;";
+    
+    // Act
+    ProgramNode ast = parser.parse(codigo);
+    
+    // Assert
+    assertNotNull(ast);
+    assertEquals(3, ast.getStatements().size());
+}</code></pre>
+                        <div class="test-purpose">
+                            <strong>Propósito:</strong> Verificar que programas válidos se parsean correctamente.
+                        </div>
+                    </div>
+
+                    <div class="test-case">
+                        <h3>Test 2: Input Vacío</h3>
+                        <pre><code class="language-java">@Test
+public void testInputVacio() {
+    // Arrange
+    Parser parser = new Parser();
+    String codigoVacio = "";
+    
+    // Act & Assert
+    ParseException exception = assertThrows(
+        ParseException.class, 
+        () -> parser.parse(codigoVacio)
+    );
+    
+    assertTrue(exception.getMessage().contains("vacío"));
+}</code></pre>
+                        <div class="test-purpose">
+                            <strong>Propósito:</strong> Verificar que rechaza inputs vacíos con mensaje claro.
+                        </div>
+                    </div>
+
+                    <div class="test-case">
+                        <h3>Test 3: Tokens Sobrantes</h3>
+                        <pre><code class="language-java">@Test
+public void testTokensSobrantes() {
+    // Arrange
+    Parser parser = new Parser();
+    String codigoConBasura = "UP; DOWN; INVALID_TOKEN";
+    
+    // Act & Assert
+    ParseException exception = assertThrows(
+        ParseException.class,
+        () -> parser.parse(codigoConBasura)
+    );
+    
+    assertTrue(exception.getMessage().contains("adicionales"));
+}</code></pre>
+                        <div class="test-purpose">
+                            <strong>Propósito:</strong> Verificar que detecta tokens no válidos al final.
+                        </div>
+                    </div>
+
+                    <div class="test-case">
+                        <h3>Test 4: Programa Complejo</h3>
+                        <pre><code class="language-java">@Test
+public void testProgramaComplejo() throws ParseException {
+    // Arrange
+    Parser parser = new Parser();
+    String codigoComplejo = """
+        IF (BATTERY > 50) {
+            REPEAT 3 {
+                UP;
+                RIGHT;
+            }
+        }
+        WHILE (OBSTACLE) {
+            LEFT;
+        }
+        """;
+    
+    // Act
+    ProgramNode ast = parser.parse(codigoComplejo);
+    
+    // Assert
+    assertNotNull(ast);
+    assertEquals(2, ast.getStatements().size()); // IF y WHILE
+    assertTrue(ast.getStatements().get(0) instanceof IfStatementNode);
+    assertTrue(ast.getStatements().get(1) instanceof WhileStatementNode);
+}</code></pre>
+                        <div class="test-purpose">
+                            <strong>Propósito:</strong> Verificar que maneja correctamente programas con estructuras anidadas.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Código Completo Final -->
+            <section class="content-section">
+                <h2>📄 Código Completo del Parser Principal</h2>
+                <p class="section-intro">
+                    Aquí está la implementación completa con todos los comentarios explicativos.
+                </p>
+
+                <div class="final-code">
+                    <pre><code class="language-java">package parser;
+
+import lexer.*;
+import parser.ast.ProgramNode;
+import parser.parsers.literals.ProgramParser;
+import java.util.List;
+
+/**
+ * Parser coordinador principal para el lenguaje RoboLang.
+ * 
+ * Esta clase actúa como el punto de entrada único para todo el proceso
+ * de parsing, coordinando las diferentes etapas y delegando el trabajo
+ * específico a parsers especializados.
+ * 
+ * Responsabilidades:
+ * - Coordinar el flujo completo de parsing
+ * - Proporcionar una API simple para usuarios externos
+ * - Validar entrada y salida del proceso
+ * - Manejar errores de alto nivel
+ * 
+ * NO responsabilidades:
+ * - NO parsea elementos específicos del lenguaje
+ * - NO maneja detalles de tokens individuales
+ * - NO construye nodos AST directamente
+ */
+public class Parser {
+    
+    /**
+     * Parser especializado para programas completos.
+     * Se encarga del parsing real siguiendo la gramática.
+     */
+    private final ProgramParser programParser;
+    
+    /**
+     * Constructor por defecto.
+     * Inicializa las dependencias necesarias.
+     */
+    public Parser() {
+        this.programParser = new ProgramParser();
+    }
+    
+    /**
+     * Parsea un programa RoboLang desde una cadena de texto.
+     * 
+     * Este es el método principal que usarán la mayoría de usuarios.
+     * Se encarga de todo el proceso: tokenización, parsing y validación.
+     * 
+     * @param input Código fuente RoboLang como String
+     * @return ProgramNode raíz del AST generado
+     * @throws ParseException si hay errores de sintaxis o el input es inválido
+     * 
+     * Ejemplo de uso:
+     * <pre>
+     * Parser parser = new Parser();
+     * ProgramNode ast = parser.parse("UP; RIGHT; PENDOWN;");
+     * </pre>
+     */
+    public ProgramNode parse(String input) throws ParseException {
+        // PASO 1: Tokenización
+        // Crear lexer y convertir el string en tokens
+        Lexer lexer = new Lexer();
+        List<Token> tokens = lexer.tokenize(input);
+        
+        // PASO 2: Validación básica
+        // Verificar que el lexer produjo al menos un token
+        if (tokens.isEmpty()) {
+            throw new ParseException("Input vacío - no hay tokens para parsear");
+        }
+        
+        // PASO 3: Delegar al método sobrecargado
+        // Reutilizar la lógica del otro método parse
+        return parse(tokens);
+    }
+    
+    /**
+     * Parsea un programa desde una lista de tokens pre-procesados.
+     * 
+     * Este método es útil para casos avanzados donde los tokens
+     * ya han sido generados o modificados externamente.
+     * 
+     * @param tokens Lista de tokens a parsear
+     * @return ProgramNode raíz del AST generado
+     * @throws ParseException si hay errores de sintaxis
+     * 
+     * Ejemplo de uso:
+     * <pre>
+     * Lexer lexer = new Lexer();
+     * List<Token> tokens = lexer.tokenize(input);
+     * // Posible manipulación de tokens aquí
+     * Parser parser = new Parser();
+     * ProgramNode ast = parser.parse(tokens);
+     * </pre>
+     */
+    public ProgramNode parse(List<Token> tokens) throws ParseException {
+        // PASO 1: Validación de entrada
+        // No podemos parsear una lista vacía
+        if (tokens.isEmpty()) {
+            throw new ParseException("Lista de tokens vacía");
+        }
+        
+        // PASO 2: Crear contexto de parsing
+        // El contexto mantiene el estado durante el parsing
+        ParseContext context = new ParseContext(tokens);
+        
+        // PASO 3: Parsing real
+        // Delegar al parser especializado que conoce la gramática
+        ProgramNode program = programParser.parse(context);
+        
+        // PASO 4: Validación post-parsing
+        // CRÍTICO: Asegurar que consumimos TODOS los tokens
+        // Si quedan tokens, significa que hay código inválido al final
+        if (!context.isAtEnd()) {
+            // Obtener el token problemático para mejor reporte de error
+            Token tokenProblematico = context.getCurrentToken();
+            
+            throw new ParseException(
+                "Tokens adicionales después del final del programa", 
+                tokenProblematico
+            );
+        }
+        
+        // PASO 5: Retornar el AST completo y validado
+        return program;
+    }
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- Resumen y Checklist -->
+            <section class="content-section">
+                <h2>✅ Checklist Final</h2>
+                <p class="section-intro">
+                    Usa esta lista para verificar que tu implementación del Parser principal está completa.
+                </p>
+
+                <div class="checklist">
+                    <h3>📋 Tu Parser Principal debe:</h3>
+                    <ul class="checklist-items">
+                        <li>
+                            <input type="checkbox" id="check1">
+                            <label for="check1">Tener dos métodos parse() sobrecargados</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check2">
+                            <label for="check2">Crear y usar un Lexer para tokenización</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check3">
+                            <label for="check3">Validar que la lista de tokens no esté vacía</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check4">
+                            <label for="check4">Crear un ParseContext con los tokens</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check5">
+                            <label for="check5">Delegar a ProgramParser (NO parsear directamente)</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check6">
+                            <label for="check6">Verificar que se consumieron TODOS los tokens</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check7">
+                            <label for="check7">Lanzar ParseException con mensajes descriptivos</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check8">
+                            <label for="check8">Retornar un ProgramNode válido</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check9">
+                            <label for="check9">NO capturar excepciones innecesariamente</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="check10">
+                            <label for="check10">Tener tests para casos válidos e inválidos</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="next-steps">
+                    <h3>🚀 Próximos Pasos</h3>
+                    <div class="next-steps-cards">
+                        <a href="testing.html" class="next-step-card">
+                            <span class="icon">🧪</span>
+                            <h4>Testing</h4>
+                            <p>Aprende a testear tu Parser Principal</p>
+                        </a>
+                        <a href="gui.html" class="next-step-card">
+                            <span class="icon">🎨</span>
+                            <h4>GUI</h4>
+                            <p>Integra tu Parser con la interfaz gráfica</p>
+                        </a>
+                        <a href="implementation.html" class="next-step-card">
+                            <span class="icon">📝</span>
+                            <h4>Implementación</h4>
+                            <p>Comienza a implementar los parsers específicos</p>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

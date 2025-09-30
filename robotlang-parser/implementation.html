@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea de Implementación - 16 Parsers | RoboLang Parser</title>
+    <meta name="description" content="Lista completa de 16 parsers a implementar organizados por nivel de dificultad">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parser-implementation.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="section-header">
+        <nav class="section-nav">
+            <div class="nav-content">
+                <a href="index.html" class="nav-home">🏠 Inicio</a>
+                <div class="nav-sections">
+                    <a href="ast.html" class="nav-item">🏗️ AST</a>
+                    <a href="parsers.html" class="nav-item">⚙️ Parsers</a>
+                    <a href="main-parser.html" class="nav-item">🎯 Parser Principal</a>
+                    <a href="testing.html" class="nav-item">🧪 Testing</a>
+                    <a href="gui.html" class="nav-item">🎨 GUI</a>
+                    <a href="implementation.html" class="nav-item active">🎯 Implementación</a>
+                </div>
+            </div>
+        </nav>
+        <div class="section-title">
+            <h1>🎯 Tarea de Implementación</h1>
+            <p class="section-subtitle">Lista completa de trabajo a realizar por los estudiantes</p>
+        </div>
+    </header>
+
+    <main class="section-content">
+        <div class="content-container">
+            
+            <!-- Progress Tracker -->
+            <section class="content-section" id="progress-tracker">
+                <div class="progress-tracker">
+                    <h2>📊 Tu Progreso en RoboLang Parser</h2>
+                    <div class="progress-overview">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" data-stat="completed">0</span>
+                                <span class="stat-label">Completados</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" data-stat="remaining">3</span>
+                                <span class="stat-label">Restantes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" data-stat="percentage">0%</span>
+                                <span class="stat-label">Progreso</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="progress-message">
+                        🎯 <strong>Objetivo:</strong> Implementar los 3 parsers restantes para completar el compilador RoboLang
+                    </p>
+                </div>
+            </section>
+
+            <!-- Introducción a la Tarea -->
+            <section class="content-section">
+                <h2>🎯 Descripción General de la Tarea</h2>
+                <p class="section-intro">
+                    Tu tarea es implementar 3 parsers críticos que completan el compilador RoboLang.
+                    La mayoría de los parsers ya están implementados como ejemplos educativos.
+                    Los parsers restantes son estructuras de control avanzadas.
+                </p>
+                
+                <div class="implementation-note">
+                    <h3>📚 Nota importante</h3>
+                    <p>Los siguientes parsers ya están implementados como ejemplos en la sección <a href="parsers.html">⚙️ Parsers</a>
+                    y <strong>NO</strong> necesitas implementarlos:</p>
+                    <ul>
+                        <li><code>NumberParser</code> - Ejemplo básico explicado paso a paso</li>
+                        <li><code>MovementCommandParser</code> - Ejemplo intermedio con match()</li>
+                        <li><code>IfStatementParser</code> - Ejemplo avanzado con delegación</li>
+                        <li><code>ComparisonExpressionParser</code> - Implementado para precedencia</li>
+                        <li><code>NotExpressionParser</code> - Implementado para precedencia</li>
+                        <li><code>AndExpressionParser</code> - Implementado para precedencia</li>
+                        <li><code>OrExpressionParser</code> - Implementado para precedencia</li>
+                        <li><code>StatementParser</code> - Parser dispatcher explicado</li>
+                        <li><code>StatementListParser</code> - Parser de listas explicado</li>
+                    </ul>
+                    <p>📖 <strong>Recomendación:</strong> Estudia estos ejemplos antes de implementar los parsers restantes.</p>
+                </div>
+
+                <div class="task-overview">
+                    <div class="overview-card">
+                        <h3>📋 Qué debes entregar</h3>
+                        <ul>
+                            <li>3 archivos Java con implementaciones completas</li>
+                            <li>Tests unitarios para cada parser</li>
+                            <li>Documentación de decisiones de diseño</li>
+                            <li>Demostración funcional en la GUI</li>
+                        </ul>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>⏰ Tiempo estimado total</h3>
+                        <div class="time-breakdown">
+                            <div class="time-item">
+                                <span class="time-level">Básico (4 parsers):</span>
+                                <span class="time-value">1-2 horas</span>
+                            </div>
+                            <div class="time-item">
+                                <span class="time-level">Medio (3 parsers):</span>
+                                <span class="time-value">2-3 horas</span>
+                            </div>
+                            <div class="time-item">
+                                <span class="time-level">Avanzado (1 parser):</span>
+                                <span class="time-value">30-45 min</span>
+                            </div>
+                            <div class="time-item">
+                                <span class="time-level">Experto (4 parsers):</span>
+                                <span class="time-value">2-3 horas</span>
+                            </div>
+                            <div class="total-time">
+                                <strong>Total: 8-12 horas</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>🛣️ Estrategia recomendada</h3>
+                        <ol>
+                            <li><strong>Secuencial:</strong> Implementa en orden de dificultad</li>
+                            <li><strong>Test-driven:</strong> Escribe tests antes de implementar</li>
+                            <li><strong>Incremental:</strong> Prueba cada parser antes del siguiente</li>
+                            <li><strong>Visual:</strong> Usa la GUI para validar resultados</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Parsers por Dificultad -->
+            <section class="content-section">
+                <h2>📈 Parsers Organizados por Nivel de Dificultad</h2>
+                
+                <!-- Nota: Parsers Básicos, Medios y de Expresiones YA IMPLEMENTADOS -->
+                <div class="parsers-by-difficulty">
+                    <div class="difficulty-section">
+                        <div class="difficulty-header difficulty-info">
+                            <h3>✅ Parsers Ya Implementados (No hacer)</h3>
+                            <p class="difficulty-description">
+                                Los siguientes parsers ya están completos y sirven como ejemplos de referencia.
+                                Estúdialos antes de implementar los parsers restantes.
+                            </p>
+                        </div>
+                        <div class="difficulty-content">
+                            <ul style="column-count: 2; padding: 1rem 2rem;">
+                                <li>✅ NumberParser</li>
+                                <li>✅ BooleanParser</li>
+                                <li>✅ BooleanSensorParser</li>
+                                <li>✅ NumericSensorParser</li>
+                                <li>✅ MovementCommandParser</li>
+                                <li>✅ PenCommandParser</li>
+                                <li>✅ SimpleCommandParser</li>
+                                <li>✅ ComparisonExpressionParser</li>
+                                <li>✅ NotExpressionParser</li>
+                                <li>✅ AndExpressionParser</li>
+                                <li>✅ OrExpressionParser</li>
+                                <li>✅ ConditionParser</li>
+                                <li>✅ IfStatementParser</li>
+                                <li>✅ StatementParser</li>
+                                <li>✅ StatementListParser</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parsers a Implementar -->
+                <div class="parsers-by-difficulty">
+                    <div class="difficulty-section">
+                        <div class="difficulty-header difficulty-expert">
+                            <h3>🎯 Parsers a Implementar (3 restantes)</h3>
+                            <p class="difficulty-description">
+                                Estos son los únicos parsers que debes implementar para completar el proyecto.
+                            </p>
+                        </div>
+                        <div class="difficulty-content">
+
+                            <!-- WhileStatementParser -->
+                            <div class="parser-card" data-parser="WhileStatementParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="NumberParser" id="NumberParser">
+                                        <label for="NumberParser" class="parser-title">NumberParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-basic">⭐ Básico</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/literals/NumberParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;number&gt; ::= [0-9]+</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#number" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser más simple que reconoce números enteros. Convierte tokens NUMBER en nodos NumberNode.
+                                        Fundamental para entender el patrón básico de parsing.
+                                    </p>
+                                    
+                                    <div class="implementation-hints">
+                                        <h4>💡 Pistas de Implementación:</h4>
+                                        <ul>
+                                            <li>Verificar que el token actual sea TokenType.NUMBER</li>
+                                            <li>Usar Integer.parseInt() para convertir el valor</li>
+                                            <li>No olvidar context.advance()</li>
+                                            <li>Lanzar ParseException si no es un número</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="test-cases">
+                                        <h4>🧪 Casos de Prueba Obligatorios:</h4>
+                                        <ul>
+                                            <li>✅ Número de un dígito: "5"</li>
+                                            <li>✅ Número de múltiples dígitos: "12345"</li>
+                                            <li>✅ Cero: "0"</li>
+                                            <li>❌ Token no numérico: "UP"</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 15-20 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: Ninguna</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- BooleanParser -->
+                            <div class="parser-card" data-parser="BooleanParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="BooleanParser" id="BooleanParser">
+                                        <label for="BooleanParser" class="parser-title">BooleanParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-basic">⭐ Básico</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/literals/BooleanParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;boolean&gt; ::= "true" | "false"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#boolean" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser que reconoce valores booleanos literales (true/false). 
+                                        Introduce el concepto de múltiples opciones válidas.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 10-15 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: Ninguna</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- BooleanSensorParser -->
+                            <div class="parser-card" data-parser="BooleanSensorParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="BooleanSensorParser" id="BooleanSensorParser">
+                                        <label for="BooleanSensorParser" class="parser-title">BooleanSensorParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-basic">⭐ Básico</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/literals/BooleanSensorParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;boolean_sensor&gt; ::= "OBSTACLE" | "BLOCKED"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#boolean_sensor" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser especializado en sensores que retornan valores booleanos. 
+                                        OBSTACLE y BLOCKED son sensores del robot.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 10-15 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: Ninguna</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- NumericSensorParser -->
+                            <div class="parser-card" data-parser="NumericSensorParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="NumericSensorParser" id="NumericSensorParser">
+                                        <label for="NumericSensorParser" class="parser-title">NumericSensorParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-basic">⭐ Básico</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/literals/NumericSensorParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;numeric_sensor&gt; ::= "BATTERY" | "LIGHT" | "TEMP" | "DIST"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#numeric_sensor" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser para sensores que retornan valores numéricos. 
+                                        Incluye sensores de batería, luz, temperatura y distancia.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 10-15 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: Ninguna</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nivel Medio -->
+                <div class="parsers-by-difficulty">
+                    <div class="difficulty-section">
+                        <div class="difficulty-header difficulty-medium">
+                            <h3>⭐⭐ Nivel Medio - Command Parsers</h3>
+                            <p class="difficulty-description">
+                                Parsers que manejan comandos del robot. Introducen conceptos de 
+                                composición y delegación entre parsers.
+                            </p>
+                        </div>
+                        <div class="difficulty-content">
+                            
+                            <!-- MovementCommandParser -->
+                            <div class="parser-card" data-parser="MovementCommandParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="MovementCommandParser" id="MovementCommandParser">
+                                        <label for="MovementCommandParser" class="parser-title">MovementCommandParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-medium">⭐⭐ Medio</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/commands/MovementCommandParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;movement_command&gt; ::= "UP" | "DOWN" | "LEFT" | "RIGHT"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#movement_command" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser que reconoce comandos de movimiento del robot. 
+                                        Primer parser que maneja múltiples opciones con match().
+                                    </p>
+                                    
+                                    <div class="implementation-hints">
+                                        <h4>💡 Pistas de Implementación:</h4>
+                                        <ul>
+                                            <li>Usar context.match(TokenType.UP, TokenType.DOWN, ...)</li>
+                                            <li>Guardar el token antes del match() para obtener el valor</li>
+                                            <li>Retornar MovementCommandNode con la dirección</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 20-25 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: Ninguna</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- PenCommandParser -->
+                            <div class="parser-card" data-parser="PenCommandParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="PenCommandParser" id="PenCommandParser">
+                                        <label for="PenCommandParser" class="parser-title">PenCommandParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-medium">⭐⭐ Medio</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/commands/PenCommandParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;pen_command&gt; ::= "PENUP" | "PENDOWN"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#pen_command" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser para comandos que controlan el lápiz del robot (subir/bajar). 
+                                        Similar a MovementCommand pero con diferentes tokens.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 15-20 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: Ninguna</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- SimpleCommandParser -->
+                            <div class="parser-card" data-parser="SimpleCommandParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="SimpleCommandParser" id="SimpleCommandParser">
+                                        <label for="SimpleCommandParser" class="parser-title">SimpleCommandParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-medium">⭐⭐ Medio</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/commands/SimpleCommandParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;simple_command&gt; ::= &lt;movement_command&gt; ";" | &lt;pen_command&gt; ";"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#simple_command" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser que combina comandos básicos con punto y coma. 
+                                        Primer ejemplo de composición y delegación entre parsers.
+                                    </p>
+                                    
+                                    <div class="implementation-hints">
+                                        <h4>💡 Pistas de Implementación:</h4>
+                                        <ul>
+                                            <li>Delegar a MovementCommandParser o PenCommandParser</li>
+                                            <li>Verificar y consumir el punto y coma obligatorio</li>
+                                            <li>Usar context.consume(TokenType.SEMICOLON, "mensaje")</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 30-40 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: MovementCommandParser, PenCommandParser</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nivel Avanzado -->
+                <div class="parsers-by-difficulty">
+                    <div class="difficulty-section">
+                        <div class="difficulty-header difficulty-advanced">
+                            <h3>⭐⭐⭐ Nivel Avanzado - Expression Parsers</h3>
+                            <p class="difficulty-description">
+                                Parsers de expresiones booleanas y comparaciones. 
+                                Manejan precedencia de operadores y recursión.
+                            </p>
+                        </div>
+                        <div class="difficulty-content">
+                            
+                            
+                            
+                            <!-- ConditionParser -->
+                            <div class="parser-card" data-parser="ConditionParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="ConditionParser" id="ConditionParser">
+                                        <label for="ConditionParser" class="parser-title">ConditionParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-advanced">⭐⭐⭐ Avanzado</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/expressions/ConditionParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;condition&gt; ::= &lt;or_expr&gt;</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#condition" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser de nivel superior para condiciones. Punto de entrada para expresiones booleanas.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 20-25 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: OrExpressionParser</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nivel Experto -->
+                <div class="parsers-by-difficulty">
+                    <div class="difficulty-section">
+                        <div class="difficulty-header difficulty-expert">
+                            <h3>⭐⭐⭐⭐ Nivel Experto - Statement Parsers</h3>
+                            <p class="difficulty-description">
+                                Parsers de estructuras de control complejas. 
+                                El mayor desafío del proyecto.
+                            </p>
+                        </div>
+                        <div class="difficulty-content">
+                            
+                            <!-- IfStatementParser -->
+                            <div class="parser-card" data-parser="IfStatementParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="IfStatementParser" id="IfStatementParser">
+                                        <label for="IfStatementParser" class="parser-title">IfStatementParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-expert">⭐⭐⭐⭐ Experto</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/statements/IfStatementParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;if_stmt&gt; ::= "IF" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#if_statement" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser de estructura condicional IF. Demuestra delegación compleja y manejo de paréntesis.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 40-50 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: ConditionParser, StatementBlockParser</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- WhileStatementParser -->
+                            <div class="parser-card" data-parser="WhileStatementParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="WhileStatementParser" id="WhileStatementParser">
+                                        <label for="WhileStatementParser" class="parser-title">WhileStatementParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-expert">⭐⭐⭐⭐ Experto</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/statements/WhileStatementParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;while_stmt&gt; ::= "WHILE" "(" &lt;condition&gt; ")" &lt;statement_block&gt;</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#while_statement" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser de bucle WHILE. Similar a IF pero con semántica diferente.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 35-45 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: ConditionParser, StatementBlockParser</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- RepeatStatementParser -->
+                            <div class="parser-card" data-parser="RepeatStatementParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="RepeatStatementParser" id="RepeatStatementParser">
+                                        <label for="RepeatStatementParser" class="parser-title">RepeatStatementParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-expert">⭐⭐⭐⭐ Experto</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/statements/RepeatStatementParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;repeat_stmt&gt; ::= "REPEAT" "(" &lt;number&gt; ")" &lt;statement_block&gt;</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#repeat_statement" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser de bucle REPEAT con número fijo de iteraciones.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 35-45 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: NumberParser, StatementBlockParser</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- StatementBlockParser -->
+                            <div class="parser-card" data-parser="StatementBlockParser">
+                                <div class="parser-header">
+                                    <div class="parser-info">
+                                        <input type="checkbox" class="parser-checkbox" data-parser-id="StatementBlockParser" id="StatementBlockParser">
+                                        <label for="StatementBlockParser" class="parser-title">StatementBlockParser</label>
+                                    </div>
+                                    <span class="parser-badge difficulty-expert">⭐⭐⭐⭐ Experto</span>
+                                </div>
+                                <div class="parser-details">
+                                    <div class="parser-path">📂 src/main/java/parser/parsers/statements/StatementBlockParser.java</div>
+                                    
+                                    <div class="bnf-reference">
+                                        <div class="bnf-inline">
+                                            <strong>📝 Gramática:</strong> 
+                                            <code>&lt;statement_block&gt; ::= "{" &lt;statement_list&gt; "}"</code>
+                                        </div>
+                                        <div class="bnf-visual">
+                                            <a href="robotlangbnf.html#statement_block" target="_blank" class="bnf-link">
+                                                📖 Ver diagrama visual
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="parser-description">
+                                        Parser de bloques de statements entre llaves. Base de las estructuras de control.
+                                    </p>
+                                    
+                                    <div class="parser-meta">
+                                        <span class="time-estimate">⏱️ 30-40 minutos</span>
+                                        <span class="dependencies">🔗 Dependencias: StatementListParser</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Guía de Implementación -->
+            <section class="content-section">
+                <h2>📋 Guía de Implementación Paso a Paso</h2>
+                <p class="section-intro">
+                    Estrategia recomendada para implementar los 16 parsers de manera eficiente y sin frustraciones.
+                </p>
+
+                <div class="implementation-guide">
+                    <div class="guide-section">
+                        <h3>🎯 Orden de Implementación Recomendado</h3>
+                        <div class="implementation-order">
+                            <div class="order-phase">
+                                <h4>Fase 1: Fundamentos (⭐ Básico)</h4>
+                                <ol>
+                                    <li>NumberParser</li>
+                                    <li>BooleanParser</li>
+                                    <li>BooleanSensorParser</li>
+                                    <li>NumericSensorParser</li>
+                                </ol>
+                                <p class="phase-goal">
+                                    <strong>Objetivo:</strong> Dominar el patrón básico de parsing
+                                </p>
+                            </div>
+
+                            <div class="order-phase">
+                                <h4>Fase 2: Comandos (⭐⭐ Medio)</h4>
+                                <ol start="5">
+                                    <li>MovementCommandParser</li>
+                                    <li>PenCommandParser</li>
+                                    <li>SimpleCommandParser</li>
+                                </ol>
+                                <p class="phase-goal">
+                                    <strong>Objetivo:</strong> Aprender composición y delegación
+                                </p>
+                            </div>
+
+                            <div class="order-phase">
+                                <h4>Fase 3: Expresiones (⭐⭐⭐ Avanzado)</h4>
+                                <ol start="8">
+                                    <li>ComparisonExpressionParser</li>
+                                    <li>NotExpressionParser</li>
+                                    <li>AndExpressionParser</li>
+                                    <li>OrExpressionParser</li>
+                                    <li>ConditionParser</li>
+                                </ol>
+                                <p class="phase-goal">
+                                    <strong>Objetivo:</strong> Manejar precedencia y recursión
+                                </p>
+                            </div>
+
+                            <div class="order-phase">
+                                <h4>Fase 4: Estructuras (⭐⭐⭐⭐ Experto)</h4>
+                                <ol start="13">
+                                    <li>StatementBlockParser</li>
+                                    <li>RepeatStatementParser</li>
+                                    <li>IfStatementParser</li>
+                                    <li>WhileStatementParser</li>
+                                </ol>
+                                <p class="phase-goal">
+                                    <strong>Objetivo:</strong> Completar el compilador
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>🔄 Estrategia Progresiva</h3>
+                        <div class="strategy-steps">
+                            <div class="strategy-step">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <h4>Simple → Compuesto</h4>
+                                    <p>Comienza con parsers que manejan un solo token, luego avanza a parsers que combinan múltiples elementos.</p>
+                                </div>
+                            </div>
+                            <div class="strategy-step">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <h4>Independiente → Dependiente</h4>
+                                    <p>Implementa primero parsers que no dependen de otros, luego los que requieren delegación.</p>
+                                </div>
+                            </div>
+                            <div class="strategy-step">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <h4>Test → Código → Validación</h4>
+                                    <p>Para cada parser: escribe tests, implementa, valida en GUI, luego continúa.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>✅ Puntos de Verificación</h3>
+                        <div class="checkpoints">
+                            <div class="checkpoint">
+                                <h4>Después de cada parser:</h4>
+                                <ul>
+                                    <li>✅ Compila sin errores</li>
+                                    <li>✅ Tests pasan</li>
+                                    <li>✅ Se ve correctamente en la GUI</li>
+                                    <li>✅ Maneja errores apropiadamente</li>
+                                </ul>
+                            </div>
+                            <div class="checkpoint">
+                                <h4>Después de cada fase:</h4>
+                                <ul>
+                                    <li>✅ Todos los parsers de la fase funcionan</li>
+                                    <li>✅ Pueden parsearse ejemplos complejos</li>
+                                    <li>✅ No hay regresiones en parsers anteriores</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Entregables Esperados -->
+            <section class="content-section">
+                <h2>📦 Entregables Esperados</h2>
+                <p class="section-intro">
+                    Lista completa de todo lo que debes entregar al finalizar el proyecto.
+                </p>
+
+                <div class="deliverables">
+                    <div class="deliverable-card">
+                        <h3>💻 Código Java Funcional</h3>
+                        <ul>
+                            <li>16 archivos .java con parsers completos</li>
+                            <li>Código que compila sin errores ni warnings</li>
+                            <li>Implementación siguiendo patrones establecidos</li>
+                            <li>Manejo adecuado de errores con ParseException</li>
+                            <li>Comentarios en métodos complejos</li>
+                        </ul>
+                        <div class="quality-criteria">
+                            <strong>Criterios de calidad:</strong>
+                            <ul>
+                                <li>Indentación consistente</li>
+                                <li>Nombres de variables descriptivos</li>
+                                <li>Sin código duplicado</li>
+                                <li>Lógica clara y mantenible</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="deliverable-card">
+                        <h3>🧪 Tests Unitarios Básicos</h3>
+                        <ul>
+                            <li>Al menos 2 tests válidos por parser</li>
+                            <li>Al menos 1 test de error por parser</li>
+                            <li>Tests para casos límite importantes</li>
+                            <li>Uso correcto de assertions JUnit</li>
+                            <li>Nombres de tests descriptivos</li>
+                        </ul>
+                        <div class="test-coverage">
+                            <strong>Cobertura mínima esperada:</strong>
+                            <ul>
+                                <li>85%+ líneas de código</li>
+                                <li>100% caminos principales</li>
+                                <li>Todos los mensajes de error</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="deliverable-card">
+                        <h3>📝 Documentación de Diseño</h3>
+                        <ul>
+                            <li>README.md con instrucciones de compilación</li>
+                            <li>Explicación de decisiones arquitecturales</li>
+                            <li>Diagramas de dependencias entre parsers</li>
+                            <li>Casos de prueba documentados</li>
+                            <li>Problemas encontrados y soluciones</li>
+                        </ul>
+                    </div>
+
+                    <div class="deliverable-card">
+                        <h3>🖥️ Demostración Funcional</h3>
+                        <ul>
+                            <li>Proyecto compila y ejecuta correctamente</li>
+                            <li>GUI funciona con todos los parsers</li>
+                            <li>Ejemplos de código complejo que parsean</li>
+                            <li>Demostración de manejo de errores</li>
+                            <li>Video/capturas de pantalla de funcionalidad</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recursos de Apoyo -->
+            <section class="content-section">
+                <h2>🛠️ Recursos de Apoyo</h2>
+                
+                <div class="support-resources">
+                    <div class="resource-card">
+                        <h3>📖 Documentación</h3>
+                        <ul>
+                            <li><a href="robotlangbnf.html" target="_blank">Gramática BNF Visual Completa</a></li>
+                            <li><a href="ast.html">Fundamentos de AST</a></li>
+                            <li><a href="parsers.html">Guía de Construcción de Parsers</a></li>
+                            <li><a href="testing.html">Metodología de Testing</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h3>🛠️ Herramientas</h3>
+                        <ul>
+                            <li><strong>GUI:</strong> RoboLangIDE para testing visual</li>
+                            <li><strong>Tests:</strong> JUnit 5 framework</li>
+                            <li><strong>Build:</strong> Maven/Gradle según proyecto</li>
+                            <li><strong>IDE:</strong> IntelliJ IDEA/Eclipse recomendado</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h3>💬 Soporte</h3>
+                        <ul>
+                            <li>Consultas con instructor en horario de oficina</li>
+                            <li>Foro de estudiantes para dudas técnicas</li>
+                            <li>Documentación de errores comunes</li>
+                            <li>Ejemplos de implementación de referencia</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navegación Final -->
+            <section class="navigation-section">
+                <div class="nav-card completed implementation-complete">
+                    <h3>🚀 ¡Comienza tu Implementación!</h3>
+                    <p>
+                        Tienes toda la información necesaria para implementar los 16 parsers. 
+                        Recuerda: comienza por los parsers básicos y avanza gradualmente.
+                    </p>
+                    <div class="implementation-tips">
+                        <p><strong>💡 Consejo final:</strong> No intentes implementar todo de una vez. 
+                        Cada parser exitoso te dará más confianza para el siguiente.</p>
+                    </div>
+                </div>
+                <div class="nav-actions">
+                    <a href="gui.html" class="btn btn-secondary">← GUI</a>
+                    <a href="index.html" class="btn btn-primary">
+                        🏠 Volver al Inicio
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

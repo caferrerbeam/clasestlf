@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUI - Interfaz Gráfica | RoboLang Parser</title>
+    <meta name="description" content="Herramienta visual para probar y depurar parsers con RoboLang IDE">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parser-implementation.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="section-header">
+        <nav class="section-nav">
+            <div class="nav-content">
+                <a href="index.html" class="nav-home">🏠 Inicio</a>
+                <div class="nav-sections">
+                    <a href="ast.html" class="nav-item">🏗️ AST</a>
+                    <a href="parsers.html" class="nav-item">⚙️ Parsers</a>
+                    <a href="main-parser.html" class="nav-item">🎯 Parser Principal</a>
+                    <a href="testing.html" class="nav-item">🧪 Testing</a>
+                    <a href="gui.html" class="nav-item active">🎨 GUI</a>
+                    <a href="implementation.html" class="nav-item">🎯 Implementación</a>
+                </div>
+            </div>
+        </nav>
+        <div class="section-title">
+            <h1>🎨 GUI (Interfaz Gráfica)</h1>
+            <p class="section-subtitle">Herramienta visual para probar y depurar parsers</p>
+        </div>
+    </header>
+
+    <main class="section-content">
+        <div class="content-container">
+            
+            <!-- RoboLang IDE - Características -->
+            <section class="content-section">
+                <h2>🚀 RoboLang IDE - Características</h2>
+                <p class="section-intro">
+                    RoboLang IDE es una herramienta visual completa que integra todos los componentes 
+                    del compilador en una interfaz gráfica intuitiva. Permite escribir código, 
+                    ver los tokens generados, visualizar el AST y detectar errores en tiempo real.
+                </p>
+
+                <div class="ide-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">✏️</div>
+                        <h3>Editor con Syntax Highlighting</h3>
+                        <ul>
+                            <li>Coloración de sintaxis en tiempo real</li>
+                            <li>Numeración de líneas</li>
+                            <li>Autocompletado de comandos</li>
+                            <li>Detección de errores mientras escribes</li>
+                            <li>Indentación automática</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔤</div>
+                        <h3>Visualizador de Tokens</h3>
+                        <ul>
+                            <li>Lista completa de tokens generados</li>
+                            <li>Tipo y valor de cada token</li>
+                            <li>Número de línea y columna</li>
+                            <li>Resaltado del token actual</li>
+                            <li>Filtrado por tipo de token</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🌳</div>
+                        <h3>Árbol AST Interactivo</h3>
+                        <ul>
+                            <li>Visualización jerárquica del AST</li>
+                            <li>Expansión/colapso de nodos</li>
+                            <li>Información detallada de cada nodo</li>
+                            <li>Navegación sincronizada con código</li>
+                            <li>Exportación del árbol como imagen</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Consola de Errores</h3>
+                        <ul>
+                            <li>Mensajes de error descriptivos</li>
+                            <li>Ubicación exacta del error</li>
+                            <li>Sugerencias de corrección</li>
+                            <li>Stack trace completo</li>
+                            <li>Historial de errores</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h3>Ejemplos Integrados</h3>
+                        <ul>
+                            <li>Biblioteca de ejemplos predefinidos</li>
+                            <li>Casos de prueba para cada parser</li>
+                            <li>Ejemplos de errores comunes</li>
+                            <li>Plantillas de código</li>
+                            <li>Tutoriales interactivos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">⚙️</div>
+                        <h3>Herramientas de Debugging</h3>
+                        <ul>
+                            <li>Ejecución paso a paso del parser</li>
+                            <li>Breakpoints en el código</li>
+                            <li>Inspector de contexto</li>
+                            <li>Visualización de la pila de parsers</li>
+                            <li>Registro de actividad detallado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="ide-screenshot">
+                    <h3>🖼️ Vista General de la Interfaz</h3>
+                    <div class="screenshot-placeholder">
+                        <div class="ide-layout">
+                            <div class="ide-section editor">
+                                <h4>Editor de Código</h4>
+                                <div class="code-sample">
+<pre><code class="language-java">IF (BATTERY > 20) {
+    UP;
+    RIGHT;
+    PENDOWN;
+}
+WHILE (NOT OBSTACLE) {
+    UP;
+}</code></pre>
+                                </div>
+                            </div>
+                            <div class="ide-section tokens">
+                                <h4>Tokens</h4>
+                                <table>
+                                    <tr><td>IF</td><td>Keyword</td></tr>
+                                    <tr><td>(</td><td>LPAREN</td></tr>
+                                    <tr><td>BATTERY</td><td>Sensor</td></tr>
+                                    <tr><td>></td><td>GT</td></tr>
+                                    <tr><td>20</td><td>Number</td></tr>
+                                </table>
+                            </div>
+                            <div class="ide-section ast">
+                                <h4>AST</h4>
+                                <div class="tree-view">
+                                    └─ Program<br>
+                                    &nbsp;&nbsp;&nbsp;├─ IfStatement<br>
+                                    &nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├─ Condition<br>
+                                    &nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└─ Block<br>
+                                    &nbsp;&nbsp;&nbsp;└─ WhileStatement
+                                </div>
+                            </div>
+                            <div class="ide-section console">
+                                <h4>Consola</h4>
+                                <p class="success">✓ Parsing exitoso</p>
+                                <p class="info">AST generado correctamente</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Arquitectura de la GUI -->
+            <section class="content-section">
+                <h2>🏗️ Arquitectura de la GUI</h2>
+                <p class="section-intro">
+                    La GUI está construida siguiendo el patrón MVC (Model-View-Controller) 
+                    para mantener una separación clara entre la lógica y la presentación.
+                </p>
+
+                <div class="mvc-architecture">
+                    <h3>📐 Patrón MVC (Model-View-Controller)</h3>
+                    
+                    <div class="mvc-diagram">
+                        <div class="mvc-component model">
+                            <h4>📦 Model</h4>
+                            <p>Parser, Lexer, AST</p>
+                            <ul>
+                                <li>Lógica de parsing</li>
+                                <li>Estructura de datos AST</li>
+                                <li>Validación sintáctica</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mvc-flow">
+                            <div class="arrow">↔️</div>
+                        </div>
+                        
+                        <div class="mvc-component controller">
+                            <h4>🎮 Controller</h4>
+                            <p>ParserController</p>
+                            <ul>
+                                <li>Coordina Model y View</li>
+                                <li>Maneja eventos de usuario</li>
+                                <li>Actualiza la vista</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mvc-flow">
+                            <div class="arrow">↔️</div>
+                        </div>
+                        
+                        <div class="mvc-component view">
+                            <h4>🖼️ View</h4>
+                            <p>Swing Components</p>
+                            <ul>
+                                <li>JTextPane (editor)</li>
+                                <li>JTable (tokens)</li>
+                                <li>JTree (AST)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="architecture-details">
+                    <h3>🔄 Flujo de Datos</h3>
+                    <div class="data-flow">
+                        <div class="flow-step">
+                            <span class="step-num">1</span>
+                            <div class="step-content">
+                                <strong>Usuario escribe código</strong>
+                                <p>El texto se captura en JTextPane</p>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <span class="step-num">2</span>
+                            <div class="step-content">
+                                <strong>Controller recibe el texto</strong>
+                                <p>Se activa al hacer click en "Parse"</p>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <span class="step-num">3</span>
+                            <div class="step-content">
+                                <strong>Lexer tokeniza</strong>
+                                <p>Genera lista de tokens</p>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <span class="step-num">4</span>
+                            <div class="step-content">
+                                <strong>Parser construye AST</strong>
+                                <p>Usando los tokens generados</p>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <span class="step-num">5</span>
+                            <div class="step-content">
+                                <strong>View actualiza componentes</strong>
+                                <p>Muestra tokens, AST y mensajes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Componentes Principales -->
+            <section class="content-section">
+                <h2>🧩 Componentes Principales</h2>
+                <p class="section-intro">
+                    Cada componente Swing está especializado para mostrar un aspecto 
+                    diferente del proceso de parsing.
+                </p>
+
+                <div class="components-guide">
+                    <div class="component-detail">
+                        <h3>📝 JTextPane - Editor de Código</h3>
+                        <div class="component-info">
+                            <div class="component-code">
+<pre><code class="language-java">// Configuración del editor
+JTextPane codeEditor = new JTextPane();
+codeEditor.setFont(new Font("Consolas", Font.PLAIN, 14));
+
+// Syntax highlighting con StyledDocument
+StyledDocument doc = codeEditor.getStyledDocument();
+SimpleAttributeSet keywordStyle = new SimpleAttributeSet();
+StyleConstants.setForeground(keywordStyle, Color.BLUE);
+StyleConstants.setBold(keywordStyle, true);
+
+// Aplicar estilo a palabras clave
+String text = codeEditor.getText();
+if (text.contains("IF")) {
+    doc.setCharacterAttributes(
+        text.indexOf("IF"), 2, keywordStyle, false);
+}</code></pre>
+                            </div>
+                            <div class="component-features">
+                                <h4>Características:</h4>
+                                <ul>
+                                    <li>Soporte para StyledDocument</li>
+                                    <li>Eventos de DocumentListener</li>
+                                    <li>Undo/Redo integrado</li>
+                                    <li>Búsqueda y reemplazo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-detail">
+                        <h3>📊 JTable - Visualizador de Tokens</h3>
+                        <div class="component-info">
+                            <div class="component-code">
+<pre><code class="language-java">// Modelo de tabla para tokens
+DefaultTableModel tokenModel = new DefaultTableModel(
+    new String[]{"Token", "Tipo", "Línea", "Columna"}, 0
+);
+
+JTable tokenTable = new JTable(tokenModel);
+tokenTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+// Agregar tokens a la tabla
+for (Token token : tokens) {
+    tokenModel.addRow(new Object[]{
+        token.getValue(),
+        token.getType(),
+        token.getLine(),
+        token.getColumn()
+    });
+}
+
+// Resaltar token actual
+tokenTable.setRowSelectionInterval(currentRow, currentRow);</code></pre>
+                            </div>
+                            <div class="component-features">
+                                <h4>Características:</h4>
+                                <ul>
+                                    <li>TableModel personalizable</li>
+                                    <li>Ordenamiento de columnas</li>
+                                    <li>Filtrado de datos</li>
+                                    <li>Selección sincronizada</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-detail">
+                        <h3>🌳 JTree - Visualizador de AST</h3>
+                        <div class="component-info">
+                            <div class="component-code">
+<pre><code class="language-java">// Crear árbol visual del AST
+DefaultMutableTreeNode root = new DefaultMutableTreeNode("Program");
+JTree astTree = new JTree(root);
+
+// Convertir AST a JTree recursivamente
+private void buildTreeNode(ASTNode astNode, 
+                          DefaultMutableTreeNode treeNode) {
+    for (ASTNode child : astNode.getChildren()) {
+        DefaultMutableTreeNode childNode = 
+            new DefaultMutableTreeNode(child.toString());
+        treeNode.add(childNode);
+        buildTreeNode(child, childNode); // Recursión
+    }
+}
+
+// Expandir todo el árbol
+for (int i = 0; i < astTree.getRowCount(); i++) {
+    astTree.expandRow(i);
+}</code></pre>
+                            </div>
+                            <div class="component-features">
+                                <h4>Características:</h4>
+                                <ul>
+                                    <li>TreeModel dinámico</li>
+                                    <li>Iconos personalizados por tipo</li>
+                                    <li>Expansión/colapso de nodos</li>
+                                    <li>Tooltips con información</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-detail">
+                        <h3>💬 JTextArea - Consola de Mensajes</h3>
+                        <div class="component-info">
+                            <div class="component-code">
+<pre><code class="language-java">// Consola para mensajes
+JTextArea console = new JTextArea();
+console.setEditable(false);
+console.setFont(new Font("Consolas", Font.PLAIN, 12));
+
+// Agregar mensajes con colores
+private void logMessage(String message, MessageType type) {
+    String timestamp = new SimpleDateFormat("HH:mm:ss")
+        .format(new Date());
+    
+    String prefix = "";
+    switch(type) {
+        case SUCCESS: prefix = "✓"; break;
+        case ERROR: prefix = "✗"; break;
+        case INFO: prefix = "ℹ"; break;
+    }
+    
+    console.append(String.format("[%s] %s %s\n", 
+        timestamp, prefix, message));
+    
+    // Auto-scroll al último mensaje
+    console.setCaretPosition(console.getDocument().getLength());
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ejemplo de Integración -->
+            <section class="content-section">
+                <h2>🔗 Ejemplo de Integración</h2>
+                <p class="section-intro">
+                    Código completo que muestra cómo conectar todos los componentes 
+                    para crear una GUI funcional.
+                </p>
+
+                <div class="integration-example">
+                    <h3>💻 Clase Principal RoboLangIDE</h3>
+<pre><code class="language-java">public class RoboLangIDE extends JFrame {
+    
+    private JTextPane codeEditor;
+    private JTable tokenTable;
+    private JTree astTree;
+    private JTextArea console;
+    private JButton parseButton;
+    
+    public RoboLangIDE() {
+        setTitle("RoboLang IDE - Parser Visual");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        initComponents();
+        layoutComponents();
+        setupEventHandlers();
+        loadExamples();
+    }
+    
+    private void initComponents() {
+        // Editor de código
+        codeEditor = new JTextPane();
+        setupSyntaxHighlighting();
+        
+        // Tabla de tokens
+        String[] columns = {"Token", "Tipo", "Línea"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
+        tokenTable = new JTable(model);
+        
+        // Árbol AST
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("AST");
+        astTree = new JTree(root);
+        
+        // Consola
+        console = new JTextArea(5, 0);
+        console.setEditable(false);
+        
+        // Botón de parsing
+        parseButton = new JButton("Parse");
+        parseButton.setBackground(new Color(59, 130, 246));
+        parseButton.setForeground(Color.WHITE);
+    }
+    
+    private void setupEventHandlers() {
+        parseButton.addActionListener(e -> parseCode());
+        
+        // Parsing automático al escribir
+        codeEditor.getDocument().addDocumentListener(
+            new DocumentListener() {
+                public void insertUpdate(DocumentEvent e) {
+                    scheduleAutoParse();
+                }
+                public void removeUpdate(DocumentEvent e) {
+                    scheduleAutoParse();
+                }
+                public void changedUpdate(DocumentEvent e) {}
+            }
+        );
+        
+        // Sincronizar selección entre componentes
+        tokenTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                highlightTokenInCode();
+            }
+        });
+    }
+    
+    private void parseCode() {
+        String code = codeEditor.getText();
+        console.append("\n========== INICIANDO PARSING ==========\n");
+        
+        try {
+            // 1. Lexer
+            Lexer lexer = new Lexer(code);
+            List<Token> tokens = lexer.tokenize();
+            updateTokenTable(tokens);
+            console.append("✓ Tokenización exitosa: " 
+                + tokens.size() + " tokens\n");
+            
+            // 2. Parser
+            ParseContext context = new ParseContext(tokens);
+            Parser parser = new ProgramParser();
+            ASTNode ast = parser.parse(context);
+            updateASTTree(ast);
+            console.append("✓ Parsing exitoso: AST generado\n");
+            
+            // 3. Validación adicional
+            validateAST(ast);
+            console.append("✓ Validación completa\n");
+            
+        } catch (LexerException e) {
+            showError("Error Léxico", e);
+        } catch (ParseException e) {
+            showError("Error Sintáctico", e);
+        } catch (Exception e) {
+            showError("Error Inesperado", e);
+        }
+    }
+    
+    private void updateTokenTable(List<Token> tokens) {
+        DefaultTableModel model = 
+            (DefaultTableModel) tokenTable.getModel();
+        model.setRowCount(0);
+        
+        for (Token token : tokens) {
+            model.addRow(new Object[]{
+                token.getValue(),
+                token.getType().toString(),
+                token.getLine()
+            });
+        }
+    }
+    
+    private void updateASTTree(ASTNode ast) {
+        DefaultMutableTreeNode root = 
+            new DefaultMutableTreeNode(ast.getClass().getSimpleName());
+        buildTreeFromAST(ast, root);
+        
+        astTree.setModel(new DefaultTreeModel(root));
+        
+        // Expandir todo
+        for (int i = 0; i < astTree.getRowCount(); i++) {
+            astTree.expandRow(i);
+        }
+    }
+    
+    private void showError(String title, Exception e) {
+        console.append("✗ " + title + ": " + e.getMessage() + "\n");
+        
+        if (e instanceof ParseException) {
+            ParseException pe = (ParseException) e;
+            Token token = pe.getToken();
+            if (token != null) {
+                console.append("  Línea " + token.getLine() 
+                    + ", Token: " + token.getValue() + "\n");
+                highlightErrorInCode(token.getLine());
+            }
+        }
+    }
+    
+    private void layoutComponents() {
+        setLayout(new BorderLayout());
+        
+        // Panel principal con split
+        JSplitPane mainSplit = new JSplitPane(
+            JSplitPane.HORIZONTAL_SPLIT);
+        
+        // Panel izquierdo: Editor
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(new JLabel("Código RoboLang"), BorderLayout.NORTH);
+        leftPanel.add(new JScrollPane(codeEditor), BorderLayout.CENTER);
+        leftPanel.add(parseButton, BorderLayout.SOUTH);
+        
+        // Panel derecho: Resultados
+        JTabbedPane rightTabs = new JTabbedPane();
+        rightTabs.addTab("Tokens", new JScrollPane(tokenTable));
+        rightTabs.addTab("AST", new JScrollPane(astTree));
+        rightTabs.addTab("Consola", new JScrollPane(console));
+        
+        mainSplit.setLeftComponent(leftPanel);
+        mainSplit.setRightComponent(rightTabs);
+        mainSplit.setDividerLocation(500);
+        
+        add(mainSplit, BorderLayout.CENTER);
+        
+        // Barra de herramientas
+        add(createToolBar(), BorderLayout.NORTH);
+    }
+    
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            RoboLangIDE ide = new RoboLangIDE();
+            ide.setSize(1200, 700);
+            ide.setLocationRelativeTo(null);
+            ide.setVisible(true);
+        });
+    }
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- Beneficios Educativos -->
+            <section class="content-section">
+                <h2>🎓 Beneficios Educativos</h2>
+                <p class="section-intro">
+                    La GUI no es solo una herramienta, es un recurso educativo fundamental 
+                    que acelera el aprendizaje y la comprensión del parsing.
+                </p>
+
+                <div class="educational-benefits">
+                    <div class="benefit-card">
+                        <h3>👁️ Feedback Visual Inmediato</h3>
+                        <p>
+                            Los estudiantes ven instantáneamente cómo sus cambios en el código 
+                            afectan los tokens y el AST generado, creando una conexión visual 
+                            entre el código fuente y su representación interna.
+                        </p>
+                        <div class="benefit-example">
+                            <strong>Ejemplo:</strong> Al escribir "IF", inmediatamente aparece 
+                            el token IF en la tabla y se puede ver cómo afecta la estructura del AST.
+                        </div>
+                    </div>
+
+                    <div class="benefit-card">
+                        <h3>🐛 Debugging Interactivo</h3>
+                        <p>
+                            Errores que serían difíciles de entender con solo mensajes de texto 
+                            se vuelven claros cuando se puede ver exactamente dónde falló el parsing 
+                            y qué tokens estaban involucrados.
+                        </p>
+                        <div class="benefit-example">
+                            <strong>Ejemplo:</strong> Un paréntesis faltante se resalta en rojo 
+                            en el editor y el mensaje explica exactamente qué se esperaba.
+                        </div>
+                    </div>
+
+                    <div class="benefit-card">
+                        <h3>🧠 Comprensión del Flujo Completo</h3>
+                        <p>
+                            Ver todo el pipeline (Código → Tokens → AST) en una sola pantalla 
+                            ayuda a entender cómo cada etapa depende de la anterior.
+                        </p>
+                        <div class="benefit-example">
+                            <strong>Ejemplo:</strong> Modificar un operador de comparación 
+                            muestra cómo cambia el token, que a su vez modifica el nodo 
+                            de comparación en el AST.
+                        </div>
+                    </div>
+
+                    <div class="benefit-card">
+                        <h3>🔬 Experimentación Segura</h3>
+                        <p>
+                            Los estudiantes pueden probar casos extremos, sintaxis inválida 
+                            y construcciones complejas sin miedo a "romper" nada, fomentando 
+                            la exploración y el aprendizaje por descubrimiento.
+                        </p>
+                        <div class="benefit-example">
+                            <strong>Ejemplo:</strong> Intentar anidar múltiples IFs o crear 
+                            expresiones booleanas complejas para ver cómo se estructuran.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Uso Práctico para Estudiantes -->
+            <section class="content-section">
+                <h2>🚀 Uso Práctico para Estudiantes</h2>
+                <p class="section-intro">
+                    Guía paso a paso de cómo usar la GUI para probar y validar tus implementaciones de parsers.
+                </p>
+
+                <div class="practical-guide">
+                    <div class="usage-step">
+                        <h3>1️⃣ Cómo Probar Implementaciones</h3>
+                        <div class="step-content">
+                            <ol>
+                                <li>
+                                    <strong>Compilar el proyecto:</strong>
+                                    <code>javac -cp . gui/*.java parser/**/*.java</code>
+                                </li>
+                                <li>
+                                    <strong>Ejecutar la GUI:</strong>
+                                    <code>java gui.RoboLangIDE</code>
+                                </li>
+                                <li>
+                                    <strong>Cargar un ejemplo</strong> desde el menú File → Examples
+                                </li>
+                                <li>
+                                    <strong>Modificar el código</strong> y ver cambios en tiempo real
+                                </li>
+                                <li>
+                                    <strong>Verificar el AST generado</strong> contra el esperado
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="usage-step">
+                        <h3>2️⃣ Depuración de Errores</h3>
+                        <div class="step-content">
+                            <div class="debug-workflow">
+                                <h4>Flujo de Debugging:</h4>
+                                <ol>
+                                    <li>🔴 <strong>Error aparece en consola</strong></li>
+                                    <li>📍 <strong>Localizar línea del error</strong> (resaltada en rojo)</li>
+                                    <li>🔤 <strong>Revisar tokens</strong> en esa línea</li>
+                                    <li>🌳 <strong>Ver hasta dónde llegó el AST</strong></li>
+                                    <li>💡 <strong>Identificar el parser que falló</strong></li>
+                                    <li>🔧 <strong>Corregir implementación</strong></li>
+                                    <li>🔄 <strong>Recompilar y probar</strong></li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="usage-step">
+                        <h3>3️⃣ Validación de AST Generado</h3>
+                        <div class="step-content">
+                            <h4>Checklist de Validación:</h4>
+                            <ul class="validation-checklist">
+                                <li>✅ ¿La estructura del árbol es correcta?</li>
+                                <li>✅ ¿Los tipos de nodos son los esperados?</li>
+                                <li>✅ ¿Los valores en los nodos son correctos?</li>
+                                <li>✅ ¿La jerarquía padre-hijo es apropiada?</li>
+                                <li>✅ ¿Se consumieron todos los tokens?</li>
+                                <li>✅ ¿No hay nodos duplicados o faltantes?</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pro-tips">
+                    <h3>💡 Tips Profesionales</h3>
+                    <div class="tips-grid">
+                        <div class="tip">
+                            <h4>🎯 Casos de Prueba</h4>
+                            <p>Crea un archivo con casos de prueba para cada parser y úsalos sistemáticamente</p>
+                        </div>
+                        <div class="tip">
+                            <h4>📸 Screenshots</h4>
+                            <p>Captura pantallas del AST correcto para comparación visual</p>
+                        </div>
+                        <div class="tip">
+                            <h4>📝 Registro</h4>
+                            <p>Mantén un log de errores encontrados y sus soluciones</p>
+                        </div>
+                        <div class="tip">
+                            <h4>🔄 Iteración</h4>
+                            <p>Prueba → Falla → Corrige → Repite hasta el éxito</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navegación -->
+            <section class="navigation-section">
+                <div class="nav-card completed">
+                    <h3>✅ Has completado: GUI (Interfaz Gráfica)</h3>
+                    <p>
+                        Ahora conoces la herramienta visual para probar tus parsers. 
+                        El último paso es la implementación práctica de los 16 parsers.
+                    </p>
+                </div>
+                <div class="nav-actions">
+                    <a href="testing.html" class="btn btn-secondary">← Testing</a>
+                    <a href="implementation.html" class="btn btn-primary btn-implementation">
+                        Siguiente: Implementación
+                        <span class="btn-arrow">→</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

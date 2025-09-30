@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing - Ejecución de Pruebas | RoboLang Parser</title>
+    <meta name="description" content="Cómo ejecutar y entender los tests implementados en src/test del proyecto RoboLang">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parser-implementation.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="section-header">
+        <nav class="section-nav">
+            <div class="nav-content">
+                <a href="index.html" class="nav-home">🏠 Inicio</a>
+                <div class="nav-sections">
+                    <a href="ast.html" class="nav-item">🏗️ AST</a>
+                    <a href="parsers.html" class="nav-item">⚙️ Parsers</a>
+                    <a href="testing.html" class="nav-item active">🧪 Testing</a>
+                    <a href="gui.html" class="nav-item">🎨 GUI</a>
+                    <a href="implementation.html" class="nav-item">🎯 Implementación</a>
+                </div>
+            </div>
+        </nav>
+        <div class="section-title">
+            <h1>🧪 Tests Implementados</h1>
+            <p class="section-subtitle">Ejecución y análisis de las pruebas del proyecto</p>
+        </div>
+    </header>
+
+    <main class="section-content">
+        <div class="content-container">
+            
+            <!-- Introducción a los Tests del Proyecto -->
+            <section class="content-section">
+                <h2>📂 Tests Existentes en el Proyecto</h2>
+                <p class="section-intro">
+                    El proyecto RoboLang incluye una suite completa de tests JUnit 5 ubicados en <code>src/test/</code>. 
+                    Estos tests validan tanto el analizador léxico como los parsers implementados.
+                </p>
+
+                <div class="test-structure">
+                    <div class="structure-card">
+                        <h3>🗂️ Estructura de Tests</h3>
+                        <div class="directory-tree">
+                            <code>src/test/java/</code>
+                            <div class="tree-level">
+                                <code>├── edu/eam/ingesoft/tlf/</code>
+                                <div class="tree-sublevel">
+                                    <code>│   ├── GenericGrammarTest.java</code><br>
+                                    <code>│   └── RoboLangReflectionTest.java</code>
+                                </div>
+                                <code>├── lexer/</code>
+                                <div class="tree-sublevel">
+                                    <code>│   ├── RoboLangLexerTest.java</code><br>
+                                    <code>│   ├── RoboLangLexerIntegrationTest.java</code><br>
+                                    <code>│   └── matchers/ (6 tests de tokens)</code>
+                                </div>
+                                <code>└── parser/</code>
+                                <div class="tree-sublevel">
+                                    <code>    ├── ParserTest.java</code><br>
+                                    <code>    └── parsers/ (14 tests de parsers)</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="structure-card">
+                        <h3>🎯 Tecnologías de Testing</h3>
+                        <ul>
+                            <li><strong>JUnit 5:</strong> Framework principal de testing</li>
+                            <li><strong>Maven Surefire:</strong> Plugin para ejecutar tests</li>
+                            <li><strong>Assertions estándar:</strong> assertEquals, assertNotNull, assertThrows</li>
+                            <li><strong>Setup/Teardown:</strong> @BeforeEach para inicialización</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ejecutar Tests -->
+            <section class="content-section">
+                <h2>🚀 Cómo Ejecutar los Tests</h2>
+                <p class="section-intro">
+                    El proyecto usa Maven como herramienta de build. Puedes ejecutar los tests de varias maneras.
+                </p>
+
+                <div class="execution-methods">
+                    <div class="method-card">
+                        <h3>💻 Línea de Comandos</h3>
+                        <div class="command-section">
+                            <h4>Ejecutar todos los tests:</h4>
+                            <pre class="command-block"><code>mvn test</code></pre>
+                            
+                            <h4>Ejecutar tests con más información:</h4>
+                            <pre class="command-block"><code>mvn test -X</code></pre>
+                            
+                            <h4>Ejecutar un test específico:</h4>
+                            <pre class="command-block"><code>mvn test -Dtest=BooleanParserTest</code></pre>
+                            
+                            <h4>Ejecutar tests de una categoría:</h4>
+                            <pre class="command-block"><code>mvn test -Dtest="parser.parsers.*Test"</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="method-card">
+                        <h3>🔧 IDEs Populares</h3>
+                        <div class="ide-instructions">
+                            <div class="ide-section">
+                                <strong>IntelliJ IDEA:</strong>
+                                <ul>
+                                    <li>Click derecho en <code>src/test/</code> → "Run All Tests"</li>
+                                    <li>Click derecho en un test específico → "Run TestName"</li>
+                                    <li>Usar el panel "Run" para ver resultados detallados</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="ide-section">
+                                <strong>Eclipse:</strong>
+                                <ul>
+                                    <li>Click derecho en proyecto → "Run As" → "JUnit Test"</li>
+                                    <li>Ver resultados en la vista "JUnit"</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="ide-section">
+                                <strong>VS Code:</strong>
+                                <ul>
+                                    <li>Instalar extensión "Java Test Runner"</li>
+                                    <li>Usar el panel lateral "Testing"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-output">
+                    <h3>📊 Interpretando la Salida</h3>
+                    <div class="output-example">
+                        <h4>Ejemplo de Salida Exitosa:</h4>
+                        <pre class="output-block success"><code>[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running parser.parsers.BooleanParserTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] BUILD SUCCESS</code></pre>
+                    </div>
+                    
+                    <div class="output-example">
+                        <h4>Ejemplo de Test Fallido:</h4>
+                        <pre class="output-block error"><code>[ERROR] Tests run: 5, Failures: 1, Errors: 0, Skipped: 0
+[ERROR] Failures: 
+[ERROR] testParseTrue(parser.parsers.BooleanParserTest)
+[ERROR]   Expected: true
+[ERROR]   Actual: false</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Análisis de Tests Específicos -->
+            <section class="content-section">
+                <h2>🔍 Análisis de Tests Implementados</h2>
+                <p class="section-intro">
+                    Veamos cómo están estructurados los tests existentes para entender los patrones de testing.
+                </p>
+
+                <div class="test-analysis">
+                    <div class="test-category">
+                        <h3>🔤 Tests de Lexer</h3>
+                        <div class="test-examples">
+                            <div class="test-file">
+                                <h4>📄 RoboLangLexerTest.java</h4>
+                                <div class="test-content">
+                                    <p><strong>Propósito:</strong> Validar tokenización completa</p>
+                                    <div class="test-methods">
+                                        <span class="method">testTokenizeSimpleProgram()</span>
+                                        <span class="method">testTokenizeComplexExpression()</span>
+                                        <span class="method">testTokenizeWithComments()</span>
+                                    </div>
+                                    <div class="test-pattern">
+                                        <strong>Patrón:</strong>
+                                        <pre><code class="language-java">String input = "UP; DOWN;";
+List&lt;Token&gt; tokens = lexer.tokenize(input);
+assertEquals(4, tokens.size());
+assertEquals(TokenType.COMMAND_UP, tokens.get(0).getType());</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="test-file">
+                                <h4>📄 matchers/NumberMatcherTest.java</h4>
+                                <div class="test-content">
+                                    <p><strong>Propósito:</strong> Validar reconocimiento de números</p>
+                                    <div class="test-methods">
+                                        <span class="method">testMatchSingleDigit()</span>
+                                        <span class="method">testMatchMultipleDigits()</span>
+                                        <span class="method">testNoMatchLetter()</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-category">
+                        <h3>⚙️ Tests de Parsers</h3>
+                        <div class="test-examples">
+                            <div class="test-file">
+                                <h4>📄 BooleanParserTest.java</h4>
+                                <div class="test-content">
+                                    <p><strong>Propósito:</strong> Validar parsing de valores booleanos</p>
+                                    <div class="test-methods">
+                                        <span class="method success">testParseTrue() ✅</span>
+                                        <span class="method success">testParseFalse() ✅</span>
+                                        <span class="method warning">testParseNonBooleanThrowsException() ⚠️</span>
+                                    </div>
+                                    <div class="test-pattern">
+                                        <strong>Patrón AAA (Arrange-Act-Assert):</strong>
+                                        <pre><code class="language-java">// Arrange
+String input = "true";
+List&lt;Token&gt; tokens = lexer.tokenize(input);
+ParseContext context = new ParseContext(tokens);
+
+// Act
+BooleanNode result = parser.parse(context);
+
+// Assert
+assertNotNull(result);
+assertTrue(result.getValue());</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="test-file">
+                                <h4>📄 MovementCommandParserTest.java</h4>
+                                <div class="test-content">
+                                    <p><strong>Propósito:</strong> Validar parsing de comandos de movimiento</p>
+                                    <div class="test-methods">
+                                        <span class="method success">testParseUpCommand() ✅</span>
+                                        <span class="method success">testParseDownCommand() ✅</span>
+                                        <span class="method success">testParseLeftCommand() ✅</span>
+                                        <span class="method success">testParseRightCommand() ✅</span>
+                                        <span class="method warning">testParseInvalidCommandThrowsException() ⚠️</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-category">
+                        <h3>🏗️ Tests de Integración</h3>
+                        <div class="test-examples">
+                            <div class="test-file">
+                                <h4>📄 RoboLangLexerIntegrationTest.java</h4>
+                                <div class="test-content">
+                                    <p><strong>Propósito:</strong> Validar flujo completo de tokenización</p>
+                                    <div class="test-methods">
+                                        <span class="method">testCompleteProgram()</span>
+                                        <span class="method">testNestedStatements()</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patrones de Testing -->
+            <section class="content-section">
+                <h2>🎯 Patrones de Testing Implementados</h2>
+                <p class="section-intro">
+                    Los tests del proyecto siguen patrones establecidos de testing. Aquí los patrones más importantes.
+                </p>
+
+                <div class="testing-patterns">
+                    <div class="pattern-card">
+                        <h3>✅ Tests de Casos Válidos</h3>
+                        <p>Validan que el parser funciona correctamente con entrada válida.</p>
+                        <div class="pattern-example">
+                            <strong>Ejemplo:</strong>
+                            <pre><code class="language-java">@Test
+public void testParseTrue() throws ParseException {
+    String input = "true";
+    // ... tokenización ...
+    BooleanNode result = parser.parse(context);
+    
+    assertNotNull(result);
+    assertTrue(result.getValue());
+    assertEquals("Boolean(true)", result.getNodeType());
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3>❌ Tests de Casos Inválidos</h3>
+                        <p>Validan que el parser lanza excepciones apropiadas con entrada inválida.</p>
+                        <div class="pattern-example">
+                            <strong>Ejemplo:</strong>
+                            <pre><code class="language-java">@Test
+public void testParseNonBooleanThrowsException() {
+    String input = "UP";  // No es un booleano
+    // ... tokenización ...
+    
+    assertThrows(ParseException.class, () -&gt; {
+        parser.parse(context);
+    });
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3>🔄 Tests de Estado del Context</h3>
+                        <p>Validan que el parser actualiza correctamente la posición en los tokens.</p>
+                        <div class="pattern-example">
+                            <strong>Ejemplo:</strong>
+                            <pre><code class="language-java">@Test
+public void testParseBooleanUpdatesContext() throws ParseException {
+    String input = "true UP";
+    // ... setup ...
+    
+    assertEquals(TokenType.BOOLEAN_TRUE, context.getCurrentToken().getType());
+    parser.parse(context);
+    assertEquals(TokenType.COMMAND_UP, context.getCurrentToken().getType());
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3>🏗️ Tests de Estructura del AST</h3>
+                        <p>Validan que el parser construye correctamente los nodos del AST.</p>
+                        <div class="pattern-example">
+                            <strong>Ejemplo:</strong>
+                            <pre><code class="language-java">@Test
+public void testParseUpCommand() throws ParseException {
+    // ... setup ...
+    MovementCommandNode result = parser.parse(context);
+    
+    assertEquals("UP", result.getCommand());
+    assertEquals(TokenType.COMMAND_UP, result.getCommandType());
+    assertEquals("MovementCommand(UP)", result.getNodeType());
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cobertura de Tests -->
+            <section class="content-section">
+                <h2>📊 Cobertura de Tests Actual</h2>
+                <p class="section-intro">
+                    Estado actual de los tests implementados en el proyecto.
+                </p>
+
+                <div class="coverage-overview">
+                    <div class="coverage-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">23+</div>
+                            <div class="stat-label">Tests Totales</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">14</div>
+                            <div class="stat-label">Tests de Parsers</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">8</div>
+                            <div class="stat-label">Tests de Lexer</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Tests de Integración</div>
+                        </div>
+                    </div>
+
+                    <div class="coverage-details">
+                        <h3>🎯 Tests de Parsers Existentes</h3>
+                        <div class="parser-tests-grid">
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">BooleanParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">NumberParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">MovementCommandParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">BooleanSensorParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">NumericSensorParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">PenCommandParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">SimpleCommandParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">ComparisonExpressionParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">AndExpressionParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">OrExpressionParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">IfStatementParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">WhileStatementParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">RepeatStatementParserTest</span>
+                            </div>
+                            <div class="test-status implemented">
+                                <span class="status-icon">✅</span>
+                                <span class="test-name">ParserTest</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Debuggear Tests -->
+            <section class="content-section">
+                <h2>🐛 Debugging de Tests</h2>
+                <p class="section-intro">
+                    Técnicas para debuggear cuando los tests fallan.
+                </p>
+
+                <div class="debugging-techniques">
+                    <div class="technique-card">
+                        <h3>🔍 Análisis de Fallos</h3>
+                        <div class="debugging-steps">
+                            <div class="step">
+                                <strong>1. Leer el mensaje de error completo</strong>
+                                <p>Los tests de JUnit proporcionan información detallada sobre qué se esperaba vs. qué se obtuvo.</p>
+                            </div>
+                            <div class="step">
+                                <strong>2. Verificar la tokenización</strong>
+                                <p>Muchos errores vienen de tokens mal formados. Imprime los tokens generados.</p>
+                                <pre><code class="language-java">System.out.println("Tokens: " + tokens);</code></pre>
+                            </div>
+                            <div class="step">
+                                <strong>3. Verificar el estado del contexto</strong>
+                                <p>Asegúrate de que el contexto esté en la posición correcta.</p>
+                                <pre><code class="language-java">System.out.println("Current token: " + context.getCurrentToken());</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="technique-card">
+                        <h3>🛠️ Herramientas de Debug</h3>
+                        <ul>
+                            <li><strong>Breakpoints:</strong> Usa el debugger del IDE para pausar en líneas específicas</li>
+                            <li><strong>System.out.println:</strong> Imprime valores intermedios</li>
+                            <li><strong>Logs de Maven:</strong> Usa <code>mvn test -X</code> para ver logs detallados</li>
+                            <li><strong>Tests individuales:</strong> Ejecuta un solo test para aislar el problema</li>
+                        </ul>
+                    </div>
+
+                    <div class="technique-card">
+                        <h3>⚡ Ejecución Selectiva</h3>
+                        <div class="selective-commands">
+                            <div class="command-example">
+                                <strong>Un test específico:</strong>
+                                <pre><code class="language-bash">mvn test -Dtest=BooleanParserTest#testParseTrue</code></pre>
+                            </div>
+                            <div class="command-example">
+                                <strong>Una clase de test:</strong>
+                                <pre><code class="language-bash">mvn test -Dtest=BooleanParserTest</code></pre>
+                            </div>
+                            <div class="command-example">
+                                <strong>Tests de parsers únicamente:</strong>
+                                <pre><code class="language-bash">mvn test -Dtest="parser.parsers.*Test"</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recomendaciones -->
+            <section class="content-section">
+                <h2>💡 Recomendaciones de Uso</h2>
+                <p class="section-intro">
+                    Mejores prácticas para trabajar con los tests del proyecto.
+                </p>
+
+                <div class="recommendations">
+                    <div class="recommendation-card">
+                        <h3>🔄 Desarrollo Iterativo</h3>
+                        <ul>
+                            <li>Ejecuta los tests después de cada cambio en el código</li>
+                            <li>Comienza implementando parsers que ya tienen tests</li>
+                            <li>Usa los tests como especificación de comportamiento</li>
+                            <li>Si un test falla, lee el código del test para entender qué espera</li>
+                        </ul>
+                    </div>
+
+                    <div class="recommendation-card">
+                        <h3>📚 Aprendizaje</h3>
+                        <ul>
+                            <li>Estudia los tests existentes antes de implementar parsers nuevos</li>
+                            <li>Los tests muestran cómo usar ParseContext y crear nodos AST</li>
+                            <li>Observa los patrones de manejo de excepciones</li>
+                            <li>Nota cómo se valida el estado del contexto después del parsing</li>
+                        </ul>
+                    </div>
+
+                    <div class="recommendation-card">
+                        <h3>🎯 Testing de Parsers Nuevos</h3>
+                        <ul>
+                            <li>Crea tests para tus nuevos parsers siguiendo los patrones existentes</li>
+                            <li>Incluye casos válidos, inválidos y límite</li>
+                            <li>Valida tanto el resultado como el estado del contexto</li>
+                            <li>Usa nombres descriptivos para los métodos de test</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

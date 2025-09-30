@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoboLang Parser - Guía de Implementación | Universidad EAM</title>
+    <meta name="description" content="Guía completa para estudiantes de Teoría de Lenguajes Formales - Implementación de parsers para el lenguaje RoboLang">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parser-implementation.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🤖 RoboLang Parser</h1>
+                <p class="subtitle">Guía de Implementación - Universidad EAM</p>
+            </div>
+            <div class="course-info">
+                <span class="course-badge">Teoría de Lenguajes Formales</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h2>Aprende a Implementar Parsers Paso a Paso</h2>
+                <p class="hero-description">
+                    Una guía completa de autoestudio para dominar la implementación de parsers 
+                    para el lenguaje de control de robots RoboLang. Desde los fundamentos 
+                    hasta la implementación práctica de 16 parsers diferentes.
+                </p>
+                
+                <div class="progress-overview">
+                    <div class="progress-card">
+                        <div class="progress-number">16</div>
+                        <div class="progress-label">Parsers a Implementar</div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-number">6</div>
+                        <div class="progress-label">Secciones de Aprendizaje</div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-number">4</div>
+                        <div class="progress-label">Niveles de Dificultad</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="learning-path">
+            <h2>🎯 Ruta de Aprendizaje Estructurada</h2>
+            <p class="path-description">
+                Sigue estas secciones en orden secuencial para un aprendizaje óptimo. 
+                Cada sección prepara los fundamentos necesarios para la siguiente.
+            </p>
+
+            <div class="sections-grid">
+                <!-- Sección 1: Arquitectura y AST -->
+                <article class="section-card foundation">
+                    <div class="card-header">
+                        <span class="section-icon">🏗️</span>
+                        <div class="section-info">
+                            <h3>Arquitectura y AST</h3>
+                            <span class="section-level">Fundamentos</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            Comprende los fundamentos del Árbol de Sintaxis Abstracta, 
+                            la jerarquía de nodos y la arquitectura del compilador RoboLang.
+                        </p>
+                        <ul class="section-topics">
+                            <li>¿Qué es un AST?</li>
+                            <li>Jerarquía de nodos base</li>
+                            <li>Patrón Composite</li>
+                            <li>Ejemplo completo paso a paso</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>📝 Gramática Base:</strong> 
+                                <code>&lt;program&gt; ::= &lt;statement_list&gt;</code>
+                            </div>
+                            <div class="bnf-visual">
+                                <a href="robotlangbnf.html#program" target="_blank" class="bnf-link">
+                                    📖 Ver diagrama visual completo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="ast.html" class="btn btn-primary">
+                            Comenzar con AST
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 30-45 min</span>
+                    </div>
+                </article>
+
+                <!-- Sección 2: Parsers -->
+                <article class="section-card construction">
+                    <div class="card-header">
+                        <span class="section-icon">⚙️</span>
+                        <div class="section-info">
+                            <h3>Parsers - Construcción</h3>
+                            <span class="section-level">Construcción</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            Aprende cómo se construyen los parsers desde los más simples 
+                            hasta los más complejos, con ejemplos prácticos y patrones.
+                        </p>
+                        <ul class="section-topics">
+                            <li>Interface Parser&lt;T&gt;</li>
+                            <li>ParseContext en detalle</li>
+                            <li>Parser simple: NumberParser</li>
+                            <li>Parser complejo: IfStatementParser</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>📝 Ejemplo:</strong> 
+                                <code>&lt;number&gt; ::= [0-9]+</code>
+                            </div>
+                            <div class="bnf-visual">
+                                <a href="robotlangbnf.html#number" target="_blank" class="bnf-link">
+                                    📖 Ver diagrama de números
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="parsers.html" class="btn btn-primary">
+                            Explorar Parsers
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 45-60 min</span>
+                    </div>
+                </article>
+
+                <!-- Sección 3: Parser Principal -->
+                <article class="section-card coordination">
+                    <div class="card-header">
+                        <span class="section-icon">🎛️</span>
+                        <div class="section-info">
+                            <h3>Parser Principal</h3>
+                            <span class="section-level">Coordinación</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            Comprende cómo el Parser.java coordinador orquesta todos los 
+                            parsers específicos siguiendo patrones de diseño sólidos.
+                        </p>
+                        <ul class="section-topics">
+                            <li>Patrón Facade implementado</li>
+                            <li>Composición de parsers</li>
+                            <li>Manejo centralizado de errores</li>
+                            <li>Principios SOLID aplicados</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>📝 Entrada:</strong> 
+                                <code>String código → ProgramNode AST</code>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="main-parser.html" class="btn btn-primary">
+                            Conocer Parser Principal
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 25-35 min</span>
+                    </div>
+                </article>
+
+                <!-- Sección 4: Testing -->
+                <article class="section-card testing">
+                    <div class="card-header">
+                        <span class="section-icon">🧪</span>
+                        <div class="section-info">
+                            <h3>Pruebas (Testing)</h3>
+                            <span class="section-level">Validación</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            Domina las técnicas de testing para parsers, desde casos 
+                            básicos hasta pruebas complejas de manejo de errores.
+                        </p>
+                        <ul class="section-topics">
+                            <li>Filosofía de testing en parsers</li>
+                            <li>Patrón AAA (Arrange-Act-Assert)</li>
+                            <li>Tests para casos válidos e inválidos</li>
+                            <li>Framework JUnit aplicado</li>
+                        </ul>
+                    </div>
+                    <div class="card-actions">
+                        <a href="testing.html" class="btn btn-primary">
+                            Aprender Testing
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 20-30 min</span>
+                    </div>
+                </article>
+
+                <!-- Sección 5: GUI -->
+                <article class="section-card tools">
+                    <div class="card-header">
+                        <span class="section-icon">🎨</span>
+                        <div class="section-info">
+                            <h3>GUI (Interfaz Gráfica)</h3>
+                            <span class="section-level">Herramientas</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            Utiliza la interfaz gráfica RoboLang IDE para probar, 
+                            depurar y visualizar tus implementaciones de parsers.
+                        </p>
+                        <ul class="section-topics">
+                            <li>RoboLang IDE - Características</li>
+                            <li>Visualizador de tokens</li>
+                            <li>Árbol AST interactivo</li>
+                            <li>Debugging en tiempo real</li>
+                        </ul>
+                    </div>
+                    <div class="card-actions">
+                        <a href="gui.html" class="btn btn-primary">
+                            Conocer la GUI
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 15-20 min</span>
+                    </div>
+                </article>
+
+                <!-- Sección 6: Implementación -->
+                <article class="section-card implementation">
+                    <div class="card-header">
+                        <span class="section-icon">🎯</span>
+                        <div class="section-info">
+                            <h3>Tarea de Implementación</h3>
+                            <span class="section-level">Práctica</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            Lista completa de 16 parsers a implementar, organizados 
+                            por nivel de dificultad con guías detalladas.
+                        </p>
+                        <ul class="section-topics">
+                            <li>4 Literal Parsers (⭐ Básico)</li>
+                            <li>3 Command Parsers (⭐⭐ Medio)</li>
+                            <li>5 Expression Parsers (⭐⭐⭐ Avanzado)</li>
+                            <li>4 Statement Parsers (⭐⭐⭐⭐ Experto)</li>
+                        </ul>
+                    </div>
+                    <div class="card-actions">
+                        <a href="implementation.html" class="btn btn-primary btn-implementation">
+                            Comenzar Implementación
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 4-6 horas</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="quick-access">
+            <h2>🚀 Acceso Rápido</h2>
+            <div class="quick-links">
+                <a href="robotlangbnf.html" target="_blank" class="quick-link grammar">
+                    <span class="quick-icon">📝</span>
+                    <div>
+                        <strong>Gramática BNF Visual</strong>
+                        <p>Consulta la gramática completa con diagramas</p>
+                    </div>
+                </a>
+                <a href="implementation.html#progress-tracker" class="quick-link progress">
+                    <span class="quick-icon">📊</span>
+                    <div>
+                        <strong>Seguimiento de Progreso</strong>
+                        <p>Revisa tu avance en los 16 parsers</p>
+                    </div>
+                </a>
+                <a href="gui.html" class="quick-link tools-access">
+                    <span class="quick-icon">🛠️</span>
+                    <div>
+                        <strong>Herramientas de Desarrollo</strong>
+                        <p>Acceso directo a la GUI y testing</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section class="study-guide">
+            <h2>📚 Guía de Autoestudio</h2>
+            <div class="study-recommendations">
+                <div class="study-card">
+                    <h3>🎯 Secuencia Obligatoria</h3>
+                    <p>
+                        Sigue las secciones en orden: 
+                        <strong>AST → Parsers → Parser Principal → Testing → GUI → Implementación</strong>
+                    </p>
+                </div>
+                <div class="study-card">
+                    <h3>⏰ Tiempo Recomendado</h3>
+                    <p>
+                        Dedica <strong>2-3 sesiones de estudio</strong> para completar 
+                        toda la implementación con comprensión profunda.
+                    </p>
+                </div>
+                <div class="study-card">
+                    <h3>✅ Autovalidación</h3>
+                    <p>
+                        Usa los tests y la GUI para verificar cada implementación 
+                        antes de continuar con la siguiente.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Universidad EAM</h4>
+                <p>Teoría de Lenguajes Formales</p>
+                <p>Proyecto RoboLang Parser</p>
+            </div>
+            <div class="footer-section">
+                <h4>Recursos</h4>
+                <ul>
+                    <li><a href="robotlangbnf.html" target="_blank">Gramática BNF</a></li>
+                    <li><a href="implementation.html">Lista de Parsers</a></li>
+                    <li><a href="testing.html">Guía de Testing</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto Académico</h4>
+                <p>Consulta con tu instructor para dudas específicas</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Universidad EAM - Proyecto educativo de código abierto</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
