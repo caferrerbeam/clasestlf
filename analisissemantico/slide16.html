@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Ejemplo Completo Paso a Paso - Programa Real</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 16 de 23</div>
+
+    <div class="container">
+        <h1>Ejemplo Completo Paso a Paso - Programa Real</h1>
+        <div class="content">
+            <h3>Código de ejemplo completo:</h3>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">int</span> y = <span class="number">10</span>;
+<span class="keyword">if</span> (x &lt; y) {
+    <span class="keyword">int</span> z = x + y;
+    x = z;
+}
+y = x + <span class="number">1</span>;
+</div>
+<h3>Paso 1: AST generado por el parser</h3>
+<pre><code class="language-">ProgramNode
+├── VariableDeclarationNode
+│   ├── type: int
+│   ├── name: "x"
+│   └── initializer: NumberNode(5)
+├── VariableDeclarationNode
+│   ├── type: int
+│   ├── name: "y"
+│   └── initializer: NumberNode(10)
+├── IfStatementNode
+│   ├── condition: BinaryOpNode
+│   │   ├── left: IdentifierNode("x")
+│   │   ├── operator: &lt;
+│   │   └── right: IdentifierNode("y")
+│   ├── thenBranch: BlockNode
+│   │   ├── VariableDeclarationNode
+│   │   │   ├── type: int
+│   │   │   ├── name: "z"
+│   │   │   └── initializer: BinaryOpNode
+│   │   │       ├── left: IdentifierNode("x")
+│   │   │       ├── operator: +
+│   │   │       └── right: IdentifierNode("y")
+│   │   └── AssignmentNode
+│   │       ├── name: "x"
+│   │       └── value: IdentifierNode("z")
+│   └── elseBranch: null
+└── AssignmentNode
+    ├── name: "y"
+    └── value: BinaryOpNode
+        ├── left: IdentifierNode("x")
+        ├── operator: +
+        └── right: NumberNode(1)
+</code></pre>
+<h3>Paso 2: Análisis semántico línea por línea</h3>
+<h4>Línea 1: <code>int x = 5;</code></h4>
+<pre><code class="language-">INICIO ANÁLISIS LÍNEA 1
+─────────────────────────────────────
+
+Nodo: VariableDeclarationNode(type=int, name="x", initializer=NumberNode(5))
+
+PASO 1: Visitar VariableDeclarationNode
+  └─&gt; semanticAnalyzer.visitDeclarationNode(node)
+
+PASO 2: Verificar si 'x' ya existe en scope actual
+  └─&gt; symbolTable.existsInCurrentScope("x")
+  └─&gt; Retorna: false (no existe)
+  └─&gt; ✓ OK
+
+PASO 3: Verificar tipo del inicializador
+  └─&gt; node.initializer.accept(this)
+  └─&gt; numberNode(5).accept(this)
+  └─&gt; semanticAnalyzer.visitNumberNode(NumberNode(5))
+  └─&gt; 5 % 1 == 0 → true
+  └─&gt; numberNode.type = Type.INT
+  └─&gt; Retorna: Type.INT
+
+PASO 4: Verificar compatibilidad de tipos
+  └─&gt; declaredType: int
+  └─&gt; initType: int
+  └─&gt; int.isCompatible(int) → true
+  └─&gt; ✓ OK
+
+PASO 5: Insertar en tabla de símbolos
+  └─&gt; symbol = Symbol("x", Type.INT, Scope.GLOBAL, línea=1)
+  └─&gt; symbolTable.insert(symbol)
+  └─&gt; ✓ Insertado
+
+ESTADO DESPUÉS DE LÍNEA 1:
+──────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+└────────┴──────┴────────┴───────┴───────┘
+
+AST Anotado:
+  VariableDeclarationNode(name="x") [type=int ✓]
+    └─ NumberNode(5) [type=int ✓]
+
+Errores: []
+</code></pre>
+<h4>Línea 2: <code>int y = 10;</code></h4>
+<pre><code class="language-">INICIO ANÁLISIS LÍNEA 2
+─────────────────────────────────────
+
+Nodo: VariableDeclarationNode(type=int, name="y", initializer=NumberNode(10))
+
+PASO 1: Visitar VariableDeclarationNode
+  └─&gt; semanticAnalyzer.visitDeclarationNode(node)
+
+PASO 2: Verificar si 'y' ya existe
+  └─&gt; symbolTable.existsInCurrentScope("y")
+  └─&gt; Retorna: false
+  └─&gt; ✓ OK
+
+PASO 3: Verificar tipo del inicializador
+  └─&gt; NumberNode(10).accept(this)
+  └─&gt; 10 % 1 == 0 → true
+  └─&gt; Retorna: Type.INT
+
+PASO 4: Verificar compatibilidad
+  └─&gt; int.isCompatible(int) → true
+  └─&gt; ✓ OK
+
+PASO 5: Insertar en tabla
+  └─&gt; Symbol("y", Type.INT, Scope.GLOBAL, línea=2)
+  └─&gt; ✓ Insertado
+
+ESTADO DESPUÉS DE LÍNEA 2:
+──────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+
+Errores: []
+</code></pre>
+<h4>Línea 3: <code>if (x < y) {</code></h4>
+<pre><code class="language-">INICIO ANÁLISIS LÍNEA 3
+─────────────────────────────────────
+
+Nodo: IfStatementNode(condition=BinaryOpNode(&lt;, x, y))
+
+PASO 1: Visitar IfStatementNode
+  └─&gt; semanticAnalyzer.visitIfStatementNode(node)
+
+PASO 2: Verificar tipo de la condición
+  └─&gt; node.condition.accept(this)
+  └─&gt; binaryOpNode(&lt;).accept(this)
+  └─&gt; semanticAnalyzer.visitBinaryOpNode(node)
+
+PASO 3: Verificar operando izquierdo (x)
+  └─&gt; node.left.accept(this)
+  └─&gt; identifierNode("x").accept(this)
+  └─&gt; semanticAnalyzer.visitIdentifierNode(identifierNode)
+  └─&gt; symbolTable.lookup("x")
+  └─&gt; Encontrado: Symbol("x", Type.INT) ✓
+  └─&gt; identifierNode.type = Type.INT
+  └─&gt; identifierNode.resolvedSymbol = Symbol("x", ...)
+  └─&gt; Retorna: Type.INT
+
+PASO 4: Verificar operando derecho (y)
+  └─&gt; node.right.accept(this)
+  └─&gt; identifierNode("y").accept(this)
+  └─&gt; symbolTable.lookup("y")
+  └─&gt; Encontrado: Symbol("y", Type.INT) ✓
+  └─&gt; Retorna: Type.INT
+
+PASO 5: Verificar operación: INT &lt; INT
+  └─&gt; Operador: &lt; (comparación)
+  └─&gt; leftType.isNumeric() → true ✓
+  └─&gt; rightType.isNumeric() → true ✓
+  └─&gt; binaryOpNode.type = Type.BOOLEAN
+  └─&gt; Retorna: Type.BOOLEAN
+
+PASO 6: Verificar que la condición es booleana
+  └─&gt; conditionType.isBoolean() → true ✓
+
+ESTADO EN LÍNEA 3:
+──────────────────
+
+AST Anotado:
+  IfStatementNode [✓]
+    └─ condition: BinaryOpNode(&lt;) [type=boolean ✓]
+        ├─ IdentifierNode("x") [type=int ✓, resolvedTo=Symbol(x)]
+        └─ IdentifierNode("y") [type=int ✓, resolvedTo=Symbol(y)]
+
+Errores: []
+</code></pre>
+<h4>Línea 4: <code>int z = x + y;</code> (dentro del if)</h4>
+<pre><code class="language-">INICIO ANÁLISIS LÍNEA 4
+─────────────────────────────────────
+
+Contexto: Dentro del bloque if
+Scope actual: BLOQUE IF (hijo de global)
+
+PASO 1: Crear nuevo scope para el bloque if
+  └─&gt; symbolTableIf = new SymbolTable(symbolTableGlobal)
+  └─&gt; Cambiar scope actual: symbolTable = symbolTableIf
+
+Nodo: VariableDeclarationNode(type=int, name="z", initializer=BinaryOpNode(+, x, y))
+
+PASO 2: Visitar VariableDeclarationNode
+  └─&gt; semanticAnalyzer.visitDeclarationNode(node)
+
+PASO 3: Verificar si 'z' ya existe en scope ACTUAL (bloque if)
+  └─&gt; symbolTableIf.existsInCurrentScope("z")
+  └─&gt; Retorna: false (no existe en bloque if)
+  └─&gt; ✓ OK
+
+PASO 4: Verificar tipo del inicializador (x + y)
+  └─&gt; binaryOpNode(+).accept(this)
+  └─&gt; semanticAnalyzer.visitBinaryOpNode(node)
+
+PASO 5: Verificar operando izquierdo (x)
+  └─&gt; identifierNode("x").accept(this)
+  └─&gt; symbolTable.lookup("x")
+  └─&gt; Búsqueda en symbolTableIf: no encontrado
+  └─&gt; Búsqueda en parent (symbolTableGlobal): ✓ Encontrado
+  └─&gt; Retorna: Type.INT
+
+PASO 6: Verificar operando derecho (y)
+  └─&gt; identifierNode("y").accept(this)
+  └─&gt; symbolTable.lookup("y")
+  └─&gt; Búsqueda en symbolTableIf: no encontrado
+  └─&gt; Búsqueda en parent (symbolTableGlobal): ✓ Encontrado
+  └─&gt; Retorna: Type.INT
+
+PASO 7: Verificar operación: INT + INT
+  └─&gt; Ambos numéricos ✓
+  └─&gt; Type.widen(INT, INT) → INT
+  └─&gt; Retorna: Type.INT
+
+PASO 8: Verificar compatibilidad: int = int
+  └─&gt; ✓ OK
+
+PASO 9: Insertar 'z' en tabla del bloque if
+  └─&gt; Symbol("z", Type.INT, Scope.LOCAL, línea=4)
+  └─&gt; symbolTableIf.insert(symbol)
+  └─&gt; ✓ Insertado
+
+ESTADO DESPUÉS DE LÍNEA 4:
+──────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+      ↑
+      parent
+      ↓
+Tabla de Símbolos (Bloque IF):
+┌────────┬──────┬───────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope │ Valor │ Línea │
+├────────┼──────┼───────┼───────┼───────┤
+│ z      │ int  │ local │ 15    │ 4     │
+└────────┴──────┴───────┴───────┴───────┘
+
+AST Anotado:
+  VariableDeclarationNode("z") [type=int ✓]
+    └─ BinaryOpNode(+) [type=int ✓]
+        ├─ IdentifierNode("x") [type=int ✓, resolvedTo=Symbol(x) en global]
+        └─ IdentifierNode("y") [type=int ✓, resolvedTo=Symbol(y) en global]
+
+Errores: []
+</code></pre>
+<h4>Línea 5: <code>x = z;</code> (asignación dentro del if)</h4>
+<pre><code class="language-">INICIO ANÁLISIS LÍNEA 5
+─────────────────────────────────────
+
+Contexto: Todavía dentro del bloque if
+Scope actual: BLOQUE IF
+
+Nodo: AssignmentNode(name="x", value=IdentifierNode("z"))
+
+PASO 1: Visitar AssignmentNode
+  └─&gt; semanticAnalyzer.visitAssignmentNode(node)
+
+PASO 2: Buscar variable 'x'
+  └─&gt; symbolTable.lookup("x")
+  └─&gt; Búsqueda en symbolTableIf: no encontrado
+  └─&gt; Búsqueda en parent (symbolTableGlobal): ✓ Encontrado
+  └─&gt; symbol = Symbol("x", Type.INT)
+
+PASO 3: Verificar tipo de la expresión (z)
+  └─&gt; identifierNode("z").accept(this)
+  └─&gt; symbolTable.lookup("z")
+  └─&gt; Búsqueda en symbolTableIf: ✓ Encontrado
+  └─&gt; Retorna: Type.INT
+
+PASO 4: Verificar compatibilidad de tipos
+  └─&gt; variable 'x': Type.INT
+  └─&gt; expresión 'z': Type.INT
+  └─&gt; INT.isCompatible(INT) → true ✓
+
+PASO 5: Asignación válida
+  └─&gt; ✓ OK
+
+ESTADO DESPUÉS DE LÍNEA 5:
+──────────────────────────
+
+AST Anotado:
+  AssignmentNode("x") [type=int ✓]
+    └─ IdentifierNode("z") [type=int ✓, resolvedTo=Symbol(z) en bloque if]
+
+Errores: []
+</code></pre>
+<h4>Línea 6: <code>}</code> (salir del bloque if)</h4>
+<pre><code class="language-">SALIR DEL BLOQUE IF
+───────────────────
+
+PASO 1: Detectar fin de bloque
+  └─&gt; Encontrar cierre }
+
+PASO 2: Restaurar scope anterior
+  └─&gt; symbolTable = symbolTable.parent
+  └─&gt; Ahora: symbolTable = symbolTableGlobal
+
+PASO 3: Destruir tabla del bloque if
+  └─&gt; symbolTableIf se elimina
+  └─&gt; Variable 'z' YA NO EXISTE
+
+ESTADO DESPUÉS DE SALIR DEL BLOQUE:
+────────────────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+
+Nota: 'z' ya no existe (estaba en el bloque if que ya cerró)
+</code></pre>
+<h4>Línea 7: <code>y = x + 1;</code> (fuera del if)</h4>
+<pre><code class="language-">INICIO ANÁLISIS LÍNEA 7
+─────────────────────────────────────
+
+Contexto: Scope global (ya salimos del if)
+Scope actual: GLOBAL
+
+Nodo: AssignmentNode(name="y", value=BinaryOpNode(+, x, 1))
+
+PASO 1: Visitar AssignmentNode
+  └─&gt; semanticAnalyzer.visitAssignmentNode(node)
+
+PASO 2: Buscar variable 'y'
+  └─&gt; symbolTable.lookup("y")
+  └─&gt; Búsqueda en symbolTableGlobal: ✓ Encontrado
+  └─&gt; symbol = Symbol("y", Type.INT)
+
+PASO 3: Verificar tipo de la expresión (x + 1)
+  └─&gt; binaryOpNode(+).accept(this)
+
+PASO 4: Verificar operando izquierdo (x)
+  └─&gt; identifierNode("x").accept(this)
+  └─&gt; symbolTable.lookup("x")
+  └─&gt; ✓ Encontrado en global
+  └─&gt; Retorna: Type.INT
+
+PASO 5: Verificar operando derecho (1)
+  └─&gt; numberNode(1).accept(this)
+  └─&gt; Retorna: Type.INT
+
+PASO 6: Verificar operación: INT + INT
+  └─&gt; Ambos numéricos ✓
+  └─&gt; Type.widen(INT, INT) → INT
+  └─&gt; Retorna: Type.INT
+
+PASO 7: Verificar compatibilidad de tipos
+  └─&gt; variable 'y': Type.INT
+  └─&gt; expresión 'x + 1': Type.INT
+  └─&gt; INT.isCompatible(INT) → true ✓
+
+PASO 8: Asignación válida
+  └─&gt; ✓ OK
+
+ESTADO FINAL:
+─────────────
+
+AST Anotado:
+  AssignmentNode("y") [type=int ✓]
+    └─ BinaryOpNode(+) [type=int ✓]
+        ├─ IdentifierNode("x") [type=int ✓, resolvedTo=Symbol(x)]
+        └─ NumberNode(1) [type=int ✓]
+
+Errores: []
+</code></pre>
+<h3>Resumen final del análisis:</h3>
+<pre><code class="language-">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANÁLISIS SEMÁNTICO COMPLETADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INPUT:
+  int x = 5;
+  int y = 10;
+  if (x &lt; y) {
+      int z = x + y;
+      x = z;
+  }
+  y = x + 1;
+
+OUTPUT:
+  ✓ Análisis exitoso
+  ✓ 0 errores semánticos
+  ✓ Tabla de símbolos construida
+  ✓ AST completamente anotado con tipos
+
+TABLA DE SÍMBOLOS FINAL (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+
+AST ANOTADO:
+  ProgramNode [✓]
+  ├── VariableDeclarationNode("x") [type=int ✓]
+  │   └─ NumberNode(5) [type=int ✓]
+  ├── VariableDeclarationNode("y") [type=int ✓]
+  │   └─ NumberNode(10) [type=int ✓]
+  ├── IfStatementNode [✓]
+  │   ├─ condition: BinaryOpNode(&lt;) [type=boolean ✓]
+  │   │   ├─ IdentifierNode("x") [type=int ✓]
+  │   │   └─ IdentifierNode("y") [type=int ✓]
+  │   └─ then: BlockNode [✓]
+  │       ├─ VariableDeclarationNode("z") [type=int ✓]
+  │       │   └─ BinaryOpNode(+) [type=int ✓]
+  │       │       ├─ IdentifierNode("x") [type=int ✓]
+  │       │       └─ IdentifierNode("y") [type=int ✓]
+  │       └─ AssignmentNode("x") [type=int ✓]
+  │           └─ IdentifierNode("z") [type=int ✓]
+  └── AssignmentNode("y") [type=int ✓]
+      └─ BinaryOpNode(+) [type=int ✓]
+          ├─ IdentifierNode("x") [type=int ✓]
+          └─ NumberNode(1) [type=int ✓]
+
+ESTADÍSTICAS:
+  - Declaraciones analizadas: 3 (x, y, z)
+  - Asignaciones analizadas: 2
+  - Expresiones analizadas: 5
+  - Scopes creados: 2 (global + if-block)
+  - Tiempo: &lt; 1ms
+
+El programa está SEMÁNTICAMENTE CORRECTO ✓
+Listo para la fase de generación de código.
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué pasaría si en la línea 7 intentamos usar 'z'?</p>
+<div class="code-block">y = z + <span class="number">1</span>;  <span class="comment">// ¿Error?</span>
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">✗ ERROR SEMÁNTICO
+
+Razón: La variable 'z' fue declarada dentro del bloque if (líneas 3-6).
+Al salir del bloque if, el scope se destruye y 'z' deja de existir.
+
+Error en línea 7:
+  Variable 'z' no declarada
+  y = z + 1;
+      ^
+
+'z' solo existe dentro del bloque if donde fue declarada.
+</code></pre>
+        </div>
+        
+    </div>
+
+    <div class="navigation">
+        <a href="slide15.html" class="nav-btn">← Anterior</a>
+        <a href="slide17.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 16 > 1) {
+                window.location.href = 'slide15.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 16 < 23) {
+                window.location.href = 'slide17.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

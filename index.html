@@ -217,7 +217,7 @@
         .progress-fill {
             background: linear-gradient(135deg, #4caf50, #45a049);
             height: 100%;
-            width: 33.3%; /* 2/6 topics completed */
+            width: 50%; /* 3/6 topics completed */
             border-radius: 25px;
             transition: width 0.8s ease;
         }
@@ -330,22 +330,22 @@
             </div>
 
             <!-- Tema 3: Análisis Semántico -->
-            <div class="topic-card coming-soon">
+            <div class="topic-card available" onclick="location.href='analisissemantico/slide01.html'">
                 <div class="topic-icon">🧠</div>
                 <h2 class="topic-title">3. Análisis Semántico</h2>
                 <p class="topic-description">
-                    Verificación de tipos, tabla de símbolos avanzada, checking semántico 
-                    y optimizaciones básicas.
+                    Tabla de símbolos, scoping, verificación de tipos, patrón Visitor,
+                    y análisis semántico completo con ejemplos prácticos.
                 </p>
                 <div class="topic-details">
                     <div class="topic-stats">
                         <div class="stat-item">
                             <span>📊</span>
-                            <span>~12 slides</span>
+                            <span>23 slides</span>
                         </div>
                         <div class="stat-item">
                             <span>⏱️</span>
-                            <span>50-65 min</span>
+                            <span>75-90 min</span>
                         </div>
                         <div class="stat-item">
                             <span>💻</span>
@@ -357,9 +357,9 @@
                         </div>
                     </div>
                 </div>
-                <button class="start-btn disabled">
-                    🚧 Próximamente
-                </button>
+                <a href="analisissemantico/slide01.html" class="start-btn">
+                    🚀 Comenzar Tema
+                </a>
             </div>
 
             <!-- Tema 4: Generación de Código -->
@@ -469,8 +469,8 @@
                 <div class="progress-fill"></div>
             </div>
             <p class="progress-text">
-                <strong>2 de 6 temas completados</strong> • 
-                <span style="color: #4caf50;">Análisis Léxico ✅ • Análisis Sintáctico ✅</span> • 
+                <strong>3 de 6 temas completados</strong> •
+                <span style="color: #4caf50;">Análisis Léxico ✅ • Análisis Sintáctico ✅ • Análisis Semántico ✅</span> •
                 Tiempo estimado total: ~5-6 horas
             </p>
         </div>
@@ -494,7 +494,7 @@
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const progressFill = document.querySelector('.progress-fill');
-                progressFill.style.width = '16.7%'; // 1/6 = 16.7%
+                progressFill.style.width = '50%'; // 3/6 = 50%
             }, 1000);
         });
 

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Arquitectura Completa del Analizador Semántico</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 11 de 23</div>
+
+    <div class="container">
+        <h1>Arquitectura Completa del Analizador Semántico</h1>
+        <div class="content">
+            <h3>Diagrama de arquitectura detallado:</h3>
+<h3>Explicación de cada componente:</h3>
+<h4>1. SemanticAnalyzer (Coordinador Principal)</h4>
+<div class="code-block"><span class="keyword">class</span> SemanticAnalyzer <span class="keyword">implements</span> ASTVisitor&lt;<span class="class">Type</span>&gt; {
+    <span class="comment">// COMPONENTES PRINCIPALES</span>
+    <span class="keyword">private</span> <span class="class">SymbolTable</span> symbolTable;        <span class="comment">// Tabla de símbolos</span>
+    <span class="keyword">private</span> TypeChecker typeChecker;        <span class="comment">// Verificador de tipos</span>
+    <span class="keyword">private</span> ErrorHandler errorHandler;      <span class="comment">// Manejador de errores</span>
+    <span class="keyword">private</span> <span class="class">List</span>&lt;<span class="class">SemanticException</span>&gt; errors; <span class="comment">// Lista de errores encontrados</span>
+
+    <span class="comment">// ESTADO ACTUAL</span>
+    <span class="keyword">private</span> <span class="class">Scope</span> currentScope;             <span class="comment">// Scope actual</span>
+    <span class="keyword">private</span> <span class="class">Type</span> currentReturnType;         <span class="comment">// Tipo de retorno esperado</span>
+    <span class="keyword">private</span> <span class="keyword">boolean</span> inLoop;                 <span class="comment">// ¿Estamos dentro de un loop?</span>
+
+    <span class="keyword">public</span> SemanticAnalyzer() {
+        <span class="keyword">this</span>.symbolTable = <span class="keyword">new</span> <span class="class">SymbolTable</span>(<span class="keyword">null</span>);
+        <span class="keyword">this</span>.typeChecker = <span class="keyword">new</span> TypeChecker(symbolTable);
+        <span class="keyword">this</span>.errorHandler = <span class="keyword">new</span> ErrorHandler();
+        <span class="keyword">this</span>.errors = <span class="keyword">new</span> <span class="class">ArrayList</span>&lt;&gt;();
+        <span class="keyword">this</span>.currentScope = <span class="class">Scope</span>.GLOBAL;
+        <span class="keyword">this</span>.inLoop = <span class="keyword">false</span>;
+    }
+
+    <span class="comment">// MÉTODO PRINCIPAL</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> analyze(ProgramNode program) {
+        <span class="keyword">try</span> {
+            program.accept(<span class="keyword">this</span>);  <span class="comment">// Iniciar recorrido del AST</span>
+        } <span class="keyword">catch</span> (<span class="class">SemanticException</span> e) {
+            errors.add(e);
+        }
+
+        <span class="keyword">if</span> (!errors.isEmpty()) {
+            errorHandler.reportErrors(errors);
+        }
+    }
+}
+</div>
+<p><strong>Responsabilidades:</strong></p>
+<ul>
+<li>Coordinar todos los componentes</li>
+<li>Recorrer el AST usando el patrón Visitor</li>
+<li>Mantener el estado actual (scope, loop, tipo de retorno)</li>
+<li>Recolectar todos los errores encontrados</li>
+</ul>
+<h4>2. SymbolTable (Tabla de Símbolos)</h4>
+<div class="code-block"><span class="keyword">class</span> <span class="class">SymbolTable</span> {
+    <span class="comment">// Almacena símbolos del scope actual</span>
+    <span class="keyword">private</span> <span class="class">Map</span>&lt;<span class="keyword">String</span>, <span class="class">Symbol</span>&gt; symbols;
+
+    <span class="comment">// Referencia al scope padre (para búsqueda recursiva)</span>
+    <span class="keyword">private</span> <span class="class">SymbolTable</span> parent;
+
+    <span class="comment">// Lista de scopes hijos (para debugging)</span>
+    <span class="keyword">private</span> <span class="class">List</span>&lt;<span class="class">SymbolTable</span>&gt; children;
+
+    <span class="comment">// OPERACIONES PRINCIPALES</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> insert(<span class="class">Symbol</span> symbol);          <span class="comment">// Agregar símbolo</span>
+    <span class="keyword">public</span> <span class="class">Symbol</span> lookup(<span class="keyword">String</span> name);          <span class="comment">// Buscar símbolo</span>
+    <span class="keyword">public</span> <span class="keyword">boolean</span> existsInCurrentScope(<span class="keyword">String</span> name);  <span class="comment">// Verificar redeclaración</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> enterScope();                   <span class="comment">// Entrar a nuevo scope</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> exitScope();                    <span class="comment">// Salir de scope actual</span>
+}
+</div>
+<p><strong>Responsabilidades:</strong></p>
+<ul>
+<li>Almacenar información de todas las variables, funciones, clases</li>
+<li>Gestionar scopes anidados</li>
+<li>Permitir búsqueda eficiente (O(1))</li>
+<li>Detectar redeclaraciones</li>
+</ul>
+<h4>3. TypeChecker (Verificador de Tipos)</h4>
+<div class="code-block"><span class="keyword">class</span> TypeChecker {
+    <span class="keyword">private</span> <span class="class">SymbolTable</span> symbolTable;  <span class="comment">// Necesita acceso a la tabla</span>
+
+    <span class="comment">// Verificar tipo de expresión</span>
+    <span class="keyword">public</span> <span class="class">Type</span> checkExpression(ExpressionNode expr);
+
+    <span class="comment">// Verificar operación binaria (a + b, a == b, etc.)</span>
+    <span class="keyword">public</span> <span class="class">Type</span> checkBinaryOp(<span class="class">BinaryOpNode</span> node);
+
+    <span class="comment">// Verificar compatibilidad de tipos</span>
+    <span class="keyword">public</span> <span class="keyword">boolean</span> areCompatible(<span class="class">Type</span> t1, <span class="class">Type</span> t2);
+
+    <span class="comment">// Promover tipo (int → double)</span>
+    <span class="keyword">public</span> <span class="class">Type</span> promoteType(<span class="class">Type</span> t1, <span class="class">Type</span> t2);
+}
+</div>
+<p><strong>Responsabilidades:</strong></p>
+<ul>
+<li>Verificar que las operaciones usan tipos compatibles</li>
+<li>Implementar reglas de promoción de tipos</li>
+<li>Detectar errores de tipos</li>
+</ul>
+<h4>4. ErrorHandler (Manejador de Errores)</h4>
+<div class="code-block"><span class="keyword">class</span> ErrorHandler {
+    <span class="comment">// Reportar un error</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> reportError(<span class="class">SemanticException</span> error);
+
+    <span class="comment">// Reportar múltiples errores</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> reportErrors(<span class="class">List</span>&lt;<span class="class">SemanticException</span>&gt; errors);
+
+    <span class="comment">// Formatear mensaje de error</span>
+    <span class="keyword">private</span> <span class="keyword">String</span> formatError(<span class="class">SemanticException</span> error);
+}
+</div>
+<p><strong>Responsabilidades:</strong></p>
+<ul>
+<li>Recolectar todos los errores</li>
+<li>Formatear mensajes descriptivos</li>
+<li>Mostrar línea y columna del error</li>
+</ul>
+<h3>Flujo completo del análisis semántico:</h3>
+<h3>Ejemplo de flujo completo:</h3>
+<p>Analicemos este código paso a paso:</p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">int</span> y = x + <span class="number">10</span>;
+</div>
+<p><strong>Traza completa del análisis:</strong></p>
+<pre><code class="language-">INICIO: SemanticAnalyzer.analyze(programNode)
+
+━━━ LÍNEA 1: int x = 5; ━━━
+
+1. SA llama a programNode.accept(this)
+   └─&gt; visitProgramNode(programNode)
+
+2. Encontrar DeclarationNode(type=int, name="x", value=5)
+   └─&gt; visitDeclarationNode(node)
+
+3. Verificar si "x" ya existe
+   └─&gt; symbolTable.existsInCurrentScope("x")
+   └─&gt; Retorna: false (no existe)
+
+4. Verificar tipo del inicializador
+   └─&gt; visitNumberNode(5)
+   └─&gt; TypeChecker.checkExpression(NumberNode(5))
+   └─&gt; Retorna: Type.INT
+
+5. Verificar compatibilidad: int = int
+   └─&gt; TypeChecker.areCompatible(INT, INT)
+   └─&gt; Retorna: true ✓
+
+6. Insertar en tabla de símbolos
+   └─&gt; symbolTable.insert(Symbol("x", INT, 5, línea=1))
+   └─&gt; Tabla ahora: {x: int}
+
+Estado después línea 1:
+  SymbolTable: {x: int}
+  Errores: []
+
+━━━ LÍNEA 2: int y = x + 10; ━━━
+
+7. Encontrar DeclarationNode(type=int, name="y", value=x+10)
+   └─&gt; visitDeclarationNode(node)
+
+8. Verificar si "y" ya existe
+   └─&gt; symbolTable.existsInCurrentScope("y")
+   └─&gt; Retorna: false (no existe)
+
+9. Verificar tipo del inicializador (x + 10)
+   └─&gt; visitBinaryOpNode(left=x, op=+, right=10)
+
+10. Verificar tipo de "x"
+    └─&gt; visitIdentifierNode("x")
+    └─&gt; symbolTable.lookup("x")
+    └─&gt; Retorna: Symbol("x", INT)
+    └─&gt; Tipo de x: INT
+
+11. Verificar tipo de "10"
+    └─&gt; visitNumberNode(10)
+    └─&gt; Retorna: Type.INT
+
+12. Verificar operación: INT + INT
+    └─&gt; TypeChecker.checkBinaryOp(+, INT, INT)
+    └─&gt; Retorna: Type.INT ✓
+
+13. Verificar compatibilidad: int = int
+    └─&gt; TypeChecker.areCompatible(INT, INT)
+    └─&gt; Retorna: true ✓
+
+14. Insertar en tabla de símbolos
+    └─&gt; symbolTable.insert(Symbol("y", INT, 15, línea=2))
+    └─&gt; Tabla ahora: {x: int, y: int}
+
+Estado final:
+  SymbolTable: {x: int, y: int}
+  Errores: []
+  AST Anotado:
+    DeclarationNode("x", INT) [type=INT ✓]
+    DeclarationNode("y", INT) [type=INT ✓]
+      └─ BinaryOpNode(+) [type=INT ✓]
+          ├─ IdentifierNode("x") [type=INT ✓, resolvedTo=Symbol(x)]
+          └─ NumberNode(10) [type=INT ✓]
+
+FIN: Análisis exitoso sin errores
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué componentes se usan en cada paso del siguiente código?</p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+y = x + <span class="number">10</span>;
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">Línea 1: int x = 5;
+  - SemanticAnalyzer: coordina
+  - Visitor: visitDeclarationNode
+  - SymbolTable: insert("x")
+  - TypeChecker: checkExpression(5)
+  - Resultado: ✓ OK
+
+Línea 2: y = x + 10;
+  - SemanticAnalyzer: coordina
+  - Visitor: visitAssignmentNode
+  - SymbolTable: lookup("y")  ← ✗ NO EXISTE
+  - ErrorHandler: reportError("Variable 'y' no declarada")
+  - Resultado: ✗ ERROR
+</code></pre>
+        </div>
+        <div class="mermaid">graph TB
+    subgraph "INPUT"
+        AST[AST del Parser<br/>Sintácticamente válido]
+    end
+
+    subgraph "ANALIZADOR SEMÁNTICO"
+        SA[SemanticAnalyzer<br/>Coordinador Principal]
+
+        subgraph "Componentes Core"
+            ST[SymbolTable<br/>Tabla de Símbolos<br/>+ Gestión de Scopes]
+            TC[TypeChecker<br/>Verificador de Tipos]
+            EH[ErrorHandler<br/>Manejador de Errores]
+        end
+
+        subgraph "Visitor Pattern"
+            V[ASTVisitor Interface]
+            VP[visitProgramNode]
+            VD[visitDeclarationNode]
+            VA[visitAssignmentNode]
+            VE[visitExpressionNode]
+            VI[visitIfNode]
+            VW[visitWhileNode]
+        end
+
+        subgraph "Sistema de Tipos"
+            TB[Type Base Class]
+            TP[PrimitiveType]
+            TA[ArrayType]
+            TF[FunctionType]
+        end
+    end
+
+    subgraph "OUTPUT"
+        AAST[AST Anotado<br/>con información de tipos]
+        STF[Tabla de Símbolos Final<br/>con todas las declaraciones]
+        ERR[Lista de Errores Semánticos<br/>si los hay]
+    end
+
+    AST --> SA
+    SA --> ST
+    SA --> TC
+    SA --> EH
+    SA --> V
+
+    V --> VP
+    V --> VD
+    V --> VA
+    V --> VE
+    V --> VI
+    V --> VW
+
+    TC --> TB
+    TB --> TP
+    TB --> TA
+    TB --> TF
+
+    ST -.información.-> TC
+    TC -.errores.-> EH
+
+    SA --> AAST
+    SA --> STF
+    SA --> ERR
+
+    style SA fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px
+    style ST fill:#4ecdc4,stroke:#45b7aa,stroke-width:2px
+    style TC fill:#95e1d3,stroke:#45b7aa,stroke-width:2px
+    style EH fill:#ffd93d,stroke:#f9a825,stroke-width:2px
+    style AST fill:#e3f2fd,stroke:#1976d2
+    style AAST fill:#c8e6c9,stroke:#388e3c</div>
+        <div class="mermaid">sequenceDiagram
+    participant Parser
+    participant SA as SemanticAnalyzer
+    participant V as Visitor
+    participant ST as SymbolTable
+    participant TC as TypeChecker
+    participant EH as ErrorHandler
+
+    Parser->>SA: AST (sintácticamente válido)
+    SA->>V: program.accept(this)
+
+    loop Para cada nodo del AST
+        V->>V: visitNodeType(node)
+
+        alt Es Declaración
+            V->>ST: insert(symbol)
+            ST-->>V: OK o ERROR
+        end
+
+        alt Es Uso de Variable
+            V->>ST: lookup(name)
+            ST-->>V: Symbol o null
+        end
+
+        alt Es Expresión
+            V->>TC: checkExpression(expr)
+            TC->>ST: lookup variables
+            TC->>TC: verificar tipos
+            TC-->>V: Type o ERROR
+        end
+
+        alt Hay Error
+            V->>EH: reportError(error)
+        end
+    end
+
+    SA->>EH: reportErrors(allErrors)
+    SA-->>Parser: AST anotado + errores</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide10.html" class="nav-btn">← Anterior</a>
+        <a href="slide12.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 11 > 1) {
+                window.location.href = 'slide10.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 11 < 23) {
+                window.location.href = 'slide12.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

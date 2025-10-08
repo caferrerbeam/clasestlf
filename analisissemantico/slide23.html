@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Resumen y Conclusiones</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 23 de 23</div>
+
+    <div class="container">
+        <h1>Resumen y Conclusiones</h1>
+        <div class="content">
+            <h3>🎯 Lo que hemos aprendido:</h3>
+<ol>
+<li><strong>Arquitectura del Analizador Semántico</strong></li>
+</ol>
+<p>   - Componentes: SymbolTable, TypeChecker, ErrorHandler</p>
+<p>   - Patrón Visitor para recorrer el AST</p>
+<p>   - Separación de responsabilidades</p>
+<ol>
+<li><strong>Tabla de Símbolos</strong></li>
+</ol>
+<p>   - Estructura de datos fundamental</p>
+<p>   - Gestión de scopes anidados</p>
+<p>   - Operaciones: insert, lookup, existsInCurrentScope</p>
+<ol>
+<li><strong>Scopes y Shadowing</strong></li>
+</ol>
+<p>   - Reglas de visibilidad</p>
+<p>   - Búsqueda recursiva en scopes padre</p>
+<p>   - Shadowing válido vs redeclaración inválida</p>
+<ol>
+<li><strong>Sistema de Tipos</strong></li>
+</ol>
+<p>   - Jerarquía de tipos (primitivos, arrays, funciones)</p>
+<p>   - Verificación de compatibilidad</p>
+<p>   - Promoción implícita vs cast explícito</p>
+<ol>
+<li><strong>Errores Semánticos</strong></li>
+</ol>
+<p>   - Catálogo completo de errores</p>
+<p>   - Mensajes descriptivos con línea y columna</p>
+<p>   - Manejo de múltiples errores</p>
+<ol>
+<li><strong>Patrón Visitor</strong></li>
+</ol>
+<p>   - Diseño elegante para operaciones sobre AST</p>
+<p>   - Fácil agregar nuevas operaciones</p>
+<p>   - Reutilización del AST</p>
+<h3>💡 Conceptos clave:</h3>
+<pre><code class="language-">✓ Sintaxis correcta ≠ Semántica correcta
+  - El análisis sintáctico verifica la FORMA
+  - El análisis semántico verifica el SIGNIFICADO
+
+✓ La tabla de símbolos es el "cerebro" del compilador
+  - Almacena TODO sobre identificadores
+  - Permite verificar tipos y scopes
+
+✓ Scopes anidados requieren búsqueda recursiva
+  - Buscar desde scope actual hacia scopes padre
+  - Variables de scope interno "sombrea" a las externas
+
+✓ El patrón Visitor separa estructura de operaciones
+  - AST no cambia
+  - Operaciones se agregan como nuevos Visitors
+</code></pre>
+<h3>🚀 Diferencias clave:</h3>
+<table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>Sintáctico</th>
+<th>Semántico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entrada</strong></td>
+<td>Tokens</td>
+<td>AST</td>
+</tr>
+<tr>
+<td><strong>Salida</strong></td>
+<td>AST</td>
+<td>AST anotado + Tabla</td>
+</tr>
+<tr>
+<td><strong>Verifica</strong></td>
+<td>Gramática</td>
+<td>Tipos, scopes, contexto</td>
+</tr>
+<tr>
+<td><strong>Ejemplo Error</strong></td>
+<td><code>if x > 0)</code></td>
+<td><code>int x = "hello"</code></td>
+</tr>
+</tbody>
+</table>
+<h3>🛠️ Habilidades desarrolladas:</h3>
+<ul>
+<li>✓ Implementar tabla de símbolos con HashMap</li>
+<li>✓ Diseñar sistema de tipos robusto</li>
+<li>✓ Usar patrón Visitor eficientemente</li>
+<li>✓ Manejar scopes anidados correctamente</li>
+<li>✓ Detectar y reportar errores semánticos</li>
+<li>✓ Integrar análisis en pipeline completo</li>
+</ul>
+<h3>📚 Para profundizar:</h3>
+<ul>
+<li>"Compilers: Principles, Techniques, and Tools" (Dragon Book)</li>
+<li>"Modern Compiler Implementation in Java" (Tiger Book)</li>
+<li>"Engineering a Compiler" (Cooper & Torczon)</li>
+<li>Documentación de ANTLR y herramientas similares</li>
+</ul>
+<h3>🔜 Próximos pasos:</h3>
+<ol>
+<li><strong>Generación de Código Intermedio</strong></li>
+</ol>
+<p>   - Transformar AST a código de 3 direcciones</p>
+<p>   - Optimizaciones de código intermedio</p>
+<ol>
+<li><strong>Optimización</strong></li>
+</ol>
+<p>   - Constant folding</p>
+<p>   - Dead code elimination</p>
+<p>   - Common subexpression elimination</p>
+<ol>
+<li><strong>Generación de Código Final</strong></li>
+</ol>
+<p>   - Asignación de registros</p>
+<p>   - Selección de instrucciones</p>
+<p>   - Código máquina o bytecode</p>
+<p><strong>¡El análisis semántico es donde el compilador realmente "entiende" tu código!</strong> 🧠✨</p>
+        </div>
+        
+    </div>
+
+    <div class="navigation">
+        <a href="slide22.html" class="nav-btn">← Anterior</a>
+        <a href="../index.html" class="nav-btn">⌂ Inicio</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 23 > 1) {
+                window.location.href = 'slide22.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 23 < 23) {
+                window.location.href = '../index.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

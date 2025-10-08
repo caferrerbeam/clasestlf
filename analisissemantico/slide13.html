@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Coerción y Promoción de Tipos - Explicación Completa</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 13 de 23</div>
+
+    <div class="container">
+        <h1>Coerción y Promoción de Tipos - Explicación Completa</h1>
+        <div class="content">
+            <h3>¿Qué es la Coerción de Tipos?</h3>
+<p><strong>Coerción</strong> (type coercion) es la conversión de un tipo a otro.</p>
+<p><strong>Dos tipos:</strong></p>
+<ol>
+<li><strong>Implícita (automática):</strong> El compilador convierte automáticamente</li>
+<li><strong>Explícita (cast):</strong> El programador fuerza la conversión</li>
+</ol>
+<h3>Jerarquía de promoción numérica:</h3>
+<pre><code class="language-">WIDENING (Promoción implícita - SEGURA):
+
+byte → short → int → long → float → double
+       char →
+
+Dirección: →  SIEMPRE SEGURO (no hay pérdida de información)
+Dirección: ←  REQUIERE CAST (puede haber pérdida)
+</code></pre>
+<h3>Explicación visual:</h3>
+<pre><code class="language-">Contenedores de diferentes tamaños:
+
+byte:   [8 bits]
+short:  [16 bits]
+int:    [32 bits]
+long:   [64 bits]
+float:  [32 bits con punto flotante]
+double: [64 bits con punto flotante]
+
+WIDENING (agrandar contenedor):
+  byte → int
+  [pequeño] → [grande]
+  ✓ Siempre cabe
+
+NARROWING (achicar contenedor):
+  int → byte
+  [grande] → [pequeño]
+  ✗ Puede no caber
+</code></pre>
+<h3>Promoción Implícita (Widening) - DETALLE:</h3>
+<h4>Ejemplo 1: int → double</h4>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">double</span> y = x;  <span class="comment">// ✓ Promoción implícita</span>
+</div>
+<p><strong>¿Qué pasa internamente?</strong></p>
+<pre><code class="language-">PASO 1: Compilador detecta asignación
+  - Variable destino: y (tipo double)
+  - Valor fuente: x (tipo int)
+
+PASO 2: Verificar compatibilidad
+  - int.isCompatible(double) ?
+  - Consultar reglas de promoción
+  - int → double está en la jerarquía ✓
+
+PASO 3: Conversión automática
+  Valor en memoria:
+    x (int):    00000000 00000000 00000000 00000101  (5 en binario)
+    y (double): 01000000 00010100 00000000... (5.0 en punto flotante)
+
+PASO 4: Asignación completada
+  - Sin pérdida de información
+  - Sin advertencias
+</code></pre>
+<p><strong>Implementación:</strong></p>
+<div class="code-block"><span class="keyword">class</span> <span class="class">Type</span> {
+    <span class="keyword">public</span> <span class="keyword">boolean</span> canWiden(<span class="class">Type</span> target) {
+        <span class="comment">// Mismo tipo siempre es compatible</span>
+        <span class="keyword">if</span> (<span class="keyword">this</span>.equals(target)) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;
+        }
+
+        <span class="comment">// Reglas de widening</span>
+        <span class="keyword">if</span> (<span class="keyword">this</span>.isInt() &amp;&amp; target.isDouble()) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// int → double ✓</span>
+        }
+
+        <span class="keyword">if</span> (<span class="keyword">this</span>.isInt() &amp;&amp; target.isLong()) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// int → long ✓</span>
+        }
+
+        <span class="keyword">if</span> (<span class="keyword">this</span>.isChar() &amp;&amp; target.isInt()) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// char → int ✓</span>
+        }
+
+        <span class="keyword">if</span> (<span class="keyword">this</span>.isFloat() &amp;&amp; target.isDouble()) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// float → double ✓</span>
+        }
+
+        <span class="comment">// ... más reglas</span>
+
+        <span class="keyword">return</span> <span class="keyword">false</span>;  <span class="comment">// No se puede promover</span>
+    }
+
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class">Type</span> widen(<span class="class">Type</span> t1, <span class="class">Type</span> t2) {
+        <span class="comment">// Retornar el tipo "más grande"</span>
+
+        <span class="comment">// Si uno es double, resultado es double</span>
+        <span class="keyword">if</span> (t1.isDouble() || t2.isDouble()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.DOUBLE;
+        }
+
+        <span class="comment">// Si uno es float, resultado es float</span>
+        <span class="keyword">if</span> (t1.isFloat() || t2.isFloat()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.FLOAT;
+        }
+
+        <span class="comment">// Si uno es long, resultado es long</span>
+        <span class="keyword">if</span> (t1.isLong() || t2.isLong()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.LONG;
+        }
+
+        <span class="comment">// Si ambos son int o menores, resultado es int</span>
+        <span class="keyword">if</span> (t1.isInt() || t2.isInt()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.INT;
+        }
+
+        <span class="comment">// Por defecto, el primero</span>
+        <span class="keyword">return</span> t1;
+    }
+}
+</div>
+<h4>Ejemplo 2: Promoción en expresiones</h4>
+<div class="code-block"><span class="keyword">int</span> a = <span class="number">5</span>;
+<span class="keyword">double</span> b = <span class="number">3.14</span>;
+<span class="keyword">double</span> resultado = a + b;  <span class="comment">// ✓ OK</span>
+</div>
+<p><strong>Proceso detallado:</strong></p>
+<pre><code class="language-">EXPRESIÓN: a + b
+
+1. Verificar tipo de 'a'
+   └─&gt; lookup("a") → Symbol(a, int)
+   └─&gt; Tipo: int
+
+2. Verificar tipo de 'b'
+   └─&gt; lookup("b") → Symbol(b, double)
+   └─&gt; Tipo: double
+
+3. Verificar operación: int + double
+   └─&gt; Ambos son numéricos ✓
+
+4. Promover al tipo más amplio
+   └─&gt; Type.widen(int, double)
+   └─&gt; Retorna: double
+
+5. Conversión implícita de 'a'
+   Antes: a = 5 (int)
+   Después: a = 5.0 (double temporalmente para la operación)
+
+6. Realizar operación
+   5.0 + 3.14 = 8.14
+
+7. Verificar asignación: double = double
+   └─&gt; Tipos coinciden ✓
+
+RESULTADO: resultado = 8.14 (double)
+</code></pre>
+<h3>Cast Explícito (Narrowing) - DETALLE:</h3>
+<h4>Ejemplo 1: double → int (pérdida de precisión)</h4>
+<div class="code-block"><span class="keyword">double</span> pi = <span class="number">3.14159</span>;
+<span class="keyword">int</span> truncado = (<span class="keyword">int</span>) pi;  <span class="comment">// Cast explícito necesario</span>
+</div>
+<p><strong>¿Qué pasa internamente?</strong></p>
+<pre><code class="language-">EXPRESIÓN: (int) pi
+
+PASO 1: Sin cast - ERROR
+  double pi = 3.14159;
+  int truncado = pi;  // ✗ ERROR
+  
+  Razón: double NO puede asignarse a int implícitamente
+         (pérdida de información)
+
+PASO 2: Con cast - OK pero con ADVERTENCIA
+  int truncado = (int) pi;  // ✓ OK
+  
+  Compilador:
+    - Detecta cast explícito (int)
+    - Permite la conversión
+    - Posible advertencia: "pérdida de precisión"
+
+PASO 3: Conversión
+  Valor original: 3.14159 (double)
+  Conversión:     3.14159 → 3 (se eliminan decimales)
+  Valor final:    3 (int)
+
+RESULTADO: truncado = 3 (se perdió .14159)
+</code></pre>
+<p><strong>Implementación:</strong></p>
+<div class="code-block">@Override
+<span class="keyword">public</span> <span class="class">Type</span> visitCastExpression(CastExpressionNode node) {
+    <span class="comment">// Verificar tipo de la expresión</span>
+    <span class="class">Type</span> exprType = node.expression.accept(<span class="keyword">this</span>);
+
+    <span class="comment">// Verificar tipo de destino</span>
+    <span class="class">Type</span> targetType = node.targetType;
+
+    <span class="comment">// ¿Es widening? (OK sin cast)</span>
+    <span class="keyword">if</span> (exprType.canWiden(targetType)) {
+        <span class="comment">// Advertencia: cast innecesario</span>
+        System.out.println(<span class="string">"Advertencia: cast innecesario de "</span> +
+                          exprType + <span class="string">" a "</span> + targetType);
+    }
+    <span class="comment">// ¿Es narrowing? (requiere cast)</span>
+    <span class="keyword">else</span> <span class="keyword">if</span> (targetType.canNarrow(exprType)) {
+        <span class="comment">// Advertencia: posible pérdida de datos</span>
+        System.out.println(<span class="string">"Advertencia: posible pérdida de datos al "</span> +
+                          <span class="string">"convertir "</span> + exprType + <span class="string">" a "</span> + targetType);
+    }
+    <span class="comment">// ¿Incompatible totalmente?</span>
+    <span class="keyword">else</span> {
+        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+            <span class="string">"No se puede convertir "</span> + exprType + <span class="string">" a "</span> + targetType
+        );
+    }
+
+    node.type = targetType;
+    <span class="keyword">return</span> targetType;
+}
+</div>
+<h4>Ejemplo 2: Cast inválido</h4>
+<div class="code-block"><span class="keyword">String</span> s = <span class="string">"hello"</span>;
+<span class="keyword">int</span> n = (<span class="keyword">int</span>) s;  <span class="comment">// ✗ ERROR: cast inválido</span>
+</div>
+<p><strong>Proceso:</strong></p>
+<pre><code class="language-">EXPRESIÓN: (int) s
+
+1. Identificar tipo de 's'
+   └─&gt; lookup("s") → Symbol(s, String)
+   └─&gt; Tipo: String
+
+2. Tipo de destino: int
+
+3. ¿String puede widening a int?
+   └─&gt; String.canWiden(int) → false
+
+4. ¿String puede narrowing a int?
+   └─&gt; String.canNarrow(int) → false
+
+5. ¿Son compatibles de alguna forma?
+   └─&gt; No hay relación entre String e int
+
+6. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "No se puede convertir String a int"
+   )
+
+RESULTADO: ✗ ERROR DE COMPILACIÓN
+</code></pre>
+<h3>Tabla completa de conversiones:</h3>
+<pre><code class="language-">CONVERSIONES VÁLIDAS:
+
+ORIGEN  | DESTINO | TIPO      | PÉRDIDA | EJEMPLO
+────────┼─────────┼───────────┼─────────┼──────────────────
+byte    | short   | implícita | no      | byte b = 5; short s = b;
+byte    | int     | implícita | no      | byte b = 5; int i = b;
+short   | int     | implícita | no      | short s = 5; int i = s;
+int     | long    | implícita | no      | int i = 5; long l = i;
+int     | double  | implícita | no      | int i = 5; double d = i;
+float   | double  | implícita | no      | float f = 5.0f; double d = f;
+char    | int     | implícita | no      | char c = 'A'; int i = c;
+────────┼─────────┼───────────┼─────────┼──────────────────
+double  | int     | explícita | SÍ      | double d = 3.14; int i = (int)d;
+long    | int     | explícita | posible | long l = 5000000000L; int i = (int)l;
+int     | byte    | explícita | posible | int i = 200; byte b = (byte)i;
+int     | char    | explícita | posible | int i = 65; char c = (char)i;
+────────┼─────────┼───────────┼─────────┼──────────────────
+String  | int     | INVÁLIDO  | N/A     | ✗ No hay conversión
+int     | String  | INVÁLIDO  | N/A     | ✗ Usar String.valueOf(i)
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>Clasifica estas conversiones:</p>
+<div class="code-block"><span class="keyword">int</span> a = <span class="number">5</span>;
+<span class="keyword">double</span> b = a;       <span class="comment">// ¿Implícita o explícita? ¿Válida?</span>
+
+<span class="keyword">double</span> c = <span class="number">3.14</span>;
+<span class="keyword">int</span> d = c;          <span class="comment">// ¿Implícita o explícita? ¿Válida?</span>
+
+<span class="keyword">double</span> e = <span class="number">3.14</span>;
+<span class="keyword">int</span> f = (<span class="keyword">int</span>) e;    <span class="comment">// ¿Implícita o explícita? ¿Válida?</span>
+
+<span class="keyword">String</span> s = <span class="string">"hello"</span>;
+<span class="keyword">int</span> g = (<span class="keyword">int</span>) s;    <span class="comment">// ¿Implícita o explícita? ¿Válida?</span>
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">double b = a;    → Implícita, ✓ VÁLIDA (int → double, widening)
+int d = c;       → ✗ INVÁLIDA (double → int requiere cast)
+int f = (int) e; → Explícita, ✓ VÁLIDA (cast correcto, pierde .14)
+int g = (int) s; → ✗ INVÁLIDA (String e int incompatibles, incluso con cast)
+</code></pre>
+        </div>
+        <div class="mermaid">graph LR
+    A[Coerción de Tipos] --> B[Implícita<br/>Widening]
+    A --> C[Explícita<br/>Narrowing/Cast]
+
+    B --> D["int → double<br/>Automático<br/>Sin pérdida"]
+    B --> E["char → int<br/>Automático<br/>Sin pérdida"]
+
+    C --> F["double → int<br/>Requiere cast<br/>Pierde decimales"]
+    C --> G["Object → String<br/>Requiere cast<br/>Puede fallar"]
+
+    style B fill:#c8e6c9,stroke:#388e3c
+    style C fill:#fff9c4,stroke:#f9a825</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide12.html" class="nav-btn">← Anterior</a>
+        <a href="slide14.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 13 > 1) {
+                window.location.href = 'slide12.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 13 < 23) {
+                window.location.href = 'slide14.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

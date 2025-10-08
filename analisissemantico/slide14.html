@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Errores Semánticos Comunes - Catálogo Completo</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 14 de 23</div>
+
+    <div class="container">
+        <h1>Errores Semánticos Comunes - Catálogo Completo</h1>
+        <div class="content">
+            <h3>Catálogo de Errores Semánticos con Ejemplos:</h3>
+<h4>Error 1: Variable no declarada</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block">x = <span class="number">5</span>;  <span class="comment">// ✗ ERROR</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Encontrar AssignmentNode(name="x", value=5)
+2. Buscar variable 'x' en tabla de símbolos
+   └─&gt; symbolTable.lookup("x")
+   └─&gt; Retorna: null (no existe)
+3. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException("Variable 'x' no declarada")
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 1, columna 1:
+  Variable 'x' no declarada
+  x = 5;
+  ^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x;  <span class="comment">// Declarar primero</span>
+x = <span class="number">5</span>;  <span class="comment">// Ahora sí ✓</span>
+</div>
+<h4>Error 2: Variable ya declarada (Redeclaración)</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">int</span> x = <span class="number">10</span>;  <span class="comment">// ✗ ERROR</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">Línea 1: int x = 5;
+  1. existsInCurrentScope("x") → false
+  2. insert(Symbol("x", int, 5)) → OK
+  Tabla: {x: int}
+
+Línea 2: int x = 10;
+  1. existsInCurrentScope("x") → true ✗
+  2. LANZAR EXCEPCIÓN
+     └─&gt; throw new SemanticException(
+         "Variable 'x' ya declarada en línea 1"
+     )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 2, columna 5:
+  Variable 'x' ya declarada en línea 1
+  int x = 10;
+      ^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+x = <span class="number">10</span>;  <span class="comment">// Asignación, no declaración ✓</span>
+</div>
+<h4>Error 3: Incompatibilidad de tipos en asignación</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="string">"hello"</span>;  <span class="comment">// ✗ ERROR</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Declaración: int x = "hello"
+2. Tipo declarado: int
+3. Verificar tipo de inicializador
+   └─&gt; checkExpression(StringNode("hello"))
+   └─&gt; Retorna: Type.STRING
+4. Verificar compatibilidad: int = String
+   └─&gt; int.isCompatible(String) → false
+5. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "No se puede inicializar int con String"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 1, columna 9:
+  No se puede asignar String a variable de tipo int
+  int x = "hello";
+          ^^^^^^^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">String</span> x = <span class="string">"hello"</span>;  <span class="comment">// Declarar como String ✓</span>
+<span class="comment">// O</span>
+<span class="keyword">int</span> x = <span class="number">5</span>;  <span class="comment">// Usar valor compatible ✓</span>
+</div>
+<h4>Error 4: Operación inválida para tipos</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">boolean</span> b = <span class="keyword">true</span>;
+<span class="keyword">int</span> x = b + <span class="number">5</span>;  <span class="comment">// ✗ ERROR</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Expresión: b + 5
+2. Tipo de 'b'
+   └─&gt; lookup("b") → Symbol(b, boolean)
+   └─&gt; Tipo: boolean
+3. Tipo de '5'
+   └─&gt; NumberNode(5) → Type.INT
+4. Verificar operación: boolean + int
+   └─&gt; Operador + requiere operandos numéricos
+   └─&gt; boolean.isNumeric() → false ✗
+5. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "Operador '+' requiere operandos numéricos"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 2, columna 9:
+  Operador '+' requiere operandos numéricos, se obtuvo boolean
+  int x = b + 5;
+          ^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">boolean</span> b = <span class="keyword">true</span>;
+<span class="keyword">int</span> x = (b ? <span class="number">1</span> : <span class="number">0</span>) + <span class="number">5</span>;  <span class="comment">// Convertir boolean a int ✓</span>
+</div>
+<h4>Error 5: Número incorrecto de argumentos en llamada</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">int</span> suma(<span class="keyword">int</span> a, <span class="keyword">int</span> b) {
+    <span class="keyword">return</span> a + b;
+}
+<span class="keyword">int</span> x = suma(<span class="number">5</span>);  <span class="comment">// ✗ ERROR: faltan argumentos</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Declarar función suma(int, int) → int
+   └─&gt; insert(Symbol("suma", FunctionType(int, [int, int])))
+   Tabla: {suma: (int, int) → int}
+
+2. Llamada: suma(5)
+   └─&gt; lookup("suma") → Symbol(suma, FunctionType)
+   └─&gt; FunctionType.parameterTypes.size() = 2
+   └─&gt; Argumentos proporcionados = 1
+3. Verificar cantidad: 2 ≠ 1 ✗
+4. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "Función 'suma' espera 2 argumentos, se recibieron 1"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 4, columna 9:
+  Función 'suma' espera 2 argumentos, se recibieron 1
+  int x = suma(5);
+          ^^^^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x = suma(<span class="number">5</span>, <span class="number">10</span>);  <span class="comment">// Pasar ambos argumentos ✓</span>
+</div>
+<h4>Error 6: Tipo incorrecto de argumento</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">int</span> suma(<span class="keyword">int</span> a, <span class="keyword">int</span> b) {
+    <span class="keyword">return</span> a + b;
+}
+<span class="keyword">int</span> x = suma(<span class="number">5</span>, <span class="string">"hola"</span>);  <span class="comment">// ✗ ERROR: tipo incorrecto</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Función: suma(int, int) → int
+2. Llamada: suma(5, "hola")
+3. Verificar argumento 1:
+   └─&gt; Tipo: int (esperado int) ✓
+4. Verificar argumento 2:
+   └─&gt; Tipo: String (esperado int) ✗
+   └─&gt; String.isCompatible(int) → false
+5. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "Argumento 2: se esperaba int, se obtuvo String"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 4, columna 18:
+  Argumento 2: se esperaba int, se obtuvo String
+  int x = suma(5, "hola");
+                  ^^^^^^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x = suma(<span class="number">5</span>, <span class="number">10</span>);  <span class="comment">// Pasar int, no String ✓</span>
+</div>
+<h4>Error 7: Tipo de retorno incorrecto</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">int</span> calcular() {
+    <span class="keyword">return</span> <span class="string">"hello"</span>;  <span class="comment">// ✗ ERROR</span>
+}
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Función declarada: int calcular()
+   └─&gt; currentReturnType = Type.INT
+2. Return statement: return "hello";
+3. Tipo de expresión retornada:
+   └─&gt; checkExpression(StringNode("hello"))
+   └─&gt; Retorna: Type.STRING
+4. Verificar compatibilidad: int = String
+   └─&gt; String.isCompatible(int) → false ✗
+5. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "Se esperaba retorno de tipo int, se obtuvo String"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 2, columna 12:
+  Se esperaba retorno de tipo int, se obtuvo String
+      return "hello";
+             ^^^^^^^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> calcular() {
+    <span class="keyword">return</span> <span class="number">42</span>;  <span class="comment">// Retornar int ✓</span>
+}
+<span class="comment">// O cambiar tipo de retorno:</span>
+<span class="keyword">String</span> calcular() {
+    <span class="keyword">return</span> <span class="string">"hello"</span>;  <span class="comment">// ✓</span>
+}
+</div>
+<h4>Error 8: Break/Continue fuera de loop</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">void</span> foo() {
+    <span class="keyword">break</span>;  <span class="comment">// ✗ ERROR</span>
+}
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Entrar función foo()
+   └─&gt; currentScope = foo
+   └─&gt; inLoop = false
+2. Encontrar BreakNode
+3. Verificar contexto
+   └─&gt; if (!inLoop) ✗
+4. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "break debe estar dentro de un loop"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 2, columna 5:
+  'break' debe estar dentro de un loop
+      break;
+      ^^^^^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">void</span> foo() {
+    <span class="keyword">while</span> (<span class="keyword">true</span>) {
+        <span class="keyword">break</span>;  <span class="comment">// Ahora sí está en loop ✓</span>
+    }
+}
+</div>
+<h4>Error 9: Return fuera de función</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">return</span> <span class="number">5</span>;  <span class="comment">// ✗ ERROR: return en scope global</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Scope actual: GLOBAL
+   └─&gt; currentReturnType = null
+2. Encontrar ReturnNode
+3. Verificar contexto
+   └─&gt; if (currentReturnType == null) ✗
+4. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "return debe estar dentro de una función"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 1, columna 1:
+  'return' debe estar dentro de una función
+  return 5;
+  ^^^^^^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> foo() {
+    <span class="keyword">return</span> <span class="number">5</span>;  <span class="comment">// Dentro de función ✓</span>
+}
+</div>
+<h4>Error 10: Acceso a campo inexistente</h4>
+<p><strong>Código:</strong></p>
+<div class="code-block"><span class="keyword">class</span> Point {
+    <span class="keyword">int</span> x;
+    <span class="keyword">int</span> y;
+}
+Point p = <span class="keyword">new</span> Point();
+<span class="keyword">int</span> z = p.z;  <span class="comment">// ✗ ERROR: campo 'z' no existe</span>
+</div>
+<p><strong>Análisis paso a paso:</strong></p>
+<pre><code class="language-">1. Acceso: p.z
+2. Tipo de 'p'
+   └─&gt; lookup("p") → Symbol(p, Point)
+   └─&gt; Tipo: ClassType(Point)
+3. Buscar campo 'z' en Point
+   └─&gt; Point.fields.get("z") → null
+4. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "La clase Point no tiene campo 'z'"
+   )
+</code></pre>
+<p><strong>Mensaje de error:</strong></p>
+<pre><code class="language-">Error semántico en línea 6, columna 11:
+  La clase Point no tiene campo 'z'
+  int z = p.z;
+            ^
+</code></pre>
+<p><strong>Solución:</strong></p>
+<div class="code-block"><span class="keyword">int</span> z = p.x;  <span class="comment">// Usar campo existente ✓</span>
+<span class="comment">// O agregar campo 'z' a la clase</span>
+</div>
+<h3>Clase SemanticException:</h3>
+<div class="code-block"><span class="keyword">class</span> <span class="class">SemanticException</span> <span class="keyword">extends</span> Exception {
+    <span class="keyword">int</span> lineNumber;
+    <span class="keyword">int</span> columnNumber;
+    <span class="keyword">String</span> message;
+    <span class="class">ASTNode</span> node;  <span class="comment">// Nodo donde ocurrió el error</span>
+
+    <span class="keyword">public</span> <span class="class">SemanticException</span>(<span class="keyword">String</span> message, <span class="class">ASTNode</span> node) {
+        <span class="keyword">super</span>(message);
+        <span class="keyword">this</span>.message = message;
+        <span class="keyword">this</span>.lineNumber = node.lineNumber;
+        <span class="keyword">this</span>.columnNumber = node.columnNumber;
+        <span class="keyword">this</span>.node = node;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">String</span> toString() {
+        StringBuilder sb = <span class="keyword">new</span> StringBuilder();
+
+        <span class="comment">// Línea del error</span>
+        sb.append(<span class="string">"Error semántico en línea "</span>)
+          .append(lineNumber)
+          .append(<span class="string">", columna "</span>)
+          .append(columnNumber)
+          .append(<span class="string">":\n"</span>);
+
+        <span class="comment">// Mensaje descriptivo</span>
+        sb.append(<span class="string">"  "</span>).append(message).append(<span class="string">"\n"</span>);
+
+        <span class="comment">// Mostrar línea de código (si está disponible)</span>
+        <span class="keyword">if</span> (node.sourceLine != <span class="keyword">null</span>) {
+            sb.append(<span class="string">"  "</span>).append(node.sourceLine).append(<span class="string">"\n"</span>);
+
+            <span class="comment">// Indicador visual (^)</span>
+            sb.append(<span class="string">"  "</span>);
+            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; columnNumber - <span class="number">1</span>; i++) {
+                sb.append(<span class="string">" "</span>);
+            }
+            sb.append(<span class="string">"^\n"</span>);
+        }
+
+        <span class="keyword">return</span> sb.toString();
+    }
+}
+</div>
+<h3>Formato de mensaje de error completo:</h3>
+<pre><code class="language-">Error semántico en línea 15, columna 12: Variable 'contador' no declarada
+    contador = contador + 1;
+               ^^^^^^^^
+Sugerencia: ¿Quizás quisiste decir 'count'?
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué errores hay en este código?</p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">int</span> x = <span class="number">10</span>;
+y = x + <span class="string">"hola"</span>;
+<span class="keyword">int</span> suma(<span class="keyword">int</span> a) {
+    <span class="keyword">return</span> a + b;
+}
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">Línea 2: Variable 'x' ya declarada en línea 1
+Línea 3: Variable 'y' no declarada
+Línea 3: Operador '+' incompatible: int + String
+Línea 5: Variable 'b' no declarada
+</code></pre>
+        </div>
+        
+    </div>
+
+    <div class="navigation">
+        <a href="slide13.html" class="nav-btn">← Anterior</a>
+        <a href="slide15.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 14 > 1) {
+                window.location.href = 'slide13.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 14 < 23) {
+                window.location.href = 'slide15.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

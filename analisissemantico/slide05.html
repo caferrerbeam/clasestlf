@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Tabla de Símbolos - El Corazón del Análisis Semántico</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 5 de 23</div>
+
+    <div class="container">
+        <h1>Tabla de Símbolos - El Corazón del Análisis Semántico</h1>
+        <div class="content">
+            <h3>¿Qué es la Tabla de Símbolos?</h3>
+<p>Es como una <strong>base de datos</strong> que almacena información sobre TODOS los identificadores (variables, funciones, clases) que aparecen en tu programa.</p>
+<p><strong>Analogía:</strong> Piensa en ella como una agenda telefónica. Cada contacto (variable) tiene:</p>
+<ul>
+<li>Nombre (identificador)</li>
+<li>Tipo (int, double, etc.)</li>
+<li>Información adicional (dónde fue declarado, su valor, etc.)</li>
+</ul>
+<h3>Ejemplo paso a paso: Construyendo la tabla</h3>
+<p>Analicemos este código línea por línea:</p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">double</span> y = <span class="number">3.14</span>;
+<span class="keyword">boolean</span> flag = <span class="keyword">true</span>;
+</div>
+<h4>Paso 1: Analizar línea 1</h4>
+<pre><code class="language-">Código: int x = 5;
+
+Preguntas del analizador:
+1. ¿"x" ya existe en la tabla? → No
+2. ¿"int" es un tipo válido? → Sí
+3. ¿5 es compatible con int? → Sí
+
+Acción: Insertar en la tabla de símbolos
+</code></pre>
+<p><strong>Tabla de Símbolos después de línea 1:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor Inicial</th>
+<th>Línea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>global</td>
+<td>5</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h4>Paso 2: Analizar línea 2</h4>
+<pre><code class="language-">Código: double y = 3.14;
+
+Preguntas del analizador:
+1. ¿"y" ya existe en la tabla? → No
+2. ¿"double" es un tipo válido? → Sí
+3. ¿3.14 es compatible con double? → Sí
+
+Acción: Insertar en la tabla de símbolos
+</code></pre>
+<p><strong>Tabla de Símbolos después de línea 2:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor Inicial</th>
+<th>Línea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>global</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>y</td>
+<td>double</td>
+<td>global</td>
+<td>3.14</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<h4>Paso 3: Analizar línea 3</h4>
+<pre><code class="language-">Código: boolean flag = true;
+
+Preguntas del analizador:
+1. ¿"flag" ya existe en la tabla? → No
+2. ¿"boolean" es un tipo válido? → Sí
+3. ¿true es compatible con boolean? → Sí
+
+Acción: Insertar en la tabla de símbolos
+</code></pre>
+<p><strong>Tabla de Símbolos FINAL:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor Inicial</th>
+<th>Línea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>global</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>y</td>
+<td>double</td>
+<td>global</td>
+<td>3.14</td>
+<td>2</td>
+</tr>
+<tr>
+<td>flag</td>
+<td>boolean</td>
+<td>global</td>
+<td>true</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h3>¿Qué pasa si intentamos declarar una variable duplicada?</h3>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;    <span class="comment">// Línea 1</span>
+<span class="keyword">int</span> x = <span class="number">10</span>;   <span class="comment">// Línea 2</span>
+</div>
+<p><strong>Proceso:</strong></p>
+<pre><code class="language-">Línea 1: int x = 5;
+  1. ¿"x" existe? → No
+  2. Insertar x:int en tabla → OK
+
+Línea 2: int x = 10;
+  1. ¿"x" existe? → SÍ (ya está en la línea 1)
+  2. ✗ ERROR!
+
+Error semántico en línea 2:
+  Variable 'x' ya fue declarada en línea 1
+</code></pre>
+<h3>Operaciones de la Tabla de Símbolos:</h3>
+<h4>1. <code>insert(symbol)</code> - Agregar símbolo</h4>
+<pre><code class="language-">Uso: Cuando encontramos una declaración de variable
+Ejemplo: int x = 5;
+Acción: Agregar entrada para "x" en la tabla
+</code></pre>
+<h4>2. <code>lookup(name)</code> - Buscar símbolo</h4>
+<pre><code class="language-">Uso: Cuando encontramos un uso de variable
+Ejemplo: y = x + 1;
+Acción: Buscar "x" en la tabla para saber su tipo
+</code></pre>
+<h4>3. <code>update(name, info)</code> - Actualizar información</h4>
+<pre><code class="language-">Uso: Cuando cambiamos alguna propiedad
+Ejemplo: Actualizar el valor de una variable
+</code></pre>
+<h4>4. <code>delete(name)</code> - Eliminar símbolo</h4>
+<pre><code class="language-">Uso: Cuando salimos de un scope y las variables locales ya no existen
+Ejemplo: Al terminar un bloque { }
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué contiene la tabla de símbolos después de este código?</p>
+<div class="code-block"><span class="keyword">int</span> a = <span class="number">10</span>;
+<span class="keyword">double</span> b = <span class="number">20.5</span>;
+<span class="keyword">int</span> a = <span class="number">30</span>;
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">Línea 1: OK, tabla = {a:int}
+Línea 2: OK, tabla = {a:int, b:double}
+Línea 3: ✗ ERROR - "a" ya existe
+
+La tabla se queda con: {a:int (10), b:double (20.5)}
+El error impide que se agregue el segundo "a"
+</code></pre>
+        </div>
+        <div class="mermaid">graph LR
+    A[Identificador: x] --> B[Información Completa]
+    B --> C[Tipo: int]
+    B --> D[Scope: global]
+    B --> E[Valor Inicial: 5]
+    B --> F[Posición en Memoria: 0x1000]
+    B --> G[Línea de Declaración: 1]</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide04.html" class="nav-btn">← Anterior</a>
+        <a href="slide06.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 5 > 1) {
+                window.location.href = 'slide04.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 5 < 23) {
+                window.location.href = 'slide06.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

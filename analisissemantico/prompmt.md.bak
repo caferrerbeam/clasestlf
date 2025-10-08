@@ -1,0 +1,5773 @@
+# 📘 Presentación: Analizador Semántico - Del AST al Significado
+
+## Página 1: Portada
+- Título: *"Analizador Semántico: Dando Significado al Código"*
+- Subtítulo: "De Árboles Sintácticos a Código con Sentido"
+- Curso: Compiladores y Teoría de Lenguajes
+- Universidad EAM
+
+---
+
+## Página 2: Arquitectura del Compilador - Ubicación del Análisis Semántico
+
+### **¿Dónde estamos en el proceso de compilación?**
+
+```mermaid
+graph TB
+    A[Código Fuente] --> B[📝 Analizador Léxico]
+    B --> C[Tokens]
+    C --> D[🌳 Analizador Sintáctico]
+    D --> E[AST - Árbol de Sintaxis]
+    E --> F[🧠 ANALIZADOR SEMÁNTICO]
+    F --> G[AST Anotado + Tabla de Símbolos]
+    G --> H[⚙️ Generador de Código]
+    H --> I[Código Objeto]
+
+    style F fill:#ff6b6b,stroke:#c92a2a,stroke-width:4px
+    style E fill:#4ecdc4,stroke:#45b7aa
+    style G fill:#95e1d3,stroke:#45b7aa
+```
+
+### **Ejemplo concreto del flujo:**
+
+**Código fuente:**
+```java
+int x = 5;
+x = 'a';
+```
+
+**Fase 1 - Analizador Léxico:**
+```
+Entrada: "int x = 5; x = 'a';"
+Salida: [INT, ID("x"), ASSIGN, NUM(5), SEMICOLON, ID("x"), ASSIGN, CHAR('a'), SEMICOLON]
+Resultado: ✓ ÉXITO
+```
+
+**Fase 2 - Analizador Sintáctico:**
+```
+Entrada: [INT, ID("x"), ASSIGN, NUM(5), SEMICOLON, ID("x"), ASSIGN, CHAR('a'), SEMICOLON]
+Salida: AST
+    ProgramNode
+    ├── VariableDeclarationNode(type=int, name="x", value=5)
+    └── AssignmentNode(name="x", value='a')
+Resultado: ✓ ÉXITO (sintácticamente válido)
+```
+
+**Fase 3 - Analizador Semántico:**
+```
+Entrada: AST del paso anterior
+Proceso:
+  1. Declara x como int → OK, agregar a tabla de símbolos
+  2. Asignar 'a' (char) a x (int) → ✗ ERROR
+
+Error: Línea 2: No se puede asignar tipo 'char' a variable de tipo 'int'
+Resultado: ✗ FALLO SEMÁNTICO
+```
+
+### **Pregunta clave para reflexionar:**
+¿Por qué el código pasa el análisis sintáctico pero falla en el semántico?
+
+**Respuesta:** Porque sintácticamente `x = 'a'` sigue las reglas gramaticales (variable = expresión), pero semánticamente no tiene sentido asignar un char a una variable int.
+
+**El análisis semántico es el "detector de sentido común" del compilador.**
+
+---
+
+## Página 3: ¿Qué Hace el Analizador Semántico?
+
+### **Responsabilidades principales:**
+
+#### **1. 🔍 Verificación de Tipos**
+
+**¿Qué significa?** Verificar que las operaciones se hacen con tipos compatibles.
+
+**Ejemplos concretos:**
+
+```java
+// VÁLIDO: Los tipos coinciden
+int x = 5;        // int = int ✓
+double y = 3.14;  // double = double ✓
+
+// INVÁLIDO: Los tipos son incompatibles
+int x = "hola";   // int = String ✗
+boolean b = 42;   // boolean = int ✗
+```
+
+**¿Por qué es importante?** Sin verificación de tipos, podrías intentar sumar un número con un texto, lo cual no tiene sentido matemático.
+
+#### **2. 📋 Gestión de la Tabla de Símbolos**
+
+**¿Qué significa?** Llevar un registro de todas las variables declaradas y su información.
+
+**Ejemplo paso a paso:**
+
+```java
+// Línea 1:
+int x = 5;
+// El analizador semántico pregunta:
+// - ¿"x" ya existe? No → OK, crear entrada
+// - ¿El tipo es válido? Sí, "int" es un tipo conocido
+// - ¿La inicialización es correcta? Sí, 5 es un int
+// Acción: Agregar "x" (tipo: int, valor: 5) a la tabla
+
+// Línea 2:
+int x = 10;
+// El analizador semántico pregunta:
+// - ¿"x" ya existe? SÍ → ✗ ERROR!
+// Error: Variable 'x' ya fue declarada en línea 1
+```
+
+#### **3. 🎯 Verificación de Contexto**
+
+**¿Qué significa?** Verificar que las instrucciones se usan en el contexto correcto.
+
+**Ejemplo concreto:**
+
+```java
+// CONTEXTO INCORRECTO:
+void foo() {
+    break;  // ✗ ERROR: break debe estar DENTRO de un loop
+}
+
+// CONTEXTO CORRECTO:
+void foo() {
+    while (true) {
+        break;  // ✓ OK: break está dentro de un loop
+    }
+}
+```
+
+**Pregunta:** ¿Por qué `break` fuera de un loop es un error?
+
+**Respuesta:** Porque `break` significa "salir del loop actual". Si no hay loop, ¿de qué salimos?
+
+#### **4. 🔄 Resolución de Nombres**
+
+**¿Qué significa?** Identificar a cuál declaración se refiere cada uso de variable.
+
+**Ejemplo con scopes anidados:**
+
+```java
+int x = 10;  // x global
+
+void foo() {
+    int x = 20;  // x local (diferente del global)
+
+    // Cuando veo "x" aquí, ¿a cuál me refiero?
+    System.out.println(x);  // ¿10 o 20?
+}
+```
+
+**Respuesta:** Se refiere a `x = 20` (la más cercana en el scope actual).
+
+**Regla:** Siempre se usa la variable del scope más interno.
+
+### **Resumen visual:**
+
+```
+Input del Analizador Semántico:
+┌─────────────────────────┐
+│ AST (sintácticamente    │
+│ correcto)               │
+└─────────────────────────┘
+
+Output del Analizador Semántico:
+┌─────────────────────────┐
+│ ✓ AST anotado con tipos │
+│ ✓ Tabla de símbolos     │
+│ ✓ Lista de errores      │
+└─────────────────────────┘
+```
+
+---
+
+## Página 4: Sintáctico vs Semántico - ¿Cuál es la Diferencia?
+
+### **Analogía con lenguaje natural:**
+
+#### **Análisis Sintáctico (forma):**
+
+```
+✓ CORRECTO (buena gramática):
+   "El perro come manzanas"
+   Sujeto + Verbo + Objeto = VÁLIDO
+
+✗ INCORRECTO (mala gramática):
+   "Perro el manzanas come"
+   Sin estructura gramatical = INVÁLIDO
+```
+
+#### **Análisis Semántico (significado):**
+
+```
+✓ TIENE SENTIDO:
+   "El perro come manzanas"
+   Los perros pueden comer manzanas en la realidad
+
+✗ NO TIENE SENTIDO (aunque sea gramaticalmente correcto):
+   "Las manzanas comen perros"
+   Gramaticalmente perfecto, pero absurdo en la realidad
+```
+
+### **En programación:**
+
+#### **Caso 1: Incompatibilidad de tipos**
+
+**Sintácticamente correcto, semánticamente incorrecto:**
+
+```java
+int x = 5;
+x = "hola";
+```
+
+**Análisis sintáctico dice:**
+```
+✓ Línea 1: Declaración válida (tipo + nombre + = + valor + ;)
+✓ Línea 2: Asignación válida (nombre + = + valor + ;)
+Conclusión: SINTAXIS CORRECTA
+```
+
+**Análisis semántico dice:**
+```
+✓ Línea 1: OK
+  - Declarar x como int
+  - Inicializar con 5 (int)
+  - Agregar x:int a la tabla de símbolos
+
+✗ Línea 2: ERROR
+  - x es int (de la línea 1)
+  - "hola" es String
+  - int ≠ String
+  - Error: No se puede asignar String a int
+```
+
+#### **Caso 2: Número incorrecto de argumentos**
+
+**Sintácticamente correcto, semánticamente incorrecto:**
+
+```java
+int suma(int a, int b) {
+    return a + b;
+}
+
+int resultado = suma(5);  // Solo 1 argumento, se necesitan 2
+```
+
+**Análisis sintáctico dice:**
+```
+✓ Declaración de función: OK
+✓ Llamada a función: OK (nombre + paréntesis + argumentos)
+Conclusión: SINTAXIS CORRECTA
+```
+
+**Análisis semántico dice:**
+```
+✓ Función 'suma' declarada correctamente
+  - Requiere 2 parámetros: int, int
+  - Retorna: int
+
+✗ Llamada a 'suma' incorrecta
+  - Se proporcionó 1 argumento
+  - Se requieren 2 argumentos
+  - Error: suma() espera 2 argumentos, se recibieron 1
+```
+
+### **Tabla comparativa:**
+
+| Aspecto | Sintáctico | Semántico | Ejemplo |
+|---------|-----------|-----------|---------|
+| **¿Qué verifica?** | La forma/estructura | El significado/sentido | |
+| **Detecta** | Paréntesis faltantes, palabras mal ordenadas | Tipos incompatibles, variables no declaradas | |
+| **Ejemplo válido** | `int x = 5;` | `int x = 5;` | ✓ Válido en ambos |
+| **Ejemplo inválido sintáctico** | `int x = ;` | (no llega a semántico) | ✗ Falta valor |
+| **Ejemplo inválido semántico** | `int x = "hola";` | `int x = "hola";` | ✓ Sintaxis OK, ✗ Semántica FAIL |
+
+### **Regla de oro:**
+
+```
+El análisis sintáctico verifica la FORMA
+El análisis semántico verifica el SIGNIFICADO
+
+Ambos deben pasar para que el código sea válido.
+```
+
+### **Pregunta para reflexionar:**
+
+¿Este código pasa el análisis sintáctico? ¿Y el semántico?
+
+```java
+int suma(int a, int b) {
+    return a + b;
+}
+
+int x = suma(5, "hola");
+```
+
+**Respuesta:**
+- **Sintáctico:** ✓ SÍ (estructura correcta)
+- **Semántico:** ✗ NO (el segundo argumento debe ser int, no String)
+
+---
+
+## Página 5: Tabla de Símbolos - El Corazón del Análisis Semántico
+
+### **¿Qué es la Tabla de Símbolos?**
+
+Es como una **base de datos** que almacena información sobre TODOS los identificadores (variables, funciones, clases) que aparecen en tu programa.
+
+**Analogía:** Piensa en ella como una agenda telefónica. Cada contacto (variable) tiene:
+- Nombre (identificador)
+- Tipo (int, double, etc.)
+- Información adicional (dónde fue declarado, su valor, etc.)
+
+```mermaid
+graph LR
+    A[Identificador: x] --> B[Información Completa]
+    B --> C[Tipo: int]
+    B --> D[Scope: global]
+    B --> E[Valor Inicial: 5]
+    B --> F[Posición en Memoria: 0x1000]
+    B --> G[Línea de Declaración: 1]
+```
+
+### **Ejemplo paso a paso: Construyendo la tabla**
+
+Analicemos este código línea por línea:
+
+```java
+int x = 5;
+double y = 3.14;
+boolean flag = true;
+```
+
+#### **Paso 1: Analizar línea 1**
+
+```
+Código: int x = 5;
+
+Preguntas del analizador:
+1. ¿"x" ya existe en la tabla? → No
+2. ¿"int" es un tipo válido? → Sí
+3. ¿5 es compatible con int? → Sí
+
+Acción: Insertar en la tabla de símbolos
+```
+
+**Tabla de Símbolos después de línea 1:**
+
+| Nombre | Tipo | Scope  | Valor Inicial | Línea |
+|--------|------|--------|---------------|-------|
+| x      | int  | global | 5             | 1     |
+
+#### **Paso 2: Analizar línea 2**
+
+```
+Código: double y = 3.14;
+
+Preguntas del analizador:
+1. ¿"y" ya existe en la tabla? → No
+2. ¿"double" es un tipo válido? → Sí
+3. ¿3.14 es compatible con double? → Sí
+
+Acción: Insertar en la tabla de símbolos
+```
+
+**Tabla de Símbolos después de línea 2:**
+
+| Nombre | Tipo   | Scope  | Valor Inicial | Línea |
+|--------|--------|--------|---------------|-------|
+| x      | int    | global | 5             | 1     |
+| y      | double | global | 3.14          | 2     |
+
+#### **Paso 3: Analizar línea 3**
+
+```
+Código: boolean flag = true;
+
+Preguntas del analizador:
+1. ¿"flag" ya existe en la tabla? → No
+2. ¿"boolean" es un tipo válido? → Sí
+3. ¿true es compatible con boolean? → Sí
+
+Acción: Insertar en la tabla de símbolos
+```
+
+**Tabla de Símbolos FINAL:**
+
+| Nombre | Tipo    | Scope  | Valor Inicial | Línea |
+|--------|---------|--------|---------------|-------|
+| x      | int     | global | 5             | 1     |
+| y      | double  | global | 3.14          | 2     |
+| flag   | boolean | global | true          | 3     |
+
+### **¿Qué pasa si intentamos declarar una variable duplicada?**
+
+```java
+int x = 5;    // Línea 1
+int x = 10;   // Línea 2
+```
+
+**Proceso:**
+
+```
+Línea 1: int x = 5;
+  1. ¿"x" existe? → No
+  2. Insertar x:int en tabla → OK
+
+Línea 2: int x = 10;
+  1. ¿"x" existe? → SÍ (ya está en la línea 1)
+  2. ✗ ERROR!
+
+Error semántico en línea 2:
+  Variable 'x' ya fue declarada en línea 1
+```
+
+### **Operaciones de la Tabla de Símbolos:**
+
+#### **1. `insert(symbol)` - Agregar símbolo**
+
+```
+Uso: Cuando encontramos una declaración de variable
+Ejemplo: int x = 5;
+Acción: Agregar entrada para "x" en la tabla
+```
+
+#### **2. `lookup(name)` - Buscar símbolo**
+
+```
+Uso: Cuando encontramos un uso de variable
+Ejemplo: y = x + 1;
+Acción: Buscar "x" en la tabla para saber su tipo
+```
+
+#### **3. `update(name, info)` - Actualizar información**
+
+```
+Uso: Cuando cambiamos alguna propiedad
+Ejemplo: Actualizar el valor de una variable
+```
+
+#### **4. `delete(name)` - Eliminar símbolo**
+
+```
+Uso: Cuando salimos de un scope y las variables locales ya no existen
+Ejemplo: Al terminar un bloque { }
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué contiene la tabla de símbolos después de este código?
+
+```java
+int a = 10;
+double b = 20.5;
+int a = 30;
+```
+
+**Respuesta:**
+
+```
+Línea 1: OK, tabla = {a:int}
+Línea 2: OK, tabla = {a:int, b:double}
+Línea 3: ✗ ERROR - "a" ya existe
+
+La tabla se queda con: {a:int (10), b:double (20.5)}
+El error impide que se agregue el segundo "a"
+```
+
+---
+
+## Página 6: Patrón Visitor - Recorriendo el AST de Forma Elegante
+
+### **¿Qué es el patrón Visitor?**
+
+El patrón Visitor es una técnica para **separar las operaciones de las estructuras de datos** sobre las que operan.
+
+**Analogía del mundo real:** Un inspector de edificios
+
+Imagina un edificio con diferentes tipos de habitaciones:
+- 🏠 Habitación → Cocina, Dormitorio, Baño, Sala
+- 👷 Inspector → Inspector de Seguridad, Inspector Eléctrico, Inspector Sanitario
+
+**Sin Visitor (MALO):**
+Cada habitación tiene que saber qué hacer con cada tipo de inspector:
+
+```java
+class Cocina {
+    void inspeccionSeguridad() { ... }
+    void inspeccionElectrica() { ... }
+    void inspeccionSanitaria() { ... }
+    // ¿Nuevo inspector? → Modificar TODAS las habitaciones ❌
+}
+```
+
+**Con Visitor (BUENO):**
+Las habitaciones solo dicen "acepto inspección", el inspector decide qué hacer:
+
+```java
+class Cocina {
+    void aceptar(Inspector inspector) {
+        inspector.inspeccionarCocina(this); // Delegar al inspector
+    }
+}
+```
+
+### **¿Por qué necesitamos Visitor en el análisis semántico?**
+
+En un compilador, el AST (Árbol de Sintaxis Abstracta) tiene **muchos tipos de nodos**:
+- `VariableNode`, `BinaryOpNode`, `FunctionNode`, `IfNode`, etc.
+
+Y necesitamos hacer **múltiples operaciones** sobre el AST:
+- ✅ Verificación de tipos
+- ✅ Verificación semántica
+- ✅ Generación de código
+- ✅ Optimización
+- ✅ Pretty printing
+
+**Problema sin Visitor:**
+
+```java
+class BinaryOpNode {
+    void typeCheck() { ... }           // Operación 1
+    void generateCode() { ... }        // Operación 2
+    void optimize() { ... }            // Operación 3
+    void prettyPrint() { ... }         // Operación 4
+    // ¿Nueva operación? → Modificar TODAS las clases de nodos ❌
+}
+```
+
+❌ **Problemas:**
+1. Si agregamos una nueva operación, debemos modificar **todas las clases de nodos**
+2. Mezcla responsabilidades: cada nodo tiene código de tipos, código de generación, etc.
+3. Difícil de mantener
+
+**Solución con Visitor:**
+
+```java
+class BinaryOpNode {
+    <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visitBinaryOp(this);
+    }
+}
+
+// Nueva operación = Nueva clase Visitor
+class TypeCheckVisitor implements ASTVisitor<Type> { ... }
+class CodeGenVisitor implements ASTVisitor<String> { ... }
+class OptimizerVisitor implements ASTVisitor<ASTNode> { ... }
+```
+
+✅ **Ventajas:**
+1. Nueva operación = Solo crear nueva clase Visitor
+2. No modificamos las clases de nodos
+3. Cada operación está en su propia clase (separación de responsabilidades)
+
+### **Cómo funciona el patrón Visitor: Paso a paso**
+
+#### **Paso 1: Definir la interfaz Visitor**
+
+```java
+interface ASTVisitor<T> {
+    T visitBinaryOp(BinaryOpNode node);
+    T visitVariable(VariableNode node);
+    T visitNumber(NumberNode node);
+    T visitFunction(FunctionNode node);
+    // Un método por cada tipo de nodo
+}
+```
+
+#### **Paso 2: Cada nodo tiene un método `accept()`**
+
+```java
+class BinaryOpNode implements ASTNode {
+    ASTNode left;
+    ASTNode right;
+    String operator;
+
+    <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visitBinaryOp(this);
+    }
+}
+
+class VariableNode implements ASTNode {
+    String name;
+
+    <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visitVariable(this);
+    }
+}
+```
+
+#### **Paso 3: Implementar un Visitor concreto**
+
+```java
+class TypeCheckVisitor implements ASTVisitor<Type> {
+    SymbolTable symbolTable;
+
+    @Override
+    public Type visitBinaryOp(BinaryOpNode node) {
+        // Verificar tipos de operandos
+        Type leftType = node.left.accept(this);  // Recursión: visitar hijo izquierdo
+        Type rightType = node.right.accept(this); // Recursión: visitar hijo derecho
+
+        // Verificar compatibilidad
+        if (!leftType.equals(rightType)) {
+            throw new SemanticException("Tipos incompatibles: " + leftType + " y " + rightType);
+        }
+
+        return leftType; // Tipo del resultado
+    }
+
+    @Override
+    public Type visitVariable(VariableNode node) {
+        // Buscar variable en tabla de símbolos
+        Symbol symbol = symbolTable.lookup(node.name);
+        if (symbol == null) {
+            throw new SemanticException("Variable no declarada: " + node.name);
+        }
+        return symbol.type;
+    }
+
+    @Override
+    public Type visitNumber(NumberNode node) {
+        return Type.INT; // Los números son int
+    }
+}
+```
+
+#### **Paso 4: Usar el Visitor**
+
+```java
+// Construir AST: x + 5
+ASTNode ast = new BinaryOpNode(
+    new VariableNode("x"),  // left
+    new NumberNode(5),      // right
+    "+"                     // operator
+);
+
+// Verificar tipos
+TypeCheckVisitor typeChecker = new TypeCheckVisitor(symbolTable);
+Type resultType = ast.accept(typeChecker);
+
+System.out.println("Tipo del resultado: " + resultType); // Type.INT
+```
+
+### **Diagrama de flujo: ¿Cómo interactúan los componentes?**
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant AST as BinaryOpNode
+    participant Left as VariableNode "x"
+    participant Right as NumberNode "5"
+    participant Visitor as TypeCheckVisitor
+    participant ST as SymbolTable
+
+    Main->>AST: ast.accept(typeChecker)
+    AST->>Visitor: visitBinaryOp(this)
+    Visitor->>Left: left.accept(this)
+    Left->>Visitor: visitVariable(this)
+    Visitor->>ST: lookup("x")
+    ST-->>Visitor: Symbol(x, Type.INT)
+    Visitor-->>Left: Type.INT
+    Left-->>AST: Type.INT
+    Visitor->>Right: right.accept(this)
+    Right->>Visitor: visitNumber(this)
+    Visitor-->>Right: Type.INT
+    Right-->>AST: Type.INT
+    Visitor->>Visitor: Verificar INT == INT ✓
+    AST-->>Main: Type.INT
+```
+
+### **Ejemplo completo paso a paso**
+
+**Código fuente:**
+```java
+int x = 10;
+int y = x + 5;
+```
+
+**AST:**
+```
+Program
+├── VariableDeclaration(x, 10)
+└── VariableDeclaration(y, x + 5)
+    └── BinaryOp(+)
+        ├── Variable("x")
+        └── Number(5)
+```
+
+**Ejecución del TypeCheckVisitor:**
+
+| Paso | Nodo visitado | Acción | Resultado |
+|------|---------------|--------|-----------|
+| 1 | VariableDeclaration(x) | Insertar x:int en tabla | ✓ OK |
+| 2 | VariableDeclaration(y) | Visitar expresión (x + 5) | → Paso 3 |
+| 3 | BinaryOp(+) | Verificar operandos | → Pasos 4 y 5 |
+| 4 | Variable("x") | Buscar x en tabla → Type.INT | Type.INT |
+| 5 | Number(5) | Literal numérico | Type.INT |
+| 6 | BinaryOp(+) | INT + INT = ✓ OK | Type.INT |
+| 7 | VariableDeclaration(y) | Insertar y:int en tabla | ✓ OK |
+
+### **Ventajas del patrón Visitor**
+
+| Sin Visitor | Con Visitor |
+|-------------|-------------|
+| Modificar cada clase de nodo para nueva operación | Solo crear nueva clase Visitor |
+| Código mezclado en nodos | Operaciones separadas por Visitor |
+| Difícil agregar operaciones | Fácil agregar operaciones |
+| Fácil agregar nuevos tipos de nodos | Difícil agregar nuevos tipos de nodos |
+
+### **¿Cuándo usar Visitor?**
+
+✅ **USA Visitor cuando:**
+- Tienes una estructura de datos estable (tipos de nodos no cambian mucho)
+- Necesitas agregar muchas operaciones sobre esa estructura
+- Quieres separar las operaciones de las estructuras
+
+❌ **NO uses Visitor cuando:**
+- La estructura cambia constantemente (agregas nuevos tipos de nodos todo el tiempo)
+- Solo tienes 1-2 operaciones
+
+### **Resumen visual**
+
+```
+SIN VISITOR:
+┌─────────────────┐     ┌─────────────────┐
+│  BinaryOpNode   │     │  VariableNode   │
+├─────────────────┤     ├─────────────────┤
+│ typeCheck()     │     │ typeCheck()     │
+│ generateCode()  │     │ generateCode()  │
+│ optimize()      │     │ optimize()      │
+│ prettyPrint()   │     │ prettyPrint()   │
+└─────────────────┘     └─────────────────┘
+Nueva operación → Modificar AMBAS clases ❌
+
+CON VISITOR:
+┌─────────────────┐     ┌─────────────────┐
+│  BinaryOpNode   │     │  VariableNode   │
+├─────────────────┤     ├─────────────────┤
+│ accept(visitor) │     │ accept(visitor) │
+└─────────────────┘     └─────────────────┘
+          ↓                       ↓
+┌──────────────────────────────────────┐
+│         TypeCheckVisitor             │
+│  visitBinaryOp()   visitVariable()   │
+└──────────────────────────────────────┘
+Nueva operación → Solo crear nueva clase Visitor ✓
+```
+
+### **Pregunta de comprensión**
+
+¿Qué hace este código?
+
+```java
+class CountNodesVisitor implements ASTVisitor<Integer> {
+    public Integer visitBinaryOp(BinaryOpNode node) {
+        return 1 + node.left.accept(this) + node.right.accept(this);
+    }
+
+    public Integer visitVariable(VariableNode node) {
+        return 1;
+    }
+
+    public Integer visitNumber(NumberNode node) {
+        return 1;
+    }
+}
+```
+
+**Respuesta:** Cuenta el número total de nodos en el AST recursivamente. Para cada nodo binario, cuenta 1 (él mismo) + nodos en subárbol izquierdo + nodos en subárbol derecho.
+
+---
+
+## Página 7: Implementación de la Tabla de Símbolos - Explicación Detallada
+
+Ahora veamos CÓMO se implementa la tabla de símbolos en código.
+
+### **Parte 1: La clase Symbol (Símbolo individual)**
+
+```java
+class Symbol {
+    String name;          // El nombre del identificador (ej: "x", "contador")
+    Type type;            // El tipo (ej: int, double, boolean)
+    Scope scope;          // El alcance (global, local, función)
+    Object value;         // El valor actual (opcional)
+    int lineNumber;       // Línea donde fue declarado
+
+    public Symbol(String name, Type type, Scope scope, int lineNumber) {
+        this.name = name;
+        this.type = type;
+        this.scope = scope;
+        this.lineNumber = lineNumber;
+    }
+}
+```
+
+**Explicación de cada campo:**
+
+1. **`name`**: El identificador que el programador escribió
+   - Ejemplo: `int contador = 0;` → name = "contador"
+
+2. **`type`**: El tipo de datos
+   - Ejemplo: `int contador = 0;` → type = Type.INT
+
+3. **`scope`**: El alcance de la variable
+   - `Scope.GLOBAL`: Variable visible en todo el programa
+   - `Scope.LOCAL`: Variable visible solo en un bloque o función
+
+4. **`value`**: El valor actual (útil para optimizaciones)
+   - Ejemplo: `int x = 5;` → value = 5
+
+5. **`lineNumber`**: Para reportar errores
+   - Ejemplo: "Variable 'x' ya declarada en línea 15"
+
+### **Parte 2: La clase SymbolTable (Tabla completa)**
+
+```java
+class SymbolTable {
+    // CAMPO 1: HashMap para almacenar símbolos
+    // ¿Por qué HashMap? Búsqueda O(1) - muy rápido
+    private Map<String, Symbol> symbols;
+
+    // CAMPO 2: Referencia al scope padre (para scopes anidados)
+    private SymbolTable parent;
+
+    // CONSTRUCTOR
+    public SymbolTable(SymbolTable parent) {
+        this.symbols = new HashMap<>();  // Crear HashMap vacío
+        this.parent = parent;             // Guardar referencia al padre
+    }
+
+    // ... métodos abajo
+}
+```
+
+**¿Por qué usamos HashMap?**
+
+```
+HashMap: búsqueda en O(1) (constante, muy rápido)
+Array:   búsqueda en O(n) (lineal, lento con muchas variables)
+ArrayList: búsqueda en O(n) (lineal, lento)
+
+Con 1000 variables:
+- HashMap: 1 operación
+- Array/ArrayList: hasta 1000 operaciones
+
+¡HashMap es MUCHO más eficiente!
+```
+
+**¿Qué es `parent`?**
+
+El `parent` es una referencia al scope "exterior". Esto permite tener scopes anidados:
+
+```
+Global Scope (parent = null)
+  └─ Función foo (parent = Global)
+      └─ Bloque if (parent = foo)
+          └─ Bloque anidado (parent = if)
+```
+
+### **Método 1: `insert()` - Agregar símbolo**
+
+```java
+public void insert(Symbol symbol) throws SemanticException {
+    // PASO 1: Verificar si ya existe en el scope ACTUAL
+    if (symbols.containsKey(symbol.name)) {
+        // Ya existe → ERROR
+        throw new SemanticException(
+            "Variable '" + symbol.name + "' ya declarada en línea " +
+            symbols.get(symbol.name).lineNumber
+        );
+    }
+
+    // PASO 2: No existe → agregar al HashMap
+    symbols.put(symbol.name, symbol);
+}
+```
+
+**Explicación detallada:**
+
+1. **`symbols.containsKey(symbol.name)`**
+   - Pregunta: ¿La clave (nombre) ya existe en el HashMap?
+   - Ejemplo: Si ya tenemos `x:int`, y queremos agregar otro `x`, esto devuelve `true`
+
+2. **Si existe → `throw new SemanticException(...)`**
+   - Lanzar una excepción con mensaje descriptivo
+   - El mensaje incluye el nombre de la variable y la línea donde se declaró primero
+
+3. **Si NO existe → `symbols.put(symbol.name, symbol)`**
+   - Agregar el nuevo símbolo al HashMap
+   - Clave = nombre, Valor = objeto Symbol completo
+
+**Ejemplo de uso:**
+
+```java
+SymbolTable table = new SymbolTable(null);  // Tabla vacía
+
+// Declarar: int x = 5;
+Symbol xSymbol = new Symbol("x", Type.INT, Scope.GLOBAL, 1);
+table.insert(xSymbol);  // ✓ OK, tabla ahora tiene {x:int}
+
+// Intentar declarar: int x = 10; en línea 2
+Symbol xSymbol2 = new Symbol("x", Type.INT, Scope.GLOBAL, 2);
+table.insert(xSymbol2);  // ✗ LANZA EXCEPCIÓN:
+// "Variable 'x' ya declarada en línea 1"
+```
+
+### **Método 2: `lookup()` - Buscar símbolo**
+
+```java
+public Symbol lookup(String name) {
+    // PASO 1: Buscar en el scope ACTUAL (this.symbols)
+    Symbol symbol = symbols.get(name);
+
+    // PASO 2: Si lo encontramos, retornarlo
+    if (symbol != null) {
+        return symbol;  // Encontrado en scope actual
+    }
+
+    // PASO 3: No está en scope actual, buscar en scope padre
+    if (parent != null) {
+        return parent.lookup(name);  // Recursión: buscar en padre
+    }
+
+    // PASO 4: No encontrado en ningún scope
+    return null;  // La variable no existe
+}
+```
+
+**Explicación detallada:**
+
+1. **`symbols.get(name)`**
+   - Buscar en el HashMap del scope actual
+   - Si existe, HashMap devuelve el Symbol
+   - Si NO existe, HashMap devuelve `null`
+
+2. **`if (symbol != null) return symbol;`**
+   - Si encontramos el símbolo en el scope actual, retornarlo inmediatamente
+   - No necesitamos seguir buscando
+
+3. **`if (parent != null) return parent.lookup(name);`**
+   - Si NO encontramos en scope actual, preguntar al scope padre
+   - **Recursión:** El padre hace el mismo proceso (buscar en sí mismo, luego en SU padre)
+   - Esto permite buscar en TODOS los scopes desde el más interno al más externo
+
+4. **`return null;`**
+   - Llegamos al scope más externo (parent == null) y no encontramos nada
+   - La variable NO existe en ningún scope
+   - El analizador semántico puede reportar error: "Variable no declarada"
+
+**Ejemplo visual de búsqueda:**
+
+```java
+// Scopes anidados:
+Global: {x: 10}
+  └─ Función foo: {y: 20}
+      └─ Bloque if: {z: 30}
+
+// Si estamos en el bloque "if" y hacemos lookup("y"):
+
+Paso 1: Buscar "y" en scope if
+        if.symbols.get("y") → null (no está aquí)
+
+Paso 2: if.parent != null → TRUE (parent es foo)
+        Llamar foo.lookup("y")
+
+Paso 3: Buscar "y" en scope foo
+        foo.symbols.get("y") → Symbol(y, int, 20) ✓ ENCONTRADO
+
+Paso 4: Retornar Symbol(y, int, 20)
+```
+
+**Ejemplo en código:**
+
+```java
+// Crear estructura de scopes
+SymbolTable global = new SymbolTable(null);
+SymbolTable foo = new SymbolTable(global);
+SymbolTable ifBlock = new SymbolTable(foo);
+
+// Agregar variables
+global.insert(new Symbol("x", Type.INT, Scope.GLOBAL, 1));
+foo.insert(new Symbol("y", Type.INT, Scope.LOCAL, 5));
+ifBlock.insert(new Symbol("z", Type.INT, Scope.LOCAL, 10));
+
+// Búsquedas desde ifBlock
+Symbol resultZ = ifBlock.lookup("z");  // Encuentra en scope actual
+Symbol resultY = ifBlock.lookup("y");  // Encuentra en scope padre
+Symbol resultX = ifBlock.lookup("x");  // Encuentra en scope abuelo
+Symbol resultW = ifBlock.lookup("w");  // null - no existe
+```
+
+**Traza de `ifBlock.lookup("y")`:**
+
+```
+1. ifBlock.lookup("y")
+   - Buscar en ifBlock.symbols: null
+   - parent != null → TRUE
+   - Llamar parent.lookup("y")
+
+2. foo.lookup("y")
+   - Buscar en foo.symbols: Symbol(y, int, 20) ✓
+   - return Symbol(y, int, 20)
+
+3. ifBlock recibe: Symbol(y, int, 20)
+   - return Symbol(y, int, 20)
+
+Resultado final: Symbol(y, int, 20)
+```
+
+### **Método 3: `existsInCurrentScope()` - Verificar solo scope actual**
+
+```java
+public boolean existsInCurrentScope(String name) {
+    return symbols.containsKey(name);
+}
+```
+
+**¿Para qué sirve?**
+
+Este método NO busca en scopes padres, solo en el scope actual.
+
+**Uso:** Detectar redeclaraciones en el mismo scope.
+
+**Ejemplo:**
+
+```java
+void foo() {
+    int x = 5;
+    int x = 10;  // ✗ ERROR: x ya declarado en este scope
+}
+```
+
+vs.
+
+```java
+int x = 5;  // Scope global
+
+void foo() {
+    int x = 10;  // ✓ OK: shadowing, diferente scope
+}
+```
+
+**Diferencia entre `lookup()` y `existsInCurrentScope()`:**
+
+```java
+SymbolTable global = new SymbolTable(null);
+SymbolTable local = new SymbolTable(global);
+
+global.insert(new Symbol("x", Type.INT, Scope.GLOBAL, 1));
+
+// Desde local:
+local.lookup("x");                  // ✓ Encuentra x (busca en global también)
+local.existsInCurrentScope("x");    // ✗ NO encuentra (solo busca en local)
+```
+
+### **Ventajas de esta implementación:**
+
+1. **Eficiencia:** HashMap da búsqueda O(1)
+2. **Scopes anidados:** La referencia `parent` permite jerarquías
+3. **Detección de errores:**
+   - Redeclaraciones: `existsInCurrentScope()`
+   - Variables no declaradas: `lookup()` retorna null
+4. **Shadowing:** Permitimos variables con mismo nombre en diferentes scopes
+
+### **Pregunta de comprensión:**
+
+¿Qué retorna este código?
+
+```java
+SymbolTable global = new SymbolTable(null);
+SymbolTable local = new SymbolTable(global);
+
+global.insert(new Symbol("x", Type.INT, Scope.GLOBAL, 1));
+local.insert(new Symbol("y", Type.INT, Scope.LOCAL, 5));
+
+Symbol a = local.lookup("x");
+Symbol b = local.lookup("y");
+Symbol c = local.lookup("z");
+```
+
+**Respuesta:**
+```
+a = Symbol(x, int, global) - encontrado en padre
+b = Symbol(y, int, local)  - encontrado en scope actual
+c = null                    - no existe en ningún scope
+```
+
+---
+
+## Página 7: Scopes y Contextos - Entendiendo el Alcance
+
+### **¿Qué es un Scope (Ámbito)?**
+
+Un **scope** es la región del código donde un identificador es válido y puede ser usado.
+
+**Analogía:** Piensa en los scopes como habitaciones en una casa:
+- Puedes ver lo que está en tu habitación (scope local)
+- Puedes ver lo que está en el pasillo (scope padre)
+- Puedes ver lo que está en la sala (scope global)
+- NO puedes ver lo que está en la habitación de tu hermano (scope hermano)
+
+```mermaid
+graph TB
+    A[Global Scope<br/>Casa completa] --> B[Función main<br/>Habitación 1]
+    A --> C[Función foo<br/>Habitación 2]
+    B --> D[Bloque if<br/>Closet en Hab.1]
+    B --> E[Bloque while<br/>Baño en Hab.1]
+    D --> F[Bloque anidado<br/>Cajón en Closet]
+
+    style A fill:#e3f2fd,stroke:#1976d2
+    style B fill:#fff3e0,stroke:#f57c00
+    style C fill:#fff3e0,stroke:#f57c00
+    style D fill:#fce4ec,stroke:#c2185b
+    style E fill:#fce4ec,stroke:#c2185b
+    style F fill:#f3e5f5,stroke:#7b1fa2
+```
+
+### **Ejemplo paso a paso con múltiples scopes:**
+
+Analicemos este código línea por línea:
+
+```java
+// SCOPE GLOBAL
+int global = 100;           // Línea 1: Scope global
+
+void foo() {                // Línea 3: Inicio scope función
+    int local = 50;         // Línea 4: Scope función foo
+
+    if (local > 0) {        // Línea 6: Inicio scope bloque if
+        int nested = 25;    // Línea 7: Scope bloque if
+        System.out.println(global);  // Línea 8
+        System.out.println(local);   // Línea 9
+        System.out.println(nested);  // Línea 10
+    }                       // Línea 11: Fin scope bloque if
+
+    System.out.println(nested);  // Línea 13: ✗ ERROR
+}                           // Línea 14: Fin scope función
+
+void bar() {                // Línea 16: Inicio scope función bar
+    System.out.println(local);   // Línea 17: ✗ ERROR
+}
+```
+
+**Análisis detallado:**
+
+#### **Línea 1: `int global = 100;`**
+
+**Scope:** GLOBAL
+**Acción:** Crear variable "global" en scope global
+
+**Tabla de Símbolos Global:**
+
+| Nombre | Tipo | Scope  |
+|--------|------|--------|
+| global | int  | global |
+
+#### **Línea 4: `int local = 50;` (dentro de `foo`)**
+
+**Scope:** FUNCIÓN FOO (hijo de global)
+**Acción:** Crear variable "local" en scope de foo
+
+**Tabla de Símbolos de foo:**
+
+| Nombre | Tipo | Scope |
+|--------|------|-------|
+| local  | int  | local |
+
+**Tabla Global (padre de foo):**
+
+| Nombre | Tipo | Scope  |
+|--------|------|--------|
+| global | int  | global |
+
+#### **Línea 7: `int nested = 25;` (dentro del `if`)**
+
+**Scope:** BLOQUE IF (hijo de foo, nieto de global)
+**Acción:** Crear variable "nested" en scope del if
+
+**Tabla de Símbolos del bloque if:**
+
+| Nombre | Tipo | Scope |
+|--------|------|-------|
+| nested | int  | local |
+
+#### **Línea 8: `System.out.println(global);`**
+
+```
+Scope actual: BLOQUE IF
+Pregunta: ¿Existe "global"?
+
+Búsqueda:
+1. Buscar en scope if → No encontrado
+2. Buscar en scope foo (padre) → No encontrado
+3. Buscar en scope global (abuelo) → ✓ ENCONTRADO
+
+Resultado: ✓ OK, usar global = 100
+```
+
+#### **Línea 9: `System.out.println(local);`**
+
+```
+Scope actual: BLOQUE IF
+Pregunta: ¿Existe "local"?
+
+Búsqueda:
+1. Buscar en scope if → No encontrado
+2. Buscar en scope foo (padre) → ✓ ENCONTRADO
+
+Resultado: ✓ OK, usar local = 50
+```
+
+#### **Línea 10: `System.out.println(nested);`**
+
+```
+Scope actual: BLOQUE IF
+Pregunta: ¿Existe "nested"?
+
+Búsqueda:
+1. Buscar en scope if → ✓ ENCONTRADO
+
+Resultado: ✓ OK, usar nested = 25
+```
+
+#### **Línea 13: `System.out.println(nested);`** (fuera del `if`)
+
+```
+Scope actual: FUNCIÓN FOO
+Pregunta: ¿Existe "nested"?
+
+Búsqueda:
+1. Buscar en scope foo → No encontrado
+2. Buscar en scope global (padre) → No encontrado
+3. No hay más scopes padre
+
+Resultado: ✗ ERROR
+Error: Variable 'nested' no declarada en línea 13
+```
+
+**¿Por qué?** Porque `nested` fue declarada en el scope del `if`, y ya salimos de ese scope (línea 11).
+
+#### **Línea 17: `System.out.println(local);`** (en función `bar`)
+
+```
+Scope actual: FUNCIÓN BAR
+Pregunta: ¿Existe "local"?
+
+Búsqueda:
+1. Buscar en scope bar → No encontrado
+2. Buscar en scope global (padre) → No encontrado
+3. No hay más scopes padre
+
+Resultado: ✗ ERROR
+Error: Variable 'local' no declarada en línea 17
+```
+
+**¿Por qué?** Porque `local` fue declarada en el scope de `foo`, y `bar` es una función HERMANA (no hija) de `foo`. Los scopes hermanos NO pueden verse entre sí.
+
+### **Reglas de scope (MEMORIZA ESTO):**
+
+```
+1. SCOPE ACTUAL:
+   ✓ Puedes ver todas las variables declaradas en el scope actual
+
+2. SCOPES PADRE (hacia arriba):
+   ✓ Puedes ver todas las variables de scopes padre/abuelo/etc.
+   Buscar desde el más interno hacia el más externo
+
+3. SCOPES HIJO (hacia abajo):
+   ✗ NO puedes ver variables de scopes hijos
+
+4. SCOPES HERMANO (lateral):
+   ✗ NO puedes ver variables de scopes hermanos
+```
+
+### **Diagrama de visibilidad:**
+
+```
+Global Scope {global}
+   ↓ (visible hacia abajo)
+   ├─ Función foo {local}
+   │    ↓ (visible hacia abajo)
+   │    └─ Bloque if {nested}
+   │         ↑ (busca hacia arriba)
+   │         ✓ Puede ver: nested, local, global
+   │
+   └─ Función bar {}
+        ✗ NO puede ver: local (está en foo, scope hermano)
+        ✓ PUEDE ver: global (scope padre)
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué imprime este código y dónde hay errores?
+
+```java
+int a = 10;
+
+void test() {
+    int b = 20;
+
+    {
+        int c = 30;
+        System.out.println(a);  // Línea 7
+        System.out.println(b);  // Línea 8
+        System.out.println(c);  // Línea 9
+    }
+
+    System.out.println(c);      // Línea 12
+}
+```
+
+**Respuesta:**
+
+```
+Línea 7: ✓ OK - Imprime 10 (a está en global, visible)
+Línea 8: ✓ OK - Imprime 20 (b está en test, visible)
+Línea 9: ✓ OK - Imprime 30 (c está en scope actual)
+Línea 12: ✗ ERROR - c no visible (declarada en bloque interno que ya terminó)
+```
+
+---
+
+## Página 8: Scopes Anidados - Implementación y Shadowing Detallado
+
+### **¿Qué es el Shadowing?**
+
+**Shadowing** (sombreado) ocurre cuando declaras una variable con el mismo nombre que otra en un scope padre. La variable del scope más interno "oculta" a la del scope externo.
+
+**Analogía:** Es como tener dos personas llamadas "Juan" en tu familia:
+- Juan (abuelo) - vive en la casa principal
+- Juan (nieto) - vive en tu habitación
+
+Cuando estás en tu habitación y dices "Juan", te refieres al nieto, no al abuelo. El nieto "sombrea" al abuelo.
+
+### **Diagrama visual de shadowing:**
+
+```mermaid
+graph TB
+    subgraph "Global Scope"
+        G1[x = 10<br/>La variable original]
+        subgraph "Función foo Scope"
+            F1[x = 20<br/>Sombrea a x global]
+            F2[y = 30<br/>Variable única]
+            subgraph "Bloque if Scope"
+                B1[x = 40<br/>Sombrea a x de foo]
+                B2[z = 50<br/>Variable única]
+            end
+        end
+    end
+
+    style G1 fill:#ffebee,stroke:#c62828
+    style F1 fill:#fff3e0,stroke:#ef6c00
+    style F2 fill:#fff3e0,stroke:#ef6c00
+    style B1 fill:#e8f5e9,stroke:#2e7d32
+    style B2 fill:#e8f5e9,stroke:#2e7d32
+```
+
+### **Ejemplo paso a paso con shadowing:**
+
+Analicemos este código en detalle:
+
+```java
+int x = 10;  // Línea 1: x global
+
+void foo() {
+    int x = 20;  // Línea 4: x local (shadowing)
+    System.out.println("En foo: " + x);  // Línea 5
+
+    {
+        int x = 40;  // Línea 8: x en bloque (shadowing)
+        System.out.println("En bloque: " + x);  // Línea 9
+    }
+
+    System.out.println("De vuelta en foo: " + x);  // Línea 12
+}
+
+System.out.println("Global: " + x);  // Línea 15
+```
+
+#### **Línea 1: Declarar x global**
+
+```
+Código: int x = 10;
+Scope: GLOBAL
+
+Acción:
+1. Crear SymbolTable global (parent = null)
+2. Insertar Symbol("x", int, 10) en tabla global
+```
+
+**Tabla Global:**
+
+| Nombre | Tipo | Scope  | Valor |
+|--------|------|--------|-------|
+| x      | int  | global | 10    |
+
+```
+Estado: 1 scope, 1 variable
+```
+
+#### **Línea 4: Declarar x en foo (SHADOWING)**
+
+```
+Código: int x = 20;
+Scope: FUNCIÓN FOO
+
+Preguntas del analizador:
+1. ¿"x" existe en el scope ACTUAL (foo)? → No
+2. ¿"x" existe en algún scope padre? → Sí (global)
+3. ¿Es shadowing? → Sí (mismo nombre, diferente scope)
+
+Decisión: ✓ PERMITIR (shadowing es válido)
+
+Acción:
+1. Crear SymbolTable foo (parent = global)
+2. Insertar Symbol("x", int, 20) en tabla foo
+```
+
+**Tabla de foo:**
+
+| Nombre | Tipo | Scope | Valor |
+|--------|------|-------|-------|
+| x      | int  | local | 20    |
+
+   ↑ parent ↓
+
+**Tabla Global:**
+
+| Nombre | Tipo | Scope  | Valor |
+|--------|------|--------|-------|
+| x      | int  | global | 10    |
+
+```
+Estado: 2 scopes, 2 variables "x" (diferentes scopes)
+```
+
+**Explicación:** El método `existsInCurrentScope("x")` retorna `false` porque busca SOLO en foo, no en global. Por eso se permite la declaración.
+
+#### **Línea 5: Usar x en foo**
+
+```
+Código: System.out.println("En foo: " + x);
+Scope actual: FOO
+
+Búsqueda de "x":
+1. foo.lookup("x")
+   - Buscar en foo.symbols: ✓ ENCONTRADO (x = 20)
+   - return Symbol("x", int, 20)
+
+NO necesita buscar en global porque ya encontró "x" en el scope actual.
+
+Resultado: Imprime "En foo: 20"
+```
+
+**Clave:** `lookup()` siempre retorna la variable del scope MÁS INTERNO primero.
+
+#### **Línea 8: Declarar x en bloque (DOBLE SHADOWING)**
+
+```
+Código: int x = 40;
+Scope: BLOQUE (hijo de foo)
+
+Preguntas del analizador:
+1. ¿"x" existe en el scope ACTUAL (bloque)? → No
+2. ¿"x" existe en algún scope padre? → Sí (foo Y global)
+3. ¿Es shadowing? → Sí (sombrea a AMBOS)
+
+Decisión: ✓ PERMITIR
+
+Acción:
+1. Crear SymbolTable bloque (parent = foo)
+2. Insertar Symbol("x", int, 40) en tabla bloque
+```
+
+**Tabla de bloque:**
+
+| Nombre | Tipo | Scope | Valor |
+|--------|------|-------|-------|
+| x      | int  | local | 40    |
+
+   ↑ parent ↓
+
+**Tabla de foo:**
+
+| Nombre | Tipo | Scope | Valor |
+|--------|------|-------|-------|
+| x      | int  | local | 20    |
+
+   ↑ parent ↓
+
+**Tabla Global:**
+
+| Nombre | Tipo | Scope  | Valor |
+|--------|------|--------|-------|
+| x      | int  | global | 10    |
+
+```
+Estado: 3 scopes, 3 variables "x" (todas en scopes diferentes)
+```
+
+#### **Línea 9: Usar x en bloque**
+
+```
+Código: System.out.println("En bloque: " + x);
+Scope actual: BLOQUE
+
+Búsqueda de "x":
+1. bloque.lookup("x")
+   - Buscar en bloque.symbols: ✓ ENCONTRADO (x = 40)
+   - return Symbol("x", int, 40)
+
+NO busca en foo ni en global porque ya encontró "x" en scope actual.
+
+Resultado: Imprime "En bloque: 40"
+```
+
+#### **Línea 10: Salir del bloque**
+
+```
+Acción: Al cerrar }, el scope del bloque se DESTRUYE
+
+Efecto:
+1. La tabla de símbolos del bloque se elimina
+2. La variable "x = 40" YA NO EXISTE
+3. Volvemos al scope de foo
+```
+
+**Tabla activa ahora: foo**
+
+| Nombre | Tipo | Scope | Valor |
+|--------|------|-------|-------|
+| x      | int  | local | 20    |
+
+```
+La x del bloque (40) desapareció.
+```
+
+#### **Línea 12: Usar x de vuelta en foo**
+
+```
+Código: System.out.println("De vuelta en foo: " + x);
+Scope actual: FOO (el bloque ya no existe)
+
+Búsqueda de "x":
+1. foo.lookup("x")
+   - Buscar en foo.symbols: ✓ ENCONTRADO (x = 20)
+   - return Symbol("x", int, 20)
+
+Resultado: Imprime "De vuelta en foo: 20"
+```
+
+**Observación:** La x del bloque (40) desapareció. Ahora vemos la x de foo (20).
+
+#### **Línea 15: Usar x global (fuera de foo)**
+
+```
+Código: System.out.println("Global: " + x);
+Scope actual: GLOBAL (foo ya terminó)
+
+Búsqueda de "x":
+1. global.lookup("x")
+   - Buscar en global.symbols: ✓ ENCONTRADO (x = 10)
+   - return Symbol("x", int, 10)
+
+Resultado: Imprime "Global: 10"
+```
+
+### **Salida completa del programa:**
+
+```
+En foo: 20
+En bloque: 40
+De vuelta en foo: 20
+Global: 10
+```
+
+### **Implementación del algoritmo de búsqueda con shadowing:**
+
+```java
+public Symbol lookup(String name) {
+    // PASO 1: Buscar en scope ACTUAL primero
+    Symbol symbol = symbols.get(name);
+
+    if (symbol != null) {
+        // ENCONTRADO en scope actual
+        // Esto implementa el shadowing: la variable local
+        // "sombrea" a las variables con mismo nombre en scopes padre
+        return symbol;
+    }
+
+    // PASO 2: No encontrado en scope actual, buscar en padre
+    if (parent != null) {
+        return parent.lookup(name);
+    }
+
+    // PASO 3: No encontrado en ningún scope
+    return null;
+}
+```
+
+**Explicación del shadowing en el código:**
+
+```
+Cuando hacemos lookup("x") desde el bloque:
+
+1. bloque.lookup("x")
+   - symbols.get("x") → Symbol(x, 40) ✓
+   - return Symbol(x, 40) INMEDIATAMENTE
+   - NO busca en foo ni en global
+
+El "if (symbol != null) return symbol;" implementa el shadowing.
+La primera coincidencia (scope más interno) gana.
+```
+
+### **Diferencia entre shadowing y redeclaración:**
+
+#### **SHADOWING (permitido):**
+
+```java
+int x = 10;  // Scope global
+
+void foo() {
+    int x = 20;  // ✓ OK: Diferente scope (sombrea a global)
+}
+```
+
+**Verificación:**
+```java
+// Desde scope de foo:
+existsInCurrentScope("x") → false (no está en foo directamente)
+lookup("x") → Symbol(x, 10) desde global
+
+// Por eso se permite declarar x en foo
+```
+
+#### **REDECLARACIÓN (prohibido):**
+
+```java
+void foo() {
+    int x = 10;  // Línea 2
+    int x = 20;  // Línea 3: ✗ ERROR: redeclaración
+}
+```
+
+**Verificación:**
+```java
+// En línea 3, desde scope de foo:
+existsInCurrentScope("x") → true (x YA está en foo desde línea 2)
+
+// Por eso se rechaza: ERROR
+```
+
+### **Reglas de shadowing (MEMORIZA):**
+
+```
+✓ PERMITIDO (shadowing):
+  - Mismo nombre
+  - Diferentes scopes (padre e hijo)
+  - La variable más interna "gana"
+
+✗ PROHIBIDO (redeclaración):
+  - Mismo nombre
+  - MISMO scope
+  - Error: variable ya declarada
+```
+
+### **Ejemplo de verificación en código:**
+
+```java
+public void visitDeclarationNode(DeclarationNode node) {
+    // Verificar SOLO en scope actual (no en padres)
+    if (symbolTable.existsInCurrentScope(node.name)) {
+        // ✗ ERROR: Redeclaración en MISMO scope
+        throw new SemanticException(
+            "Variable '" + node.name + "' ya declarada en este scope"
+        );
+    }
+
+    // No existe en scope actual → OK
+    // Puede existir en scope padre (shadowing), pero está permitido
+    Symbol symbol = new Symbol(node.name, node.type, currentScope, node.line);
+    symbolTable.insert(symbol);
+}
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué imprime este código?
+
+```java
+int a = 1;
+
+void test() {
+    System.out.println(a);  // Línea 4
+    int a = 2;
+    System.out.println(a);  // Línea 6
+
+    {
+        int a = 3;
+        System.out.println(a);  // Línea 9
+    }
+
+    System.out.println(a);  // Línea 12
+}
+
+System.out.println(a);  // Línea 15
+```
+
+**Respuesta:**
+
+```
+Línea 4: Imprime 1 (usa a global, la local aún no se declara)
+Línea 6: Imprime 2 (usa a local de test)
+Línea 9: Imprime 3 (usa a del bloque, sombrea a test)
+Línea 12: Imprime 2 (a del bloque ya no existe, usa a de test)
+Línea 15: Imprime 1 (usa a global)
+```
+
+---
+
+## Página 9: Sistema de Tipos - Fundamentos y Jerarquía
+
+### **¿Qué es un Tipo?**
+
+Un **tipo** es un contrato que define:
+1. **Qué valores puede tomar** una variable
+2. **Qué operaciones** se pueden hacer con esos valores
+
+**Analogía:** Los tipos son como categorías de objetos en el mundo real:
+- **Números (int):** Puedes sumar, restar, multiplicar
+- **Texto (String):** Puedes concatenar, buscar subcadenas
+- **Booleanos (boolean):** Puedes hacer AND, OR, NOT
+
+Intentar sumar un número con un texto no tiene sentido, igual que intentar conducir un libro no tiene sentido en el mundo real.
+
+```mermaid
+graph LR
+    A[Tipo int] --> B[Valores: -2147483648 a 2147483647]
+    A --> C[Operaciones: +, -, *, /, %]
+
+    D[Tipo boolean] --> E[Valores: true, false]
+    D --> F[Operaciones: &&, ||, !]
+
+    G[Tipo String] --> H[Valores: secuencias de caracteres]
+    G --> I[Operaciones: +, length, substring]
+```
+
+### **Jerarquía de tipos detallada:**
+
+#### **Clase base: Type**
+
+```java
+abstract class Type {
+    String name;  // "int", "double", "String", etc.
+
+    // Método abstracto: cada tipo implementa su lógica
+    abstract boolean isCompatible(Type other);
+
+    // Métodos de utilidad
+    public boolean isNumeric() {
+        return this instanceof IntType ||
+               this instanceof DoubleType ||
+               this instanceof FloatType ||
+               this instanceof LongType;
+    }
+
+    public boolean isInt() {
+        return this instanceof IntType;
+    }
+
+    public boolean isDouble() {
+        return this instanceof DoubleType;
+    }
+
+    public boolean isBoolean() {
+        return this instanceof BooleanType;
+    }
+
+    public boolean isString() {
+        return this instanceof StringType;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+```
+
+**Explicación:**
+- `isCompatible()`: Determina si dos tipos pueden usarse juntos
+- `isNumeric()`: Verifica si es un tipo numérico (para operaciones +, -, *, /)
+- Métodos `isX()`: Atajos para verificar tipos específicos
+
+#### **Tipos primitivos:**
+
+```java
+class PrimitiveType extends Type {
+    // Tipos básicos del lenguaje
+
+    public PrimitiveType(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public boolean isCompatible(Type other) {
+        // Tipos primitivos son compatibles si son exactamente iguales
+        // O si hay promoción implícita permitida
+        if (this.equals(other)) {
+            return true;  // int == int, double == double, etc.
+        }
+
+        // Promoción implícita (widening)
+        if (this.isInt() && other.isDouble()) {
+            return true;  // int → double (OK)
+        }
+
+        if (this.isChar() && other.isInt()) {
+            return true;  // char → int (OK)
+        }
+
+        return false;  // Otros casos: incompatible
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PrimitiveType)) return false;
+        PrimitiveType other = (PrimitiveType) obj;
+        return this.name.equals(other.name);
+    }
+}
+
+// Tipos específicos (para mayor claridad)
+class IntType extends PrimitiveType {
+    public IntType() { super("int"); }
+}
+
+class DoubleType extends PrimitiveType {
+    public DoubleType() { super("double"); }
+}
+
+class BooleanType extends PrimitiveType {
+    public BooleanType() { super("boolean"); }
+}
+
+class CharType extends PrimitiveType {
+    public CharType() { super("char"); }
+}
+
+class StringType extends Type {
+    public StringType() { this.name = "String"; }
+
+    @Override
+    public boolean isCompatible(Type other) {
+        return other instanceof StringType;
+    }
+}
+```
+
+**Ejemplo de uso:**
+
+```java
+Type intType = new IntType();
+Type doubleType = new DoubleType();
+Type stringType = new StringType();
+
+// Verificar compatibilidad
+intType.isCompatible(intType);      // true: int == int
+intType.isCompatible(doubleType);   // true: int → double (promoción)
+doubleType.isCompatible(intType);   // false: double ↛ int (pérdida)
+intType.isCompatible(stringType);   // false: int ↛ String (incompatible)
+```
+
+#### **Tipos compuestos: Arrays**
+
+```java
+class ArrayType extends Type {
+    Type elementType;  // Tipo de los elementos del array
+    int size;          // Tamaño del array (-1 si es dinámico)
+
+    public ArrayType(Type elementType, int size) {
+        this.elementType = elementType;
+        this.size = size;
+        this.name = elementType.name + "[]";
+    }
+
+    @Override
+    public boolean isCompatible(Type other) {
+        if (!(other instanceof ArrayType)) {
+            return false;  // Solo compatible con otros arrays
+        }
+
+        ArrayType otherArray = (ArrayType) other;
+
+        // Los arrays son compatibles si sus elementos son compatibles
+        return this.elementType.isCompatible(otherArray.elementType);
+    }
+
+    @Override
+    public String toString() {
+        return elementType.toString() + "[" +
+               (size >= 0 ? size : "") + "]";
+    }
+}
+```
+
+**Ejemplo:**
+
+```java
+// int[] array de enteros
+Type intArray = new ArrayType(new IntType(), 10);
+
+// double[] array de doubles
+Type doubleArray = new ArrayType(new DoubleType(), 5);
+
+// Verificar compatibilidad
+intArray.isCompatible(intArray);      // true: int[] == int[]
+intArray.isCompatible(doubleArray);   // false: int[] != double[]
+
+// Acceso a elementos
+// int[] arr → arr[0] es int
+((ArrayType) intArray).elementType;  // IntType
+```
+
+#### **Tipos compuestos: Funciones**
+
+```java
+class FunctionType extends Type {
+    Type returnType;              // Tipo que retorna la función
+    List<Type> parameterTypes;    // Tipos de los parámetros
+
+    public FunctionType(Type returnType, List<Type> parameterTypes) {
+        this.returnType = returnType;
+        this.parameterTypes = parameterTypes;
+        this.name = buildSignature();
+    }
+
+    private String buildSignature() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+
+        for (int i = 0; i < parameterTypes.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(parameterTypes.get(i).name);
+        }
+
+        sb.append(") -> ");
+        sb.append(returnType.name);
+
+        return sb.toString();
+    }
+
+    @Override
+    public boolean isCompatible(Type other) {
+        if (!(other instanceof FunctionType)) {
+            return false;
+        }
+
+        FunctionType otherFunc = (FunctionType) other;
+
+        // Verificar tipo de retorno
+        if (!this.returnType.isCompatible(otherFunc.returnType)) {
+            return false;
+        }
+
+        // Verificar número de parámetros
+        if (this.parameterTypes.size() != otherFunc.parameterTypes.size()) {
+            return false;
+        }
+
+        // Verificar cada parámetro
+        for (int i = 0; i < parameterTypes.size(); i++) {
+            if (!this.parameterTypes.get(i).isCompatible(
+                    otherFunc.parameterTypes.get(i))) {
+                return false;
+            }
+        }
+
+        return true;  // Todas las verificaciones pasaron
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+```
+
+**Ejemplo:**
+
+```java
+// int suma(int a, int b)
+Type sumaType = new FunctionType(
+    new IntType(),
+    Arrays.asList(new IntType(), new IntType())
+);
+// Signatura: "(int, int) -> int"
+
+// double promedio(double a, double b, double c)
+Type promedioType = new FunctionType(
+    new DoubleType(),
+    Arrays.asList(new DoubleType(), new DoubleType(), new DoubleType())
+);
+// Signatura: "(double, double, double) -> double"
+
+// Verificar compatibilidad
+sumaType.isCompatible(sumaType);       // true
+sumaType.isCompatible(promedioType);   // false (diferentes signaturas)
+```
+
+### **Tabla de compatibilidad de tipos:**
+
+```
+COMPATIBILIDAD DE ASIGNACIÓN (tipo_destino = tipo_origen)
+
+              int  double  boolean  char  String  int[]
+int           ✓    ✗       ✗        ✗     ✗       ✗
+double        ✓    ✓       ✗        ✗     ✗       ✗
+boolean       ✗    ✗       ✓        ✗     ✗       ✗
+char          ✗    ✗       ✗        ✓     ✗       ✗
+String        ✗    ✗       ✗        ✗     ✓       ✗
+int[]         ✗    ✗       ✗        ✗     ✗       ✓
+
+Leyenda:
+✓ = Compatible (permitido)
+✗ = Incompatible (error)
+
+Nota: int → double es compatible (promoción implícita)
+      double → int NO es compatible (requiere cast explícito)
+```
+
+### **Ejemplos concretos de compatibilidad:**
+
+```java
+// ✓ COMPATIBLES
+int x = 5;           // int = int
+double y = 5;        // double = int (promoción)
+double z = 3.14;     // double = double
+boolean b = true;    // boolean = boolean
+
+// ✗ INCOMPATIBLES
+int a = 3.14;        // int = double (pérdida de precisión)
+boolean c = 5;       // boolean = int (tipos diferentes)
+String s = 42;       // String = int (tipos diferentes)
+int[] arr = 5;       // int[] = int (tipos diferentes)
+```
+
+### **Pregunta de comprensión:**
+
+¿Cuáles de estas asignaciones son válidas?
+
+```java
+int a = 10;
+double b = a;      // ¿Válido?
+int c = b;         // ¿Válido?
+String d = "hola";
+int e = d;         // ¿Válido?
+```
+
+**Respuesta:**
+
+```
+double b = a;  // ✓ VÁLIDO: int → double (promoción implícita)
+int c = b;     // ✗ INVÁLIDO: double → int (pérdida de precisión)
+int e = d;     // ✗ INVÁLIDO: String → int (tipos incompatibles)
+```
+
+---
+
+## Página 10: Arquitectura Completa del Analizador Semántico
+
+### **Diagrama de arquitectura detallado:**
+
+```mermaid
+graph TB
+    subgraph "INPUT"
+        AST[AST del Parser<br/>Sintácticamente válido]
+    end
+
+    subgraph "ANALIZADOR SEMÁNTICO"
+        SA[SemanticAnalyzer<br/>Coordinador Principal]
+
+        subgraph "Componentes Core"
+            ST[SymbolTable<br/>Tabla de Símbolos<br/>+ Gestión de Scopes]
+            TC[TypeChecker<br/>Verificador de Tipos]
+            EH[ErrorHandler<br/>Manejador de Errores]
+        end
+
+        subgraph "Visitor Pattern"
+            V[ASTVisitor Interface]
+            VP[visitProgramNode]
+            VD[visitDeclarationNode]
+            VA[visitAssignmentNode]
+            VE[visitExpressionNode]
+            VI[visitIfNode]
+            VW[visitWhileNode]
+        end
+
+        subgraph "Sistema de Tipos"
+            TB[Type Base Class]
+            TP[PrimitiveType]
+            TA[ArrayType]
+            TF[FunctionType]
+        end
+    end
+
+    subgraph "OUTPUT"
+        AAST[AST Anotado<br/>con información de tipos]
+        STF[Tabla de Símbolos Final<br/>con todas las declaraciones]
+        ERR[Lista de Errores Semánticos<br/>si los hay]
+    end
+
+    AST --> SA
+    SA --> ST
+    SA --> TC
+    SA --> EH
+    SA --> V
+
+    V --> VP
+    V --> VD
+    V --> VA
+    V --> VE
+    V --> VI
+    V --> VW
+
+    TC --> TB
+    TB --> TP
+    TB --> TA
+    TB --> TF
+
+    ST -.información.-> TC
+    TC -.errores.-> EH
+
+    SA --> AAST
+    SA --> STF
+    SA --> ERR
+
+    style SA fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px
+    style ST fill:#4ecdc4,stroke:#45b7aa,stroke-width:2px
+    style TC fill:#95e1d3,stroke:#45b7aa,stroke-width:2px
+    style EH fill:#ffd93d,stroke:#f9a825,stroke-width:2px
+    style AST fill:#e3f2fd,stroke:#1976d2
+    style AAST fill:#c8e6c9,stroke:#388e3c
+```
+
+### **Explicación de cada componente:**
+
+#### **1. SemanticAnalyzer (Coordinador Principal)**
+
+```java
+class SemanticAnalyzer implements ASTVisitor<Type> {
+    // COMPONENTES PRINCIPALES
+    private SymbolTable symbolTable;        // Tabla de símbolos
+    private TypeChecker typeChecker;        // Verificador de tipos
+    private ErrorHandler errorHandler;      // Manejador de errores
+    private List<SemanticException> errors; // Lista de errores encontrados
+
+    // ESTADO ACTUAL
+    private Scope currentScope;             // Scope actual
+    private Type currentReturnType;         // Tipo de retorno esperado
+    private boolean inLoop;                 // ¿Estamos dentro de un loop?
+
+    public SemanticAnalyzer() {
+        this.symbolTable = new SymbolTable(null);
+        this.typeChecker = new TypeChecker(symbolTable);
+        this.errorHandler = new ErrorHandler();
+        this.errors = new ArrayList<>();
+        this.currentScope = Scope.GLOBAL;
+        this.inLoop = false;
+    }
+
+    // MÉTODO PRINCIPAL
+    public void analyze(ProgramNode program) {
+        try {
+            program.accept(this);  // Iniciar recorrido del AST
+        } catch (SemanticException e) {
+            errors.add(e);
+        }
+
+        if (!errors.isEmpty()) {
+            errorHandler.reportErrors(errors);
+        }
+    }
+}
+```
+
+**Responsabilidades:**
+- Coordinar todos los componentes
+- Recorrer el AST usando el patrón Visitor
+- Mantener el estado actual (scope, loop, tipo de retorno)
+- Recolectar todos los errores encontrados
+
+#### **2. SymbolTable (Tabla de Símbolos)**
+
+```java
+class SymbolTable {
+    // Almacena símbolos del scope actual
+    private Map<String, Symbol> symbols;
+
+    // Referencia al scope padre (para búsqueda recursiva)
+    private SymbolTable parent;
+
+    // Lista de scopes hijos (para debugging)
+    private List<SymbolTable> children;
+
+    // OPERACIONES PRINCIPALES
+    public void insert(Symbol symbol);          // Agregar símbolo
+    public Symbol lookup(String name);          // Buscar símbolo
+    public boolean existsInCurrentScope(String name);  // Verificar redeclaración
+    public void enterScope();                   // Entrar a nuevo scope
+    public void exitScope();                    // Salir de scope actual
+}
+```
+
+**Responsabilidades:**
+- Almacenar información de todas las variables, funciones, clases
+- Gestionar scopes anidados
+- Permitir búsqueda eficiente (O(1))
+- Detectar redeclaraciones
+
+#### **3. TypeChecker (Verificador de Tipos)**
+
+```java
+class TypeChecker {
+    private SymbolTable symbolTable;  // Necesita acceso a la tabla
+
+    // Verificar tipo de expresión
+    public Type checkExpression(ExpressionNode expr);
+
+    // Verificar operación binaria (a + b, a == b, etc.)
+    public Type checkBinaryOp(BinaryOpNode node);
+
+    // Verificar compatibilidad de tipos
+    public boolean areCompatible(Type t1, Type t2);
+
+    // Promover tipo (int → double)
+    public Type promoteType(Type t1, Type t2);
+}
+```
+
+**Responsabilidades:**
+- Verificar que las operaciones usan tipos compatibles
+- Implementar reglas de promoción de tipos
+- Detectar errores de tipos
+
+#### **4. ErrorHandler (Manejador de Errores)**
+
+```java
+class ErrorHandler {
+    // Reportar un error
+    public void reportError(SemanticException error);
+
+    // Reportar múltiples errores
+    public void reportErrors(List<SemanticException> errors);
+
+    // Formatear mensaje de error
+    private String formatError(SemanticException error);
+}
+```
+
+**Responsabilidades:**
+- Recolectar todos los errores
+- Formatear mensajes descriptivos
+- Mostrar línea y columna del error
+
+### **Flujo completo del análisis semántico:**
+
+```mermaid
+sequenceDiagram
+    participant Parser
+    participant SA as SemanticAnalyzer
+    participant V as Visitor
+    participant ST as SymbolTable
+    participant TC as TypeChecker
+    participant EH as ErrorHandler
+
+    Parser->>SA: AST (sintácticamente válido)
+    SA->>V: program.accept(this)
+
+    loop Para cada nodo del AST
+        V->>V: visitNodeType(node)
+
+        alt Es Declaración
+            V->>ST: insert(symbol)
+            ST-->>V: OK o ERROR
+        end
+
+        alt Es Uso de Variable
+            V->>ST: lookup(name)
+            ST-->>V: Symbol o null
+        end
+
+        alt Es Expresión
+            V->>TC: checkExpression(expr)
+            TC->>ST: lookup variables
+            TC->>TC: verificar tipos
+            TC-->>V: Type o ERROR
+        end
+
+        alt Hay Error
+            V->>EH: reportError(error)
+        end
+    end
+
+    SA->>EH: reportErrors(allErrors)
+    SA-->>Parser: AST anotado + errores
+```
+
+### **Ejemplo de flujo completo:**
+
+Analicemos este código paso a paso:
+
+```java
+int x = 5;
+int y = x + 10;
+```
+
+**Traza completa del análisis:**
+
+```
+INICIO: SemanticAnalyzer.analyze(programNode)
+
+━━━ LÍNEA 1: int x = 5; ━━━
+
+1. SA llama a programNode.accept(this)
+   └─> visitProgramNode(programNode)
+
+2. Encontrar DeclarationNode(type=int, name="x", value=5)
+   └─> visitDeclarationNode(node)
+
+3. Verificar si "x" ya existe
+   └─> symbolTable.existsInCurrentScope("x")
+   └─> Retorna: false (no existe)
+
+4. Verificar tipo del inicializador
+   └─> visitNumberNode(5)
+   └─> TypeChecker.checkExpression(NumberNode(5))
+   └─> Retorna: Type.INT
+
+5. Verificar compatibilidad: int = int
+   └─> TypeChecker.areCompatible(INT, INT)
+   └─> Retorna: true ✓
+
+6. Insertar en tabla de símbolos
+   └─> symbolTable.insert(Symbol("x", INT, 5, línea=1))
+   └─> Tabla ahora: {x: int}
+
+Estado después línea 1:
+  SymbolTable: {x: int}
+  Errores: []
+
+━━━ LÍNEA 2: int y = x + 10; ━━━
+
+7. Encontrar DeclarationNode(type=int, name="y", value=x+10)
+   └─> visitDeclarationNode(node)
+
+8. Verificar si "y" ya existe
+   └─> symbolTable.existsInCurrentScope("y")
+   └─> Retorna: false (no existe)
+
+9. Verificar tipo del inicializador (x + 10)
+   └─> visitBinaryOpNode(left=x, op=+, right=10)
+
+10. Verificar tipo de "x"
+    └─> visitIdentifierNode("x")
+    └─> symbolTable.lookup("x")
+    └─> Retorna: Symbol("x", INT)
+    └─> Tipo de x: INT
+
+11. Verificar tipo de "10"
+    └─> visitNumberNode(10)
+    └─> Retorna: Type.INT
+
+12. Verificar operación: INT + INT
+    └─> TypeChecker.checkBinaryOp(+, INT, INT)
+    └─> Retorna: Type.INT ✓
+
+13. Verificar compatibilidad: int = int
+    └─> TypeChecker.areCompatible(INT, INT)
+    └─> Retorna: true ✓
+
+14. Insertar en tabla de símbolos
+    └─> symbolTable.insert(Symbol("y", INT, 15, línea=2))
+    └─> Tabla ahora: {x: int, y: int}
+
+Estado final:
+  SymbolTable: {x: int, y: int}
+  Errores: []
+  AST Anotado:
+    DeclarationNode("x", INT) [type=INT ✓]
+    DeclarationNode("y", INT) [type=INT ✓]
+      └─ BinaryOpNode(+) [type=INT ✓]
+          ├─ IdentifierNode("x") [type=INT ✓, resolvedTo=Symbol(x)]
+          └─ NumberNode(10) [type=INT ✓]
+
+FIN: Análisis exitoso sin errores
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué componentes se usan en cada paso del siguiente código?
+
+```java
+int x = 5;
+y = x + 10;
+```
+
+**Respuesta:**
+
+```
+Línea 1: int x = 5;
+  - SemanticAnalyzer: coordina
+  - Visitor: visitDeclarationNode
+  - SymbolTable: insert("x")
+  - TypeChecker: checkExpression(5)
+  - Resultado: ✓ OK
+
+Línea 2: y = x + 10;
+  - SemanticAnalyzer: coordina
+  - Visitor: visitAssignmentNode
+  - SymbolTable: lookup("y")  ← ✗ NO EXISTE
+  - ErrorHandler: reportError("Variable 'y' no declarada")
+  - Resultado: ✗ ERROR
+```
+
+---
+
+## Página 11: Verificación de Tipos - Type Checking Detallado
+
+### **¿Qué es Type Checking?**
+
+**Type Checking** (verificación de tipos) es el proceso de verificar que las operaciones se realizan con tipos compatibles.
+
+**Analogía:** Es como verificar que estás usando las herramientas correctas:
+- ✓ Martillo + Clavo = OK
+- ✗ Martillo + Sopa = NO TIENE SENTIDO
+
+### **Tipos de verificación:**
+
+```mermaid
+graph TB
+    A[Type Checking] --> B[Estática<br/>Compile-time]
+    A --> C[Dinámica<br/>Runtime]
+
+    B --> D[Java, C++, TypeScript]
+    B --> E[Errores encontrados temprano]
+    B --> F[Mejor rendimiento]
+
+    C --> G[Python, JavaScript, Ruby]
+    C --> H[Mayor flexibilidad]
+    C --> I[Errores en ejecución]
+
+    style B fill:#c8e6c9,stroke:#388e3c
+    style C fill:#ffe0b2,stroke:#f57c00
+```
+
+**Nuestro enfoque: Verificación Estática**
+
+Detectamos errores de tipos ANTES de ejecutar el programa (en tiempo de compilación).
+
+### **Implementación completa del TypeChecker:**
+
+```java
+class TypeChecker {
+    private SymbolTable symbolTable;
+
+    public TypeChecker(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
+    }
+
+    // ━━━ MÉTODO PRINCIPAL ━━━
+    public Type checkExpression(ExpressionNode expr) {
+        if (expr instanceof NumberNode) {
+            return checkNumberNode((NumberNode) expr);
+        }
+        else if (expr instanceof BooleanNode) {
+            return checkBooleanNode((BooleanNode) expr);
+        }
+        else if (expr instanceof StringNode) {
+            return checkStringNode((StringNode) expr);
+        }
+        else if (expr instanceof IdentifierNode) {
+            return checkIdentifierNode((IdentifierNode) expr);
+        }
+        else if (expr instanceof BinaryOpNode) {
+            return checkBinaryOp((BinaryOpNode) expr);
+        }
+        else if (expr instanceof UnaryOpNode) {
+            return checkUnaryOp((UnaryOpNode) expr);
+        }
+        else if (expr instanceof FunctionCallNode) {
+            return checkFunctionCall((FunctionCallNode) expr);
+        }
+        else if (expr instanceof ArrayAccessNode) {
+            return checkArrayAccess((ArrayAccessNode) expr);
+        }
+
+        throw new SemanticException("Tipo de expresión desconocido");
+    }
+
+    // ━━━ VERIFICAR NODOS LITERALES ━━━
+    private Type checkNumberNode(NumberNode node) {
+        // Determinar si es int o double
+        if (node.value % 1 == 0) {
+            node.type = Type.INT;
+            return Type.INT;
+        } else {
+            node.type = Type.DOUBLE;
+            return Type.DOUBLE;
+        }
+    }
+
+    private Type checkBooleanNode(BooleanNode node) {
+        node.type = Type.BOOLEAN;
+        return Type.BOOLEAN;
+    }
+
+    private Type checkStringNode(StringNode node) {
+        node.type = Type.STRING;
+        return Type.STRING;
+    }
+
+    // ━━━ VERIFICAR IDENTIFICADORES ━━━
+    private Type checkIdentifierNode(IdentifierNode node) {
+        // Buscar variable en tabla de símbolos
+        Symbol symbol = symbolTable.lookup(node.name);
+
+        if (symbol == null) {
+            throw new SemanticException(
+                "Variable '" + node.name + "' no declarada", node
+            );
+        }
+
+        // Anotar el nodo con el tipo y el símbolo resuelto
+        node.type = symbol.type;
+        node.resolvedSymbol = symbol;
+
+        return symbol.type;
+    }
+
+    // ━━━ VERIFICAR OPERACIONES BINARIAS ━━━
+    private Type checkBinaryOp(BinaryOpNode node) {
+        // PASO 1: Verificar tipos de operandos
+        Type leftType = checkExpression(node.left);
+        Type rightType = checkExpression(node.right);
+
+        // PASO 2: Verificar según el operador
+        switch (node.operator) {
+            case PLUS:
+            case MINUS:
+            case MULTIPLY:
+            case DIVIDE:
+            case MODULO:
+                return checkArithmeticOp(node, leftType, rightType);
+
+            case EQUALS:
+            case NOT_EQUALS:
+                return checkEqualityOp(node, leftType, rightType);
+
+            case LESS_THAN:
+            case LESS_EQUAL:
+            case GREATER_THAN:
+            case GREATER_EQUAL:
+                return checkComparisonOp(node, leftType, rightType);
+
+            case AND:
+            case OR:
+                return checkLogicalOp(node, leftType, rightType);
+
+            default:
+                throw new SemanticException("Operador desconocido: " + node.operator);
+        }
+    }
+
+    // ━━━ OPERADORES ARITMÉTICOS (+, -, *, /, %) ━━━
+    private Type checkArithmeticOp(BinaryOpNode node, Type left, Type right) {
+        // Verificar que ambos operandos sean numéricos
+        if (!left.isNumeric()) {
+            throw new SemanticException(
+                "Operando izquierdo de '" + node.operator +
+                "' debe ser numérico, se obtuvo " + left, node
+            );
+        }
+
+        if (!right.isNumeric()) {
+            throw new SemanticException(
+                "Operando derecho de '" + node.operator +
+                "' debe ser numérico, se obtuvo " + right, node
+            );
+        }
+
+        // Promover al tipo "más amplio"
+        Type resultType = Type.widen(left, right);
+        node.type = resultType;
+
+        return resultType;
+    }
+
+    // ━━━ OPERADORES DE IGUALDAD (==, !=) ━━━
+    private Type checkEqualityOp(BinaryOpNode node, Type left, Type right) {
+        // Los tipos deben ser compatibles
+        if (!left.isCompatible(right)) {
+            throw new SemanticException(
+                "No se pueden comparar " + left + " con " + right, node
+            );
+        }
+
+        node.type = Type.BOOLEAN;
+        return Type.BOOLEAN;
+    }
+
+    // ━━━ OPERADORES DE COMPARACIÓN (<, <=, >, >=) ━━━
+    private Type checkComparisonOp(BinaryOpNode node, Type left, Type right) {
+        // Ambos deben ser numéricos
+        if (!left.isNumeric() || !right.isNumeric()) {
+            throw new SemanticException(
+                "Operadores de comparación requieren operandos numéricos", node
+            );
+        }
+
+        node.type = Type.BOOLEAN;
+        return Type.BOOLEAN;
+    }
+
+    // ━━━ OPERADORES LÓGICOS (&&, ||) ━━━
+    private Type checkLogicalOp(BinaryOpNode node, Type left, Type right) {
+        // Ambos deben ser booleanos
+        if (!left.isBoolean()) {
+            throw new SemanticException(
+                "Operando izquierdo de '" + node.operator +
+                "' debe ser boolean, se obtuvo " + left, node
+            );
+        }
+
+        if (!right.isBoolean()) {
+            throw new SemanticException(
+                "Operando derecho de '" + node.operator +
+                "' debe ser boolean, se obtuvo " + right, node
+            );
+        }
+
+        node.type = Type.BOOLEAN;
+        return Type.BOOLEAN;
+    }
+
+    // ━━━ OPERADORES UNARIOS (-, !) ━━━
+    private Type checkUnaryOp(UnaryOpNode node) {
+        Type operandType = checkExpression(node.operand);
+
+        switch (node.operator) {
+            case MINUS:
+                // -x requiere que x sea numérico
+                if (!operandType.isNumeric()) {
+                    throw new SemanticException(
+                        "Operador '-' requiere operando numérico, se obtuvo " +
+                        operandType, node
+                    );
+                }
+                node.type = operandType;
+                return operandType;
+
+            case NOT:
+                // !x requiere que x sea booleano
+                if (!operandType.isBoolean()) {
+                    throw new SemanticException(
+                        "Operador '!' requiere operando boolean, se obtuvo " +
+                        operandType, node
+                    );
+                }
+                node.type = Type.BOOLEAN;
+                return Type.BOOLEAN;
+
+            default:
+                throw new SemanticException("Operador unario desconocido");
+        }
+    }
+
+    // ━━━ PROMOCIÓN DE TIPOS ━━━
+    public static Type widen(Type t1, Type t2) {
+        // Si uno de los dos es double, el resultado es double
+        if (t1.isDouble() || t2.isDouble()) {
+            return Type.DOUBLE;
+        }
+
+        // Si uno es float, el resultado es float
+        if (t1.isFloat() || t2.isFloat()) {
+            return Type.FLOAT;
+        }
+
+        // Si uno es long, el resultado es long
+        if (t1.isLong() || t2.isLong()) {
+            return Type.LONG;
+        }
+
+        // Si ambos son int o más pequeños, el resultado es int
+        return Type.INT;
+    }
+}
+```
+
+### **Ejemplo paso a paso:**
+
+Analicemos la expresión: `5 + 3.14`
+
+```
+INICIO: checkExpression(BinaryOpNode(+, 5, 3.14))
+
+1. Identificar que es BinaryOpNode
+   └─> checkBinaryOp(node)
+
+2. Verificar operando izquierdo (5)
+   └─> checkExpression(NumberNode(5))
+   └─> checkNumberNode(NumberNode(5))
+   └─> 5 % 1 == 0 → true
+   └─> Retorna: Type.INT
+
+3. Verificar operando derecho (3.14)
+   └─> checkExpression(NumberNode(3.14))
+   └─> checkNumberNode(NumberNode(3.14))
+   └─> 3.14 % 1 == 0 → false
+   └─> Retorna: Type.DOUBLE
+
+4. Identificar operador: PLUS (aritmético)
+   └─> checkArithmeticOp(node, INT, DOUBLE)
+
+5. Verificar que left (INT) es numérico
+   └─> INT.isNumeric() → true ✓
+
+6. Verificar que right (DOUBLE) es numérico
+   └─> DOUBLE.isNumeric() → true ✓
+
+7. Promover al tipo más amplio
+   └─> Type.widen(INT, DOUBLE)
+   └─> Uno es DOUBLE → retorna DOUBLE
+
+8. Anotar nodo con tipo resultado
+   └─> node.type = DOUBLE
+
+9. Retornar tipo
+   └─> return DOUBLE
+
+RESULTADO: 5 + 3.14 tiene tipo DOUBLE ✓
+```
+
+### **Ejemplo con error:**
+
+Analicemos la expresión: `5 + "hola"`
+
+```
+INICIO: checkExpression(BinaryOpNode(+, 5, "hola"))
+
+1. Identificar que es BinaryOpNode
+   └─> checkBinaryOp(node)
+
+2. Verificar operando izquierdo (5)
+   └─> checkExpression(NumberNode(5))
+   └─> Retorna: Type.INT
+
+3. Verificar operando derecho ("hola")
+   └─> checkExpression(StringNode("hola"))
+   └─> Retorna: Type.STRING
+
+4. Identificar operador: PLUS (aritmético)
+   └─> checkArithmeticOp(node, INT, STRING)
+
+5. Verificar que left (INT) es numérico
+   └─> INT.isNumeric() → true ✓
+
+6. Verificar que right (STRING) es numérico
+   └─> STRING.isNumeric() → false ✗
+
+7. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "Operando derecho de '+' debe ser numérico, se obtuvo String"
+   )
+
+RESULTADO: ✗ ERROR SEMÁNTICO
+Error en línea X: Operando derecho de '+' debe ser numérico, se obtuvo String
+```
+
+### **Tabla de verificación de operadores:**
+
+```
+OPERADOR | OPERANDOS REQUERIDOS    | TIPO RESULTADO | EJEMPLO
+─────────┼─────────────────────────┼────────────────┼─────────────
+   +     | numérico + numérico     | numérico       | 5 + 3 → int
+   -     | numérico + numérico     | numérico       | 5.0 - 2 → double
+   *     | numérico + numérico     | numérico       | 3 * 4 → int
+   /     | numérico + numérico     | numérico       | 10 / 2 → int
+   %     | numérico + numérico     | numérico       | 10 % 3 → int
+─────────┼─────────────────────────┼────────────────┼─────────────
+   ==    | mismo tipo o compatibles| boolean        | 5 == 5 → true
+   !=    | mismo tipo o compatibles| boolean        | 5 != 3 → true
+─────────┼─────────────────────────┼────────────────┼─────────────
+   <     | numérico + numérico     | boolean        | 5 < 10 → true
+   <=    | numérico + numérico     | boolean        | 5 <= 5 → true
+   >     | numérico + numérico     | boolean        | 10 > 5 → true
+   >=    | numérico + numérico     | boolean        | 5 >= 10 → false
+─────────┼─────────────────────────┼────────────────┼─────────────
+   &&    | boolean + boolean       | boolean        | true && false → false
+   ||    | boolean + boolean       | boolean        | true || false → true
+─────────┼─────────────────────────┼────────────────┼─────────────
+   !     | boolean                 | boolean        | !true → false
+   -     | numérico                | numérico       | -5 → -5
+```
+
+### **Pregunta de comprensión:**
+
+¿Cuál es el tipo de estas expresiones?
+
+```java
+5 + 10          // ?
+5 + 3.14        // ?
+5 < 10          // ?
+true && false   // ?
+5 + "hola"      // ?
+```
+
+**Respuesta:**
+
+```
+5 + 10         → int (ambos int)
+5 + 3.14       → double (promoción: int + double → double)
+5 < 10         → boolean (comparación siempre retorna boolean)
+true && false  → boolean (lógico siempre retorna boolean)
+5 + "hola"     → ✗ ERROR (int + String incompatibles)
+```
+
+---
+
+## Página 12: Coerción y Promoción de Tipos - Explicación Completa
+
+### **¿Qué es la Coerción de Tipos?**
+
+**Coerción** (type coercion) es la conversión de un tipo a otro.
+
+**Dos tipos:**
+1. **Implícita (automática):** El compilador convierte automáticamente
+2. **Explícita (cast):** El programador fuerza la conversión
+
+```mermaid
+graph LR
+    A[Coerción de Tipos] --> B[Implícita<br/>Widening]
+    A --> C[Explícita<br/>Narrowing/Cast]
+
+    B --> D["int → double<br/>Automático<br/>Sin pérdida"]
+    B --> E["char → int<br/>Automático<br/>Sin pérdida"]
+
+    C --> F["double → int<br/>Requiere cast<br/>Pierde decimales"]
+    C --> G["Object → String<br/>Requiere cast<br/>Puede fallar"]
+
+    style B fill:#c8e6c9,stroke:#388e3c
+    style C fill:#fff9c4,stroke:#f9a825
+```
+
+### **Jerarquía de promoción numérica:**
+
+```
+WIDENING (Promoción implícita - SEGURA):
+
+byte → short → int → long → float → double
+       char →
+
+Dirección: →  SIEMPRE SEGURO (no hay pérdida de información)
+Dirección: ←  REQUIERE CAST (puede haber pérdida)
+```
+
+### **Explicación visual:**
+
+```
+Contenedores de diferentes tamaños:
+
+byte:   [8 bits]
+short:  [16 bits]
+int:    [32 bits]
+long:   [64 bits]
+float:  [32 bits con punto flotante]
+double: [64 bits con punto flotante]
+
+WIDENING (agrandar contenedor):
+  byte → int
+  [pequeño] → [grande]
+  ✓ Siempre cabe
+
+NARROWING (achicar contenedor):
+  int → byte
+  [grande] → [pequeño]
+  ✗ Puede no caber
+```
+
+### **Promoción Implícita (Widening) - DETALLE:**
+
+#### **Ejemplo 1: int → double**
+
+```java
+int x = 5;
+double y = x;  // ✓ Promoción implícita
+```
+
+**¿Qué pasa internamente?**
+
+```
+PASO 1: Compilador detecta asignación
+  - Variable destino: y (tipo double)
+  - Valor fuente: x (tipo int)
+
+PASO 2: Verificar compatibilidad
+  - int.isCompatible(double) ?
+  - Consultar reglas de promoción
+  - int → double está en la jerarquía ✓
+
+PASO 3: Conversión automática
+  Valor en memoria:
+    x (int):    00000000 00000000 00000000 00000101  (5 en binario)
+    y (double): 01000000 00010100 00000000... (5.0 en punto flotante)
+
+PASO 4: Asignación completada
+  - Sin pérdida de información
+  - Sin advertencias
+```
+
+**Implementación:**
+
+```java
+class Type {
+    public boolean canWiden(Type target) {
+        // Mismo tipo siempre es compatible
+        if (this.equals(target)) {
+            return true;
+        }
+
+        // Reglas de widening
+        if (this.isInt() && target.isDouble()) {
+            return true;  // int → double ✓
+        }
+
+        if (this.isInt() && target.isLong()) {
+            return true;  // int → long ✓
+        }
+
+        if (this.isChar() && target.isInt()) {
+            return true;  // char → int ✓
+        }
+
+        if (this.isFloat() && target.isDouble()) {
+            return true;  // float → double ✓
+        }
+
+        // ... más reglas
+
+        return false;  // No se puede promover
+    }
+
+    public static Type widen(Type t1, Type t2) {
+        // Retornar el tipo "más grande"
+
+        // Si uno es double, resultado es double
+        if (t1.isDouble() || t2.isDouble()) {
+            return Type.DOUBLE;
+        }
+
+        // Si uno es float, resultado es float
+        if (t1.isFloat() || t2.isFloat()) {
+            return Type.FLOAT;
+        }
+
+        // Si uno es long, resultado es long
+        if (t1.isLong() || t2.isLong()) {
+            return Type.LONG;
+        }
+
+        // Si ambos son int o menores, resultado es int
+        if (t1.isInt() || t2.isInt()) {
+            return Type.INT;
+        }
+
+        // Por defecto, el primero
+        return t1;
+    }
+}
+```
+
+#### **Ejemplo 2: Promoción en expresiones**
+
+```java
+int a = 5;
+double b = 3.14;
+double resultado = a + b;  // ✓ OK
+```
+
+**Proceso detallado:**
+
+```
+EXPRESIÓN: a + b
+
+1. Verificar tipo de 'a'
+   └─> lookup("a") → Symbol(a, int)
+   └─> Tipo: int
+
+2. Verificar tipo de 'b'
+   └─> lookup("b") → Symbol(b, double)
+   └─> Tipo: double
+
+3. Verificar operación: int + double
+   └─> Ambos son numéricos ✓
+
+4. Promover al tipo más amplio
+   └─> Type.widen(int, double)
+   └─> Retorna: double
+
+5. Conversión implícita de 'a'
+   Antes: a = 5 (int)
+   Después: a = 5.0 (double temporalmente para la operación)
+
+6. Realizar operación
+   5.0 + 3.14 = 8.14
+
+7. Verificar asignación: double = double
+   └─> Tipos coinciden ✓
+
+RESULTADO: resultado = 8.14 (double)
+```
+
+### **Cast Explícito (Narrowing) - DETALLE:**
+
+#### **Ejemplo 1: double → int (pérdida de precisión)**
+
+```java
+double pi = 3.14159;
+int truncado = (int) pi;  // Cast explícito necesario
+```
+
+**¿Qué pasa internamente?**
+
+```
+EXPRESIÓN: (int) pi
+
+PASO 1: Sin cast - ERROR
+  double pi = 3.14159;
+  int truncado = pi;  // ✗ ERROR
+  
+  Razón: double NO puede asignarse a int implícitamente
+         (pérdida de información)
+
+PASO 2: Con cast - OK pero con ADVERTENCIA
+  int truncado = (int) pi;  // ✓ OK
+  
+  Compilador:
+    - Detecta cast explícito (int)
+    - Permite la conversión
+    - Posible advertencia: "pérdida de precisión"
+
+PASO 3: Conversión
+  Valor original: 3.14159 (double)
+  Conversión:     3.14159 → 3 (se eliminan decimales)
+  Valor final:    3 (int)
+
+RESULTADO: truncado = 3 (se perdió .14159)
+```
+
+**Implementación:**
+
+```java
+@Override
+public Type visitCastExpression(CastExpressionNode node) {
+    // Verificar tipo de la expresión
+    Type exprType = node.expression.accept(this);
+
+    // Verificar tipo de destino
+    Type targetType = node.targetType;
+
+    // ¿Es widening? (OK sin cast)
+    if (exprType.canWiden(targetType)) {
+        // Advertencia: cast innecesario
+        System.out.println("Advertencia: cast innecesario de " +
+                          exprType + " a " + targetType);
+    }
+    // ¿Es narrowing? (requiere cast)
+    else if (targetType.canNarrow(exprType)) {
+        // Advertencia: posible pérdida de datos
+        System.out.println("Advertencia: posible pérdida de datos al " +
+                          "convertir " + exprType + " a " + targetType);
+    }
+    // ¿Incompatible totalmente?
+    else {
+        throw new SemanticException(
+            "No se puede convertir " + exprType + " a " + targetType
+        );
+    }
+
+    node.type = targetType;
+    return targetType;
+}
+```
+
+#### **Ejemplo 2: Cast inválido**
+
+```java
+String s = "hello";
+int n = (int) s;  // ✗ ERROR: cast inválido
+```
+
+**Proceso:**
+
+```
+EXPRESIÓN: (int) s
+
+1. Identificar tipo de 's'
+   └─> lookup("s") → Symbol(s, String)
+   └─> Tipo: String
+
+2. Tipo de destino: int
+
+3. ¿String puede widening a int?
+   └─> String.canWiden(int) → false
+
+4. ¿String puede narrowing a int?
+   └─> String.canNarrow(int) → false
+
+5. ¿Son compatibles de alguna forma?
+   └─> No hay relación entre String e int
+
+6. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "No se puede convertir String a int"
+   )
+
+RESULTADO: ✗ ERROR DE COMPILACIÓN
+```
+
+### **Tabla completa de conversiones:**
+
+```
+CONVERSIONES VÁLIDAS:
+
+ORIGEN  | DESTINO | TIPO      | PÉRDIDA | EJEMPLO
+────────┼─────────┼───────────┼─────────┼──────────────────
+byte    | short   | implícita | no      | byte b = 5; short s = b;
+byte    | int     | implícita | no      | byte b = 5; int i = b;
+short   | int     | implícita | no      | short s = 5; int i = s;
+int     | long    | implícita | no      | int i = 5; long l = i;
+int     | double  | implícita | no      | int i = 5; double d = i;
+float   | double  | implícita | no      | float f = 5.0f; double d = f;
+char    | int     | implícita | no      | char c = 'A'; int i = c;
+────────┼─────────┼───────────┼─────────┼──────────────────
+double  | int     | explícita | SÍ      | double d = 3.14; int i = (int)d;
+long    | int     | explícita | posible | long l = 5000000000L; int i = (int)l;
+int     | byte    | explícita | posible | int i = 200; byte b = (byte)i;
+int     | char    | explícita | posible | int i = 65; char c = (char)i;
+────────┼─────────┼───────────┼─────────┼──────────────────
+String  | int     | INVÁLIDO  | N/A     | ✗ No hay conversión
+int     | String  | INVÁLIDO  | N/A     | ✗ Usar String.valueOf(i)
+```
+
+### **Pregunta de comprensión:**
+
+Clasifica estas conversiones:
+
+```java
+int a = 5;
+double b = a;       // ¿Implícita o explícita? ¿Válida?
+
+double c = 3.14;
+int d = c;          // ¿Implícita o explícita? ¿Válida?
+
+double e = 3.14;
+int f = (int) e;    // ¿Implícita o explícita? ¿Válida?
+
+String s = "hello";
+int g = (int) s;    // ¿Implícita o explícita? ¿Válida?
+```
+
+**Respuesta:**
+
+```
+double b = a;    → Implícita, ✓ VÁLIDA (int → double, widening)
+int d = c;       → ✗ INVÁLIDA (double → int requiere cast)
+int f = (int) e; → Explícita, ✓ VÁLIDA (cast correcto, pierde .14)
+int g = (int) s; → ✗ INVÁLIDA (String e int incompatibles, incluso con cast)
+```
+
+---
+
+
+## Página 13: Errores Semánticos Comunes - Catálogo Completo
+
+### **Catálogo de Errores Semánticos con Ejemplos:**
+
+#### **Error 1: Variable no declarada**
+
+**Código:**
+```java
+x = 5;  // ✗ ERROR
+```
+
+**Análisis paso a paso:**
+
+```
+1. Encontrar AssignmentNode(name="x", value=5)
+2. Buscar variable 'x' en tabla de símbolos
+   └─> symbolTable.lookup("x")
+   └─> Retorna: null (no existe)
+3. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException("Variable 'x' no declarada")
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 1, columna 1:
+  Variable 'x' no declarada
+  x = 5;
+  ^
+```
+
+**Solución:**
+```java
+int x;  // Declarar primero
+x = 5;  // Ahora sí ✓
+```
+
+#### **Error 2: Variable ya declarada (Redeclaración)**
+
+**Código:**
+```java
+int x = 5;
+int x = 10;  // ✗ ERROR
+```
+
+**Análisis paso a paso:**
+
+```
+Línea 1: int x = 5;
+  1. existsInCurrentScope("x") → false
+  2. insert(Symbol("x", int, 5)) → OK
+  Tabla: {x: int}
+
+Línea 2: int x = 10;
+  1. existsInCurrentScope("x") → true ✗
+  2. LANZAR EXCEPCIÓN
+     └─> throw new SemanticException(
+         "Variable 'x' ya declarada en línea 1"
+     )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 2, columna 5:
+  Variable 'x' ya declarada en línea 1
+  int x = 10;
+      ^
+```
+
+**Solución:**
+```java
+int x = 5;
+x = 10;  // Asignación, no declaración ✓
+```
+
+#### **Error 3: Incompatibilidad de tipos en asignación**
+
+**Código:**
+```java
+int x = "hello";  // ✗ ERROR
+```
+
+**Análisis paso a paso:**
+
+```
+1. Declaración: int x = "hello"
+2. Tipo declarado: int
+3. Verificar tipo de inicializador
+   └─> checkExpression(StringNode("hello"))
+   └─> Retorna: Type.STRING
+4. Verificar compatibilidad: int = String
+   └─> int.isCompatible(String) → false
+5. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "No se puede inicializar int con String"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 1, columna 9:
+  No se puede asignar String a variable de tipo int
+  int x = "hello";
+          ^^^^^^^
+```
+
+**Solución:**
+```java
+String x = "hello";  // Declarar como String ✓
+// O
+int x = 5;  // Usar valor compatible ✓
+```
+
+#### **Error 4: Operación inválida para tipos**
+
+**Código:**
+```java
+boolean b = true;
+int x = b + 5;  // ✗ ERROR
+```
+
+**Análisis paso a paso:**
+
+```
+1. Expresión: b + 5
+2. Tipo de 'b'
+   └─> lookup("b") → Symbol(b, boolean)
+   └─> Tipo: boolean
+3. Tipo de '5'
+   └─> NumberNode(5) → Type.INT
+4. Verificar operación: boolean + int
+   └─> Operador + requiere operandos numéricos
+   └─> boolean.isNumeric() → false ✗
+5. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "Operador '+' requiere operandos numéricos"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 2, columna 9:
+  Operador '+' requiere operandos numéricos, se obtuvo boolean
+  int x = b + 5;
+          ^
+```
+
+**Solución:**
+```java
+boolean b = true;
+int x = (b ? 1 : 0) + 5;  // Convertir boolean a int ✓
+```
+
+#### **Error 5: Número incorrecto de argumentos en llamada**
+
+**Código:**
+```java
+int suma(int a, int b) {
+    return a + b;
+}
+int x = suma(5);  // ✗ ERROR: faltan argumentos
+```
+
+**Análisis paso a paso:**
+
+```
+1. Declarar función suma(int, int) → int
+   └─> insert(Symbol("suma", FunctionType(int, [int, int])))
+   Tabla: {suma: (int, int) → int}
+
+2. Llamada: suma(5)
+   └─> lookup("suma") → Symbol(suma, FunctionType)
+   └─> FunctionType.parameterTypes.size() = 2
+   └─> Argumentos proporcionados = 1
+3. Verificar cantidad: 2 ≠ 1 ✗
+4. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "Función 'suma' espera 2 argumentos, se recibieron 1"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 4, columna 9:
+  Función 'suma' espera 2 argumentos, se recibieron 1
+  int x = suma(5);
+          ^^^^
+```
+
+**Solución:**
+```java
+int x = suma(5, 10);  // Pasar ambos argumentos ✓
+```
+
+#### **Error 6: Tipo incorrecto de argumento**
+
+**Código:**
+```java
+int suma(int a, int b) {
+    return a + b;
+}
+int x = suma(5, "hola");  // ✗ ERROR: tipo incorrecto
+```
+
+**Análisis paso a paso:**
+
+```
+1. Función: suma(int, int) → int
+2. Llamada: suma(5, "hola")
+3. Verificar argumento 1:
+   └─> Tipo: int (esperado int) ✓
+4. Verificar argumento 2:
+   └─> Tipo: String (esperado int) ✗
+   └─> String.isCompatible(int) → false
+5. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "Argumento 2: se esperaba int, se obtuvo String"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 4, columna 18:
+  Argumento 2: se esperaba int, se obtuvo String
+  int x = suma(5, "hola");
+                  ^^^^^^
+```
+
+**Solución:**
+```java
+int x = suma(5, 10);  // Pasar int, no String ✓
+```
+
+#### **Error 7: Tipo de retorno incorrecto**
+
+**Código:**
+```java
+int calcular() {
+    return "hello";  // ✗ ERROR
+}
+```
+
+**Análisis paso a paso:**
+
+```
+1. Función declarada: int calcular()
+   └─> currentReturnType = Type.INT
+2. Return statement: return "hello";
+3. Tipo de expresión retornada:
+   └─> checkExpression(StringNode("hello"))
+   └─> Retorna: Type.STRING
+4. Verificar compatibilidad: int = String
+   └─> String.isCompatible(int) → false ✗
+5. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "Se esperaba retorno de tipo int, se obtuvo String"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 2, columna 12:
+  Se esperaba retorno de tipo int, se obtuvo String
+      return "hello";
+             ^^^^^^^
+```
+
+**Solución:**
+```java
+int calcular() {
+    return 42;  // Retornar int ✓
+}
+// O cambiar tipo de retorno:
+String calcular() {
+    return "hello";  // ✓
+}
+```
+
+#### **Error 8: Break/Continue fuera de loop**
+
+**Código:**
+```java
+void foo() {
+    break;  // ✗ ERROR
+}
+```
+
+**Análisis paso a paso:**
+
+```
+1. Entrar función foo()
+   └─> currentScope = foo
+   └─> inLoop = false
+2. Encontrar BreakNode
+3. Verificar contexto
+   └─> if (!inLoop) ✗
+4. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "break debe estar dentro de un loop"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 2, columna 5:
+  'break' debe estar dentro de un loop
+      break;
+      ^^^^^
+```
+
+**Solución:**
+```java
+void foo() {
+    while (true) {
+        break;  // Ahora sí está en loop ✓
+    }
+}
+```
+
+#### **Error 9: Return fuera de función**
+
+**Código:**
+```java
+return 5;  // ✗ ERROR: return en scope global
+```
+
+**Análisis paso a paso:**
+
+```
+1. Scope actual: GLOBAL
+   └─> currentReturnType = null
+2. Encontrar ReturnNode
+3. Verificar contexto
+   └─> if (currentReturnType == null) ✗
+4. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "return debe estar dentro de una función"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 1, columna 1:
+  'return' debe estar dentro de una función
+  return 5;
+  ^^^^^^
+```
+
+**Solución:**
+```java
+int foo() {
+    return 5;  // Dentro de función ✓
+}
+```
+
+#### **Error 10: Acceso a campo inexistente**
+
+**Código:**
+```java
+class Point {
+    int x;
+    int y;
+}
+Point p = new Point();
+int z = p.z;  // ✗ ERROR: campo 'z' no existe
+```
+
+**Análisis paso a paso:**
+
+```
+1. Acceso: p.z
+2. Tipo de 'p'
+   └─> lookup("p") → Symbol(p, Point)
+   └─> Tipo: ClassType(Point)
+3. Buscar campo 'z' en Point
+   └─> Point.fields.get("z") → null
+4. LANZAR EXCEPCIÓN
+   └─> throw new SemanticException(
+       "La clase Point no tiene campo 'z'"
+   )
+```
+
+**Mensaje de error:**
+```
+Error semántico en línea 6, columna 11:
+  La clase Point no tiene campo 'z'
+  int z = p.z;
+            ^
+```
+
+**Solución:**
+```java
+int z = p.x;  // Usar campo existente ✓
+// O agregar campo 'z' a la clase
+```
+
+### **Clase SemanticException:**
+
+```java
+class SemanticException extends Exception {
+    int lineNumber;
+    int columnNumber;
+    String message;
+    ASTNode node;  // Nodo donde ocurrió el error
+
+    public SemanticException(String message, ASTNode node) {
+        super(message);
+        this.message = message;
+        this.lineNumber = node.lineNumber;
+        this.columnNumber = node.columnNumber;
+        this.node = node;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        // Línea del error
+        sb.append("Error semántico en línea ")
+          .append(lineNumber)
+          .append(", columna ")
+          .append(columnNumber)
+          .append(":\n");
+
+        // Mensaje descriptivo
+        sb.append("  ").append(message).append("\n");
+
+        // Mostrar línea de código (si está disponible)
+        if (node.sourceLine != null) {
+            sb.append("  ").append(node.sourceLine).append("\n");
+
+            // Indicador visual (^)
+            sb.append("  ");
+            for (int i = 0; i < columnNumber - 1; i++) {
+                sb.append(" ");
+            }
+            sb.append("^\n");
+        }
+
+        return sb.toString();
+    }
+}
+```
+
+### **Formato de mensaje de error completo:**
+
+```
+Error semántico en línea 15, columna 12: Variable 'contador' no declarada
+    contador = contador + 1;
+               ^^^^^^^^
+Sugerencia: ¿Quizás quisiste decir 'count'?
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué errores hay en este código?
+
+```java
+int x = 5;
+int x = 10;
+y = x + "hola";
+int suma(int a) {
+    return a + b;
+}
+```
+
+**Respuesta:**
+
+```
+Línea 2: Variable 'x' ya declarada en línea 1
+Línea 3: Variable 'y' no declarada
+Línea 3: Operador '+' incompatible: int + String
+Línea 5: Variable 'b' no declarada
+```
+
+---
+
+
+## Página 14: Patrón Visitor - Recorriendo el AST en Detalle
+
+### **¿Por qué necesitamos el patrón Visitor?**
+
+**Problema:** Queremos agregar operaciones al AST sin modificar las clases de los nodos.
+
+**Ejemplo del problema:**
+
+```java
+// Sin Visitor - MALO
+class ExpressionNode {
+    // Si queremos agregar type checking, modificamos la clase
+    public Type typeCheck() { ... }
+    
+    // Si luego queremos generar código, modificamos de nuevo
+    public String generateCode() { ... }
+    
+    // Si después queremos pretty printing, modificamos de nuevo
+    public String prettyPrint() { ... }
+    
+    // ✗ Cada nueva operación requiere modificar TODAS las clases
+}
+```
+
+**Solución con Visitor:**
+
+```java
+// Con Visitor - BUENO
+class ExpressionNode {
+    // Un solo método que NO cambia
+    public <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visitExpressionNode(this);
+    }
+}
+
+// Agregar operaciones SIN modificar las clases AST
+class TypeCheckVisitor implements ASTVisitor<Type> { ... }
+class CodeGenVisitor implements ASTVisitor<String> { ... }
+class PrettyPrintVisitor implements ASTVisitor<String> { ... }
+```
+
+### **Diagrama de componentes del patrón Visitor:**
+
+```mermaid
+classDiagram
+    class ASTVisitor {
+        <<interface>>
+        +visitProgramNode(node) Type
+        +visitDeclarationNode(node) Type
+        +visitAssignmentNode(node) Type
+        +visitBinaryOpNode(node) Type
+        +visitIdentifierNode(node) Type
+        +visitNumberNode(node) Type
+    }
+
+    class SemanticAnalyzer {
+        -symbolTable SymbolTable
+        -errors List~Error~
+        +analyze(program)
+        +visitProgramNode(node) Type
+        +visitDeclarationNode(node) Type
+    }
+
+    class ASTNode {
+        <<abstract>>
+        +lineNumber int
+        +columnNumber int
+        +accept(visitor) T
+    }
+
+    class ProgramNode {
+        +statements List~Statement~
+        +accept(visitor) T
+    }
+
+    class DeclarationNode {
+        +type Type
+        +name String
+        +initializer Expression
+        +accept(visitor) T
+    }
+
+    class BinaryOpNode {
+        +left Expression
+        +operator Operator
+        +right Expression
+        +accept(visitor) T
+    }
+
+    ASTVisitor <|.. SemanticAnalyzer
+    ASTNode <|-- ProgramNode
+    ASTNode <|-- DeclarationNode
+    ASTNode <|-- BinaryOpNode
+
+    ProgramNode ..> ASTVisitor : accept()
+    DeclarationNode ..> ASTVisitor : accept()
+    BinaryOpNode ..> ASTVisitor : accept()
+```
+
+### **Implementación completa paso a paso:**
+
+#### **Paso 1: Definir la interfaz Visitor**
+
+```java
+interface ASTVisitor<T> {
+    // Un método por cada tipo de nodo
+
+    // Statements
+    T visitProgramNode(ProgramNode node);
+    T visitDeclarationNode(DeclarationNode node);
+    T visitAssignmentNode(AssignmentNode node);
+    T visitIfStatementNode(IfStatementNode node);
+    T visitWhileStatementNode(WhileStatementNode node);
+    T visitReturnNode(ReturnNode node);
+    T visitBreakNode(BreakNode node);
+    T visitContinueNode(ContinueNode node);
+
+    // Expressions
+    T visitBinaryOpNode(BinaryOpNode node);
+    T visitUnaryOpNode(UnaryOpNode node);
+    T visitFunctionCallNode(FunctionCallNode node);
+    T visitArrayAccessNode(ArrayAccessNode node);
+
+    // Literals
+    T visitIdentifierNode(IdentifierNode node);
+    T visitNumberNode(NumberNode node);
+    T visitBooleanNode(BooleanNode node);
+    T visitStringNode(StringNode node);
+}
+```
+
+**Explicación del genérico `<T>`:**
+
+```
+T = Tipo de retorno de cada método visit
+
+Ejemplos:
+- TypeCheckVisitor implements ASTVisitor<Type>
+  → Cada método retorna Type
+  
+- CodeGenVisitor implements ASTVisitor<String>
+  → Cada método retorna String (código generado)
+  
+- PrettyPrintVisitor implements ASTVisitor<String>
+  → Cada método retorna String (código formateado)
+```
+
+#### **Paso 2: Implementar accept() en cada nodo**
+
+```java
+// Clase base
+abstract class ASTNode {
+    int lineNumber;
+    int columnNumber;
+    String sourceLine;  // Línea de código fuente (para errores)
+
+    // Método abstracto que cada subclase implementa
+    abstract <T> T accept(ASTVisitor<T> visitor);
+}
+
+// Nodo de programa
+class ProgramNode extends ASTNode {
+    List<StatementNode> statements;
+
+    public ProgramNode(List<StatementNode> statements) {
+        this.statements = statements;
+    }
+
+    @Override
+    public <T> T accept(ASTVisitor<T> visitor) {
+        // Delegar al visitor
+        return visitor.visitProgramNode(this);
+    }
+}
+
+// Nodo de declaración
+class DeclarationNode extends StatementNode {
+    Type declaredType;
+    String name;
+    ExpressionNode initializer;
+
+    @Override
+    public <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visitDeclarationNode(this);
+    }
+}
+
+// Nodo de operación binaria
+class BinaryOpNode extends ExpressionNode {
+    ExpressionNode left;
+    Operator operator;
+    ExpressionNode right;
+    Type type;  // Se llena durante el análisis semántico
+
+    @Override
+    public <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visitBinaryOpNode(this);
+    }
+}
+
+// ... más nodos
+```
+
+**Patrón que se repite:**
+
+```java
+@Override
+public <T> T accept(ASTVisitor<T> visitor) {
+    return visitor.visitXXXNode(this);
+    //               ^^^
+    //               Nombre del método correspondiente
+    //                              ^^^^
+    //                              Pasar THIS (el nodo actual)
+}
+```
+
+#### **Paso 3: Implementar el Visitor concreto (SemanticAnalyzer)**
+
+```java
+class SemanticAnalyzer implements ASTVisitor<Type> {
+    private SymbolTable symbolTable;
+    private List<SemanticException> errors;
+
+    public SemanticAnalyzer() {
+        this.symbolTable = new SymbolTable(null);
+        this.errors = new ArrayList<>();
+    }
+
+    // ━━━ MÉTODO PRINCIPAL ━━━
+    public void analyze(ProgramNode program) {
+        try {
+            program.accept(this);  // Iniciar recorrido
+        } catch (SemanticException e) {
+            errors.add(e);
+        }
+    }
+
+    // ━━━ IMPLEMENTAR CADA MÉTODO VISIT ━━━
+
+    @Override
+    public Type visitProgramNode(ProgramNode node) {
+        // Recorrer todos los statements del programa
+        for (StatementNode stmt : node.statements) {
+            stmt.accept(this);  // Recursión: visitar cada statement
+        }
+        return null;
+    }
+
+    @Override
+    public Type visitDeclarationNode(DeclarationNode node) {
+        // 1. Verificar que no existe en scope actual
+        if (symbolTable.existsInCurrentScope(node.name)) {
+            errors.add(new SemanticException(
+                "Variable '" + node.name + "' ya declarada", node
+            ));
+            return null;
+        }
+
+        // 2. Verificar tipo del inicializador (si existe)
+        Type initType = null;
+        if (node.initializer != null) {
+            initType = node.initializer.accept(this);  // Recursión
+
+            // Verificar compatibilidad
+            if (!initType.isCompatible(node.declaredType)) {
+                errors.add(new SemanticException(
+                    "No se puede inicializar " + node.declaredType +
+                    " con " + initType, node
+                ));
+            }
+        }
+
+        // 3. Insertar en tabla de símbolos
+        Symbol symbol = new Symbol(
+            node.name,
+            node.declaredType,
+            Scope.CURRENT,
+            node.lineNumber
+        );
+        symbolTable.insert(symbol);
+
+        return node.declaredType;
+    }
+
+    @Override
+    public Type visitBinaryOpNode(BinaryOpNode node) {
+        // 1. Verificar operando izquierdo
+        Type leftType = node.left.accept(this);  // Recursión
+
+        // 2. Verificar operando derecho
+        Type rightType = node.right.accept(this);  // Recursión
+
+        // 3. Verificar que la operación es válida
+        switch (node.operator) {
+            case PLUS:
+            case MINUS:
+            case MULTIPLY:
+            case DIVIDE:
+                // Ambos deben ser numéricos
+                if (!leftType.isNumeric() || !rightType.isNumeric()) {
+                    errors.add(new SemanticException(
+                        "Operador aritmético requiere operandos numéricos", node
+                    ));
+                    return Type.ERROR;
+                }
+                // Promover al tipo más amplio
+                Type resultType = Type.widen(leftType, rightType);
+                node.type = resultType;
+                return resultType;
+
+            case EQUALS:
+            case NOT_EQUALS:
+                // Deben ser compatibles
+                if (!leftType.isCompatible(rightType)) {
+                    errors.add(new SemanticException(
+                        "No se pueden comparar " + leftType + " con " + rightType, node
+                    ));
+                    return Type.ERROR;
+                }
+                node.type = Type.BOOLEAN;
+                return Type.BOOLEAN;
+
+            // ... más operadores
+
+            default:
+                return Type.ERROR;
+        }
+    }
+
+    @Override
+    public Type visitIdentifierNode(IdentifierNode node) {
+        // Buscar variable en tabla de símbolos
+        Symbol symbol = symbolTable.lookup(node.name);
+
+        if (symbol == null) {
+            errors.add(new SemanticException(
+                "Variable '" + node.name + "' no declarada", node
+            ));
+            return Type.ERROR;
+        }
+
+        // Anotar nodo con tipo y símbolo resuelto
+        node.type = symbol.type;
+        node.resolvedSymbol = symbol;
+
+        return symbol.type;
+    }
+
+    @Override
+    public Type visitNumberNode(NumberNode node) {
+        // Determinar si es int o double
+        if (node.value % 1 == 0) {
+            node.type = Type.INT;
+            return Type.INT;
+        } else {
+            node.type = Type.DOUBLE;
+            return Type.DOUBLE;
+        }
+    }
+
+    // ... más métodos visit
+}
+```
+
+### **Flujo de ejecución con Visitor:**
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant SA as SemanticAnalyzer
+    participant PN as ProgramNode
+    participant DN as DeclarationNode
+    participant BO as BinaryOpNode
+    participant ID as IdentifierNode
+
+    Main->>SA: analyze(programNode)
+    SA->>PN: programNode.accept(this)
+    PN->>SA: visitProgramNode(this)
+
+    loop Por cada statement
+        SA->>DN: statement.accept(this)
+        DN->>SA: visitDeclarationNode(this)
+        
+        alt Tiene inicializador
+            SA->>BO: initializer.accept(this)
+            BO->>SA: visitBinaryOpNode(this)
+            SA->>ID: left.accept(this)
+            ID->>SA: visitIdentifierNode(this)
+            SA-->>BO: Type.INT
+            BO-->>SA: Type.INT
+        end
+        
+        SA->>SA: symbolTable.insert(symbol)
+        SA-->>PN: Type
+    end
+
+    PN-->>SA: null
+    SA-->>Main: Análisis completo
+```
+
+### **Ejemplo paso a paso:**
+
+Código:
+```java
+int x = 5;
+int y = x + 10;
+```
+
+**Traza completa del Visitor:**
+
+```
+1. Main.analyze(programNode)
+2. programNode.accept(semanticAnalyzer)
+3. semanticAnalyzer.visitProgramNode(programNode)
+4. Loop: por cada statement
+
+   ━━━ STATEMENT 1: int x = 5; ━━━
+   
+   5. statement[0].accept(semanticAnalyzer)
+   6. declarationNode.accept(semanticAnalyzer)
+   7. semanticAnalyzer.visitDeclarationNode(declarationNode)
+   8.   - Verificar que 'x' no existe: OK
+   9.   - initializer.accept(semanticAnalyzer)
+   10.  - numberNode(5).accept(semanticAnalyzer)
+   11.  - semanticAnalyzer.visitNumberNode(numberNode(5))
+   12.  - Retorna: Type.INT
+   13.  - Verificar compatibilidad: int = int ✓
+   14.  - Insert Symbol('x', INT) en tabla
+   15. Retorna: Type.INT
+
+   ━━━ STATEMENT 2: int y = x + 10; ━━━
+   
+   16. statement[1].accept(semanticAnalyzer)
+   17. declarationNode.accept(semanticAnalyzer)
+   18. semanticAnalyzer.visitDeclarationNode(declarationNode)
+   19.   - Verificar que 'y' no existe: OK
+   20.   - initializer.accept(semanticAnalyzer)
+   21.   - binaryOpNode(+).accept(semanticAnalyzer)
+   22.   - semanticAnalyzer.visitBinaryOpNode(binaryOpNode)
+   23.   - left.accept(semanticAnalyzer)
+   24.   - identifierNode('x').accept(semanticAnalyzer)
+   25.   - semanticAnalyzer.visitIdentifierNode(identifierNode)
+   26.     - lookup('x') → Symbol(x, INT) ✓
+   27.   - Retorna: Type.INT
+   28.   - right.accept(semanticAnalyzer)
+   29.   - numberNode(10).accept(semanticAnalyzer)
+   30.   - Retorna: Type.INT
+   31.   - Verificar operación: INT + INT ✓
+   32.   - Type.widen(INT, INT) → INT
+   33.   - node.type = INT
+   34.   - Retorna: Type.INT
+   35.   - Verificar compatibilidad: int = int ✓
+   36.   - Insert Symbol('y', INT) en tabla
+   37. Retorna: Type.INT
+
+38. Fin del loop
+39. Retorna: null
+40. Análisis completo ✓
+```
+
+### **Ventajas del patrón Visitor:**
+
+```
+1. SEPARACIÓN DE CONCERNS:
+   - Estructura del AST (nodos) → NO cambia
+   - Operaciones sobre el AST (visitors) → Fácil agregar
+
+2. FÁCIL AGREGAR OPERACIONES:
+   - Nueva operación = Nueva clase Visitor
+   - NO hay que modificar clases AST existentes
+
+3. REUSABILIDAD:
+   - El mismo AST sirve para:
+     * Type checking
+     * Code generation
+     * Pretty printing
+     * Optimización
+     * etc.
+
+4. POLIMORFISMO:
+   - Un solo método accept() en cada nodo
+   - Comportamiento específico delegado al visitor
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué ventaja tiene el patrón Visitor sobre agregar métodos directamente a los nodos?
+
+**Respuesta:**
+
+```
+SIN Visitor:
+  - Agregar nueva operación → modificar TODAS las clases de nodos
+  - Mezcla estructura con operaciones
+  - Difícil de mantener
+
+CON Visitor:
+  - Agregar nueva operación → crear UNA nueva clase Visitor
+  - Estructura separada de operaciones
+  - Fácil de mantener y extender
+```
+
+---
+
+## Página 15: Ejemplo Completo Paso a Paso - Programa Real
+
+### **Código de ejemplo completo:**
+
+```java
+int x = 5;
+int y = 10;
+if (x < y) {
+    int z = x + y;
+    x = z;
+}
+y = x + 1;
+```
+
+### **Paso 1: AST generado por el parser**
+
+```
+ProgramNode
+├── VariableDeclarationNode
+│   ├── type: int
+│   ├── name: "x"
+│   └── initializer: NumberNode(5)
+├── VariableDeclarationNode
+│   ├── type: int
+│   ├── name: "y"
+│   └── initializer: NumberNode(10)
+├── IfStatementNode
+│   ├── condition: BinaryOpNode
+│   │   ├── left: IdentifierNode("x")
+│   │   ├── operator: <
+│   │   └── right: IdentifierNode("y")
+│   ├── thenBranch: BlockNode
+│   │   ├── VariableDeclarationNode
+│   │   │   ├── type: int
+│   │   │   ├── name: "z"
+│   │   │   └── initializer: BinaryOpNode
+│   │   │       ├── left: IdentifierNode("x")
+│   │   │       ├── operator: +
+│   │   │       └── right: IdentifierNode("y")
+│   │   └── AssignmentNode
+│   │       ├── name: "x"
+│   │       └── value: IdentifierNode("z")
+│   └── elseBranch: null
+└── AssignmentNode
+    ├── name: "y"
+    └── value: BinaryOpNode
+        ├── left: IdentifierNode("x")
+        ├── operator: +
+        └── right: NumberNode(1)
+```
+
+### **Paso 2: Análisis semántico línea por línea**
+
+#### **Línea 1: `int x = 5;`**
+
+```
+INICIO ANÁLISIS LÍNEA 1
+─────────────────────────────────────
+
+Nodo: VariableDeclarationNode(type=int, name="x", initializer=NumberNode(5))
+
+PASO 1: Visitar VariableDeclarationNode
+  └─> semanticAnalyzer.visitDeclarationNode(node)
+
+PASO 2: Verificar si 'x' ya existe en scope actual
+  └─> symbolTable.existsInCurrentScope("x")
+  └─> Retorna: false (no existe)
+  └─> ✓ OK
+
+PASO 3: Verificar tipo del inicializador
+  └─> node.initializer.accept(this)
+  └─> numberNode(5).accept(this)
+  └─> semanticAnalyzer.visitNumberNode(NumberNode(5))
+  └─> 5 % 1 == 0 → true
+  └─> numberNode.type = Type.INT
+  └─> Retorna: Type.INT
+
+PASO 4: Verificar compatibilidad de tipos
+  └─> declaredType: int
+  └─> initType: int
+  └─> int.isCompatible(int) → true
+  └─> ✓ OK
+
+PASO 5: Insertar en tabla de símbolos
+  └─> symbol = Symbol("x", Type.INT, Scope.GLOBAL, línea=1)
+  └─> symbolTable.insert(symbol)
+  └─> ✓ Insertado
+
+ESTADO DESPUÉS DE LÍNEA 1:
+──────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+└────────┴──────┴────────┴───────┴───────┘
+
+AST Anotado:
+  VariableDeclarationNode(name="x") [type=int ✓]
+    └─ NumberNode(5) [type=int ✓]
+
+Errores: []
+```
+
+#### **Línea 2: `int y = 10;`**
+
+```
+INICIO ANÁLISIS LÍNEA 2
+─────────────────────────────────────
+
+Nodo: VariableDeclarationNode(type=int, name="y", initializer=NumberNode(10))
+
+PASO 1: Visitar VariableDeclarationNode
+  └─> semanticAnalyzer.visitDeclarationNode(node)
+
+PASO 2: Verificar si 'y' ya existe
+  └─> symbolTable.existsInCurrentScope("y")
+  └─> Retorna: false
+  └─> ✓ OK
+
+PASO 3: Verificar tipo del inicializador
+  └─> NumberNode(10).accept(this)
+  └─> 10 % 1 == 0 → true
+  └─> Retorna: Type.INT
+
+PASO 4: Verificar compatibilidad
+  └─> int.isCompatible(int) → true
+  └─> ✓ OK
+
+PASO 5: Insertar en tabla
+  └─> Symbol("y", Type.INT, Scope.GLOBAL, línea=2)
+  └─> ✓ Insertado
+
+ESTADO DESPUÉS DE LÍNEA 2:
+──────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+
+Errores: []
+```
+
+#### **Línea 3: `if (x < y) {`**
+
+```
+INICIO ANÁLISIS LÍNEA 3
+─────────────────────────────────────
+
+Nodo: IfStatementNode(condition=BinaryOpNode(<, x, y))
+
+PASO 1: Visitar IfStatementNode
+  └─> semanticAnalyzer.visitIfStatementNode(node)
+
+PASO 2: Verificar tipo de la condición
+  └─> node.condition.accept(this)
+  └─> binaryOpNode(<).accept(this)
+  └─> semanticAnalyzer.visitBinaryOpNode(node)
+
+PASO 3: Verificar operando izquierdo (x)
+  └─> node.left.accept(this)
+  └─> identifierNode("x").accept(this)
+  └─> semanticAnalyzer.visitIdentifierNode(identifierNode)
+  └─> symbolTable.lookup("x")
+  └─> Encontrado: Symbol("x", Type.INT) ✓
+  └─> identifierNode.type = Type.INT
+  └─> identifierNode.resolvedSymbol = Symbol("x", ...)
+  └─> Retorna: Type.INT
+
+PASO 4: Verificar operando derecho (y)
+  └─> node.right.accept(this)
+  └─> identifierNode("y").accept(this)
+  └─> symbolTable.lookup("y")
+  └─> Encontrado: Symbol("y", Type.INT) ✓
+  └─> Retorna: Type.INT
+
+PASO 5: Verificar operación: INT < INT
+  └─> Operador: < (comparación)
+  └─> leftType.isNumeric() → true ✓
+  └─> rightType.isNumeric() → true ✓
+  └─> binaryOpNode.type = Type.BOOLEAN
+  └─> Retorna: Type.BOOLEAN
+
+PASO 6: Verificar que la condición es booleana
+  └─> conditionType.isBoolean() → true ✓
+
+ESTADO EN LÍNEA 3:
+──────────────────
+
+AST Anotado:
+  IfStatementNode [✓]
+    └─ condition: BinaryOpNode(<) [type=boolean ✓]
+        ├─ IdentifierNode("x") [type=int ✓, resolvedTo=Symbol(x)]
+        └─ IdentifierNode("y") [type=int ✓, resolvedTo=Symbol(y)]
+
+Errores: []
+```
+
+#### **Línea 4: `int z = x + y;` (dentro del if)**
+
+```
+INICIO ANÁLISIS LÍNEA 4
+─────────────────────────────────────
+
+Contexto: Dentro del bloque if
+Scope actual: BLOQUE IF (hijo de global)
+
+PASO 1: Crear nuevo scope para el bloque if
+  └─> symbolTableIf = new SymbolTable(symbolTableGlobal)
+  └─> Cambiar scope actual: symbolTable = symbolTableIf
+
+Nodo: VariableDeclarationNode(type=int, name="z", initializer=BinaryOpNode(+, x, y))
+
+PASO 2: Visitar VariableDeclarationNode
+  └─> semanticAnalyzer.visitDeclarationNode(node)
+
+PASO 3: Verificar si 'z' ya existe en scope ACTUAL (bloque if)
+  └─> symbolTableIf.existsInCurrentScope("z")
+  └─> Retorna: false (no existe en bloque if)
+  └─> ✓ OK
+
+PASO 4: Verificar tipo del inicializador (x + y)
+  └─> binaryOpNode(+).accept(this)
+  └─> semanticAnalyzer.visitBinaryOpNode(node)
+
+PASO 5: Verificar operando izquierdo (x)
+  └─> identifierNode("x").accept(this)
+  └─> symbolTable.lookup("x")
+  └─> Búsqueda en symbolTableIf: no encontrado
+  └─> Búsqueda en parent (symbolTableGlobal): ✓ Encontrado
+  └─> Retorna: Type.INT
+
+PASO 6: Verificar operando derecho (y)
+  └─> identifierNode("y").accept(this)
+  └─> symbolTable.lookup("y")
+  └─> Búsqueda en symbolTableIf: no encontrado
+  └─> Búsqueda en parent (symbolTableGlobal): ✓ Encontrado
+  └─> Retorna: Type.INT
+
+PASO 7: Verificar operación: INT + INT
+  └─> Ambos numéricos ✓
+  └─> Type.widen(INT, INT) → INT
+  └─> Retorna: Type.INT
+
+PASO 8: Verificar compatibilidad: int = int
+  └─> ✓ OK
+
+PASO 9: Insertar 'z' en tabla del bloque if
+  └─> Symbol("z", Type.INT, Scope.LOCAL, línea=4)
+  └─> symbolTableIf.insert(symbol)
+  └─> ✓ Insertado
+
+ESTADO DESPUÉS DE LÍNEA 4:
+──────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+      ↑
+      parent
+      ↓
+Tabla de Símbolos (Bloque IF):
+┌────────┬──────┬───────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope │ Valor │ Línea │
+├────────┼──────┼───────┼───────┼───────┤
+│ z      │ int  │ local │ 15    │ 4     │
+└────────┴──────┴───────┴───────┴───────┘
+
+AST Anotado:
+  VariableDeclarationNode("z") [type=int ✓]
+    └─ BinaryOpNode(+) [type=int ✓]
+        ├─ IdentifierNode("x") [type=int ✓, resolvedTo=Symbol(x) en global]
+        └─ IdentifierNode("y") [type=int ✓, resolvedTo=Symbol(y) en global]
+
+Errores: []
+```
+
+#### **Línea 5: `x = z;` (asignación dentro del if)**
+
+```
+INICIO ANÁLISIS LÍNEA 5
+─────────────────────────────────────
+
+Contexto: Todavía dentro del bloque if
+Scope actual: BLOQUE IF
+
+Nodo: AssignmentNode(name="x", value=IdentifierNode("z"))
+
+PASO 1: Visitar AssignmentNode
+  └─> semanticAnalyzer.visitAssignmentNode(node)
+
+PASO 2: Buscar variable 'x'
+  └─> symbolTable.lookup("x")
+  └─> Búsqueda en symbolTableIf: no encontrado
+  └─> Búsqueda en parent (symbolTableGlobal): ✓ Encontrado
+  └─> symbol = Symbol("x", Type.INT)
+
+PASO 3: Verificar tipo de la expresión (z)
+  └─> identifierNode("z").accept(this)
+  └─> symbolTable.lookup("z")
+  └─> Búsqueda en symbolTableIf: ✓ Encontrado
+  └─> Retorna: Type.INT
+
+PASO 4: Verificar compatibilidad de tipos
+  └─> variable 'x': Type.INT
+  └─> expresión 'z': Type.INT
+  └─> INT.isCompatible(INT) → true ✓
+
+PASO 5: Asignación válida
+  └─> ✓ OK
+
+ESTADO DESPUÉS DE LÍNEA 5:
+──────────────────────────
+
+AST Anotado:
+  AssignmentNode("x") [type=int ✓]
+    └─ IdentifierNode("z") [type=int ✓, resolvedTo=Symbol(z) en bloque if]
+
+Errores: []
+```
+
+#### **Línea 6: `}` (salir del bloque if)**
+
+```
+SALIR DEL BLOQUE IF
+───────────────────
+
+PASO 1: Detectar fin de bloque
+  └─> Encontrar cierre }
+
+PASO 2: Restaurar scope anterior
+  └─> symbolTable = symbolTable.parent
+  └─> Ahora: symbolTable = symbolTableGlobal
+
+PASO 3: Destruir tabla del bloque if
+  └─> symbolTableIf se elimina
+  └─> Variable 'z' YA NO EXISTE
+
+ESTADO DESPUÉS DE SALIR DEL BLOQUE:
+────────────────────────────────────
+
+Tabla de Símbolos (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+
+Nota: 'z' ya no existe (estaba en el bloque if que ya cerró)
+```
+
+#### **Línea 7: `y = x + 1;` (fuera del if)**
+
+```
+INICIO ANÁLISIS LÍNEA 7
+─────────────────────────────────────
+
+Contexto: Scope global (ya salimos del if)
+Scope actual: GLOBAL
+
+Nodo: AssignmentNode(name="y", value=BinaryOpNode(+, x, 1))
+
+PASO 1: Visitar AssignmentNode
+  └─> semanticAnalyzer.visitAssignmentNode(node)
+
+PASO 2: Buscar variable 'y'
+  └─> symbolTable.lookup("y")
+  └─> Búsqueda en symbolTableGlobal: ✓ Encontrado
+  └─> symbol = Symbol("y", Type.INT)
+
+PASO 3: Verificar tipo de la expresión (x + 1)
+  └─> binaryOpNode(+).accept(this)
+
+PASO 4: Verificar operando izquierdo (x)
+  └─> identifierNode("x").accept(this)
+  └─> symbolTable.lookup("x")
+  └─> ✓ Encontrado en global
+  └─> Retorna: Type.INT
+
+PASO 5: Verificar operando derecho (1)
+  └─> numberNode(1).accept(this)
+  └─> Retorna: Type.INT
+
+PASO 6: Verificar operación: INT + INT
+  └─> Ambos numéricos ✓
+  └─> Type.widen(INT, INT) → INT
+  └─> Retorna: Type.INT
+
+PASO 7: Verificar compatibilidad de tipos
+  └─> variable 'y': Type.INT
+  └─> expresión 'x + 1': Type.INT
+  └─> INT.isCompatible(INT) → true ✓
+
+PASO 8: Asignación válida
+  └─> ✓ OK
+
+ESTADO FINAL:
+─────────────
+
+AST Anotado:
+  AssignmentNode("y") [type=int ✓]
+    └─ BinaryOpNode(+) [type=int ✓]
+        ├─ IdentifierNode("x") [type=int ✓, resolvedTo=Symbol(x)]
+        └─ NumberNode(1) [type=int ✓]
+
+Errores: []
+```
+
+### **Resumen final del análisis:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANÁLISIS SEMÁNTICO COMPLETADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INPUT:
+  int x = 5;
+  int y = 10;
+  if (x < y) {
+      int z = x + y;
+      x = z;
+  }
+  y = x + 1;
+
+OUTPUT:
+  ✓ Análisis exitoso
+  ✓ 0 errores semánticos
+  ✓ Tabla de símbolos construida
+  ✓ AST completamente anotado con tipos
+
+TABLA DE SÍMBOLOS FINAL (Global):
+┌────────┬──────┬────────┬───────┬───────┐
+│ Nombre │ Tipo │ Scope  │ Valor │ Línea │
+├────────┼──────┼────────┼───────┼───────┤
+│ x      │ int  │ global │ 5     │ 1     │
+│ y      │ int  │ global │ 10    │ 2     │
+└────────┴──────┴────────┴───────┴───────┘
+
+AST ANOTADO:
+  ProgramNode [✓]
+  ├── VariableDeclarationNode("x") [type=int ✓]
+  │   └─ NumberNode(5) [type=int ✓]
+  ├── VariableDeclarationNode("y") [type=int ✓]
+  │   └─ NumberNode(10) [type=int ✓]
+  ├── IfStatementNode [✓]
+  │   ├─ condition: BinaryOpNode(<) [type=boolean ✓]
+  │   │   ├─ IdentifierNode("x") [type=int ✓]
+  │   │   └─ IdentifierNode("y") [type=int ✓]
+  │   └─ then: BlockNode [✓]
+  │       ├─ VariableDeclarationNode("z") [type=int ✓]
+  │       │   └─ BinaryOpNode(+) [type=int ✓]
+  │       │       ├─ IdentifierNode("x") [type=int ✓]
+  │       │       └─ IdentifierNode("y") [type=int ✓]
+  │       └─ AssignmentNode("x") [type=int ✓]
+  │           └─ IdentifierNode("z") [type=int ✓]
+  └── AssignmentNode("y") [type=int ✓]
+      └─ BinaryOpNode(+) [type=int ✓]
+          ├─ IdentifierNode("x") [type=int ✓]
+          └─ NumberNode(1) [type=int ✓]
+
+ESTADÍSTICAS:
+  - Declaraciones analizadas: 3 (x, y, z)
+  - Asignaciones analizadas: 2
+  - Expresiones analizadas: 5
+  - Scopes creados: 2 (global + if-block)
+  - Tiempo: < 1ms
+
+El programa está SEMÁNTICAMENTE CORRECTO ✓
+Listo para la fase de generación de código.
+```
+
+### **Pregunta de comprensión:**
+
+¿Qué pasaría si en la línea 7 intentamos usar 'z'?
+
+```java
+y = z + 1;  // ¿Error?
+```
+
+**Respuesta:**
+
+```
+✗ ERROR SEMÁNTICO
+
+Razón: La variable 'z' fue declarada dentro del bloque if (líneas 3-6).
+Al salir del bloque if, el scope se destruye y 'z' deja de existir.
+
+Error en línea 7:
+  Variable 'z' no declarada
+  y = z + 1;
+      ^
+
+'z' solo existe dentro del bloque if donde fue declarada.
+```
+
+---
+
+
+## Página 16: Manejo de Funciones - Declaración y Llamadas
+
+### **Declaración de funciones:**
+
+```java
+int suma(int a, int b) {
+    return a + b;
+}
+```
+
+**AST:**
+```
+FunctionDeclarationNode
+├── returnType: int
+├── name: "suma"
+├── parameters: [
+│   Parameter(type=int, name="a"),
+│   Parameter(type=int, name="b")
+│ ]
+└── body: BlockNode
+    └── ReturnNode
+        └── BinaryOpNode(+, a, b)
+```
+
+### **Implementación del visitFunctionDeclarationNode:**
+
+```java
+@Override
+public Type visitFunctionDeclarationNode(FunctionDeclarationNode node) {
+    // PASO 1: Verificar que no existe función con ese nombre
+    if (symbolTable.existsInCurrentScope(node.name)) {
+        errors.add(new SemanticException(
+            "Función '" + node.name + "' ya declarada", node
+        ));
+        return null;
+    }
+
+    // PASO 2: Crear tipo de función
+    List<Type> paramTypes = new ArrayList<>();
+    for (Parameter param : node.parameters) {
+        paramTypes.add(param.type);
+    }
+    FunctionType funcType = new FunctionType(node.returnType, paramTypes);
+
+    // PASO 3: Insertar función en tabla GLOBAL
+    Symbol funcSymbol = new Symbol(
+        node.name,
+        funcType,
+        Scope.GLOBAL,
+        node.lineNumber
+    );
+    symbolTable.insert(funcSymbol);
+
+    // PASO 4: Crear nuevo scope para el cuerpo de la función
+    SymbolTable functionScope = new SymbolTable(symbolTable);
+    SymbolTable previousScope = symbolTable;
+    symbolTable = functionScope;
+
+    // PASO 5: Insertar parámetros en el scope de la función
+    for (Parameter param : node.parameters) {
+        Symbol paramSymbol = new Symbol(
+            param.name,
+            param.type,
+            Scope.LOCAL,
+            node.lineNumber
+        );
+        functionScope.insert(paramSymbol);
+    }
+
+    // PASO 6: Guardar tipo de retorno esperado (para verificar returns)
+    Type previousReturnType = currentReturnType;
+    currentReturnType = node.returnType;
+
+    // PASO 7: Verificar cuerpo de la función
+    node.body.accept(this);
+
+    // PASO 8: Restaurar scope anterior y tipo de retorno
+    symbolTable = previousScope;
+    currentReturnType = previousReturnType;
+
+    return funcType;
+}
+```
+
+**Traza completa:**
+
+```
+Declaración: int suma(int a, int b) { return a + b; }
+
+PASO 1: Verificar nombre único
+  └─> symbolTable.existsInCurrentScope("suma") → false ✓
+
+PASO 2: Crear tipo de función
+  └─> paramTypes = [Type.INT, Type.INT]
+  └─> funcType = FunctionType(Type.INT, [Type.INT, Type.INT])
+  └─> Signatura: "(int, int) -> int"
+
+PASO 3: Insertar en tabla global
+  Tabla Global:
+  ┌────────┬──────────────────────┬────────┐
+  │ Nombre │ Tipo                 │ Scope  │
+  ├────────┼──────────────────────┼────────┤
+  │ suma   │ (int, int) -> int   │ global │
+  └────────┴──────────────────────┴────────┘
+
+PASO 4: Crear scope de función
+  └─> functionScope = new SymbolTable(globalScope)
+
+PASO 5: Insertar parámetros
+  Tabla de Función 'suma':
+  ┌────────┬──────┬───────┐
+  │ Nombre │ Tipo │ Scope │
+  ├────────┼──────┼───────┤
+  │ a      │ int  │ local │
+  │ b      │ int  │ local │
+  └────────┴──────┴───────┘
+
+PASO 6: Guardar tipo de retorno esperado
+  └─> currentReturnType = Type.INT
+
+PASO 7: Analizar cuerpo { return a + b; }
+  └─> visitReturnNode(ReturnNode)
+      └─> Verificar expresión: a + b
+          └─> lookup("a") → Symbol(a, int) ✓
+          └─> lookup("b") → Symbol(b, int) ✓
+          └─> Tipo de (a + b) = int
+      └─> Verificar compatibilidad: int = int ✓
+
+PASO 8: Restaurar scope
+  └─> symbolTable = globalScope
+  └─> currentReturnType = null
+
+RESULTADO: ✓ Función declarada correctamente
+```
+
+### **Llamadas a funciones:**
+
+```java
+int resultado = suma(5, 10);
+```
+
+### **Implementación del visitFunctionCallNode:**
+
+```java
+@Override
+public Type visitFunctionCallNode(FunctionCallNode node) {
+    // PASO 1: Buscar la función
+    Symbol funcSymbol = symbolTable.lookup(node.functionName);
+    if (funcSymbol == null) {
+        errors.add(new SemanticException(
+            "Función '" + node.functionName + "' no declarada", node
+        ));
+        return Type.ERROR;
+    }
+
+    // PASO 2: Verificar que es una función
+    if (!(funcSymbol.type instanceof FunctionType)) {
+        errors.add(new SemanticException(
+            "'" + node.functionName + "' no es una función", node
+        ));
+        return Type.ERROR;
+    }
+
+    FunctionType funcType = (FunctionType) funcSymbol.type;
+
+    // PASO 3: Verificar número de argumentos
+    if (node.arguments.size() != funcType.parameterTypes.size()) {
+        errors.add(new SemanticException(
+            "Función '" + node.functionName + "' espera " +
+            funcType.parameterTypes.size() + " argumentos, se recibieron " +
+            node.arguments.size(), node
+        ));
+        return funcType.returnType;
+    }
+
+    // PASO 4: Verificar tipo de cada argumento
+    for (int i = 0; i < node.arguments.size(); i++) {
+        Type argType = node.arguments.get(i).accept(this);
+        Type paramType = funcType.parameterTypes.get(i);
+
+        if (!argType.isCompatible(paramType)) {
+            errors.add(new SemanticException(
+                "Argumento " + (i+1) + ": se esperaba " + paramType +
+                ", se obtuvo " + argType, node
+            ));
+        }
+    }
+
+    // PASO 5: Retornar tipo de retorno de la función
+    node.type = funcType.returnType;
+    return funcType.returnType;
+}
+```
+
+**Ejemplo con error:**
+
+```java
+int suma(int a, int b) { return a + b; }
+int x = suma(5, "hola");  // ✗ Error en argumento 2
+```
+
+**Traza:**
+
+```
+Llamada: suma(5, "hola")
+
+PASO 1: Buscar función
+  └─> lookup("suma") → Symbol(suma, (int, int) -> int) ✓
+
+PASO 2: Verificar que es función
+  └─> funcSymbol.type instanceof FunctionType → true ✓
+
+PASO 3: Verificar cantidad de argumentos
+  └─> Esperados: 2
+  └─> Recibidos: 2
+  └─> 2 == 2 ✓
+
+PASO 4: Verificar tipo de argumentos
+  Argumento 1:
+    └─> checkExpression(NumberNode(5))
+    └─> Retorna: Type.INT
+    └─> Esperado: Type.INT
+    └─> INT.isCompatible(INT) → true ✓
+
+  Argumento 2:
+    └─> checkExpression(StringNode("hola"))
+    └─> Retorna: Type.STRING
+    └─> Esperado: Type.INT
+    └─> STRING.isCompatible(INT) → false ✗
+
+  LANZAR EXCEPCIÓN:
+    "Argumento 2: se esperaba int, se obtuvo String"
+
+RESULTADO: ✗ ERROR SEMÁNTICO
+```
+
+---
+
+## Página 17: Manejo de Loops y Control de Flujo
+
+### **While loops:**
+
+```java
+while (condicion) {
+    // cuerpo
+    break;
+}
+```
+
+### **Implementación:**
+
+```java
+@Override
+public Type visitWhileStatementNode(WhileStatementNode node) {
+    // PASO 1: Verificar que la condición es booleana
+    Type condType = node.condition.accept(this);
+    if (!condType.isBoolean()) {
+        errors.add(new SemanticException(
+            "Condición de while debe ser boolean, se obtuvo " + condType, node
+        ));
+    }
+
+    // PASO 2: Marcar que estamos dentro de un loop
+    boolean wasInLoop = inLoop;
+    inLoop = true;
+
+    // PASO 3: Verificar el cuerpo
+    node.body.accept(this);
+
+    // PASO 4: Restaurar estado
+    inLoop = wasInLoop;
+
+    return null;
+}
+```
+
+### **Break y Continue:**
+
+```java
+@Override
+public Type visitBreakNode(BreakNode node) {
+    if (!inLoop) {
+        errors.add(new SemanticException(
+            "break debe estar dentro de un loop", node
+        ));
+    }
+    return null;
+}
+
+@Override
+public Type visitContinueNode(ContinueNode node) {
+    if (!inLoop) {
+        errors.add(new SemanticException(
+            "continue debe estar dentro de un loop", node
+        ));
+    }
+    return null;
+}
+```
+
+### **Ejemplo completo:**
+
+```java
+int i = 0;
+while (i < 10) {
+    if (i == 5) {
+        break;
+    }
+    i = i + 1;
+}
+```
+
+**Análisis:**
+
+```
+1. Declarar i = 0
+   └─> ✓ OK
+
+2. While (i < 10)
+   └─> Condición: i < 10
+       └─> Tipo de i: int
+       └─> Tipo de 10: int
+       └─> Operación: int < int → boolean ✓
+   └─> inLoop = true
+
+3. If (i == 5)
+   └─> Condición: i == 5
+       └─> Tipo: boolean ✓
+
+4. Break
+   └─> Verificar: inLoop → true ✓
+   └─> OK
+
+5. i = i + 1
+   └─> Tipo de i: int
+   └─> Tipo de (i + 1): int
+   └─> ✓ OK
+
+6. Salir del while
+   └─> inLoop = false
+
+RESULTADO: ✓ Programa correcto
+```
+
+---
+
+## Página 18: Testing del Analizador Semántico
+
+### **Estructura de tests:**
+
+```java
+class SemanticAnalyzerTest {
+    private SemanticAnalyzer analyzer;
+    private Parser parser;
+
+    @BeforeEach
+    void setUp() {
+        analyzer = new SemanticAnalyzer();
+        parser = new Parser();
+    }
+
+    // ━━━ TESTS DE CASOS VÁLIDOS ━━━
+
+    @Test
+    void testValidDeclaration() {
+        String code = "int x = 5;";
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        // Verificar sin errores
+        assertTrue(analyzer.getErrors().isEmpty());
+        
+        // Verificar tabla de símbolos
+        Symbol symbol = analyzer.getSymbolTable().lookup("x");
+        assertNotNull(symbol);
+        assertEquals(Type.INT, symbol.type);
+    }
+
+    @Test
+    void testValidFunctionDeclaration() {
+        String code = """
+            int suma(int a, int b) {
+                return a + b;
+            }
+        """;
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertTrue(analyzer.getErrors().isEmpty());
+        Symbol suma = analyzer.getSymbolTable().lookup("suma");
+        assertNotNull(suma);
+        assertTrue(suma.type instanceof FunctionType);
+    }
+
+    // ━━━ TESTS DE ERRORES ━━━
+
+    @Test
+    void testUndeclaredVariable() {
+        String code = "x = 5;"; // x no declarada
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertEquals(1, analyzer.getErrors().size());
+        SemanticException error = analyzer.getErrors().get(0);
+        assertTrue(error.getMessage().contains("no declarada"));
+    }
+
+    @Test
+    void testDuplicateDeclaration() {
+        String code = """
+            int x = 5;
+            int x = 10;
+        """;
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertEquals(1, analyzer.getErrors().size());
+        assertTrue(analyzer.getErrors().get(0).getMessage().contains("ya declarada"));
+    }
+
+    @Test
+    void testTypeIncompatibility() {
+        String code = """
+            int x = 5;
+            x = "hello";
+        """;
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertEquals(1, analyzer.getErrors().size());
+        SemanticException error = analyzer.getErrors().get(0);
+        assertTrue(error.getMessage().contains("tipos"));
+        assertEquals(2, error.lineNumber);
+    }
+
+    @Test
+    void testFunctionCallWrongArgCount() {
+        String code = """
+            int suma(int a, int b) {
+                return a + b;
+            }
+            int x = suma(5);
+        """;
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertEquals(1, analyzer.getErrors().size());
+        assertTrue(analyzer.getErrors().get(0).getMessage().contains("argumentos"));
+    }
+
+    @Test
+    void testBreakOutsideLoop() {
+        String code = """
+            if (true) {
+                break;
+            }
+        """;
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertEquals(1, analyzer.getErrors().size());
+        assertTrue(analyzer.getErrors().get(0).getMessage().contains("loop"));
+    }
+
+    // ━━━ TESTS DE SCOPING ━━━
+
+    @Test
+    void testScopingRules() {
+        String code = """
+            int x = 10;
+            {
+                int x = 20; // shadowing válido
+                int y = x;  // debe usar x = 20
+            }
+            int z = y; // ERROR: y no existe aquí
+        """;
+        ProgramNode ast = parser.parse(code);
+
+        analyzer.analyze(ast);
+
+        assertEquals(1, analyzer.getErrors().size());
+        assertTrue(analyzer.getErrors().get(0).getMessage().contains("y"));
+    }
+
+    // ━━━ TEST COMPLETO ━━━
+
+    @Test
+    void testCompleteProgram() {
+        String code = """
+            int factorial(int n) {
+                if (n <= 1) {
+                    return 1;
+                }
+                return n * factorial(n - 1);
+            }
+
+            int main() {
+                int result = factorial(5);
+                return result;
+            }
+        """;
+
+        ProgramNode ast = parser.parse(code);
+        analyzer.analyze(ast);
+
+        assertTrue(analyzer.getErrors().isEmpty());
+        assertNotNull(analyzer.getSymbolTable().lookup("factorial"));
+        assertNotNull(analyzer.getSymbolTable().lookup("main"));
+    }
+}
+```
+
+---
+
+## Página 19: Integración con el Compilador Completo
+
+### **Pipeline del compilador:**
+
+```java
+public class Compiler {
+    private Lexer lexer;
+    private Parser parser;
+    private SemanticAnalyzer semanticAnalyzer;
+    private CodeGenerator codeGenerator;
+
+    public CompilationResult compile(String sourceCode) {
+        CompilationResult result = new CompilationResult();
+
+        try {
+            // ━━━ FASE 1: Análisis Léxico ━━━
+            System.out.println("=== FASE 1: Análisis Léxico ===");
+            List<Token> tokens = lexer.tokenize(sourceCode);
+            result.tokens = tokens;
+            System.out.println("✓ " + tokens.size() + " tokens generados");
+
+            // ━━━ FASE 2: Análisis Sintáctico ━━━
+            System.out.println("\n=== FASE 2: Análisis Sintáctico ===");
+            ProgramNode ast = parser.parse(tokens);
+            result.ast = ast;
+            System.out.println("✓ AST construido exitosamente");
+
+            // ━━━ FASE 3: Análisis Semántico ━━━
+            System.out.println("\n=== FASE 3: Análisis Semántico ===");
+            semanticAnalyzer.analyze(ast);
+
+            if (!semanticAnalyzer.getErrors().isEmpty()) {
+                System.out.println("✗ Errores semánticos encontrados:");
+                for (SemanticException error : semanticAnalyzer.getErrors()) {
+                    System.out.println("  " + error);
+                }
+                result.errors = semanticAnalyzer.getErrors();
+                result.success = false;
+                return result;
+            }
+
+            result.symbolTable = semanticAnalyzer.getSymbolTable();
+            System.out.println("✓ Verificación semántica completada");
+
+            // ━━━ FASE 4: Generación de Código ━━━
+            System.out.println("\n=== FASE 4: Generación de Código ===");
+            String code = codeGenerator.generate(ast, result.symbolTable);
+            result.generatedCode = code;
+            System.out.println("✓ Código generado exitosamente");
+
+            result.success = true;
+
+        } catch (LexicalException e) {
+            System.err.println("❌ Error léxico: " + e.getMessage());
+            result.success = false;
+        } catch (ParseException e) {
+            System.err.println("❌ Error sintáctico: " + e.getMessage());
+            result.success = false;
+        } catch (Exception e) {
+            System.err.println("❌ Error inesperado: " + e.getMessage());
+            result.success = false;
+        }
+
+        return result;
+    }
+}
+
+class CompilationResult {
+    boolean success;
+    List<Token> tokens;
+    ProgramNode ast;
+    SymbolTable symbolTable;
+    List<SemanticException> errors;
+    String generatedCode;
+}
+```
+
+### **Ejemplo de uso:**
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String sourceCode = """
+            int x = 5;
+            int y = 10;
+            int suma = x + y;
+
+            if (suma > 10) {
+                suma = suma * 2;
+            }
+        """;
+
+        Compiler compiler = new Compiler();
+        CompilationResult result = compiler.compile(sourceCode);
+
+        if (result.success) {
+            System.out.println("\n✓ Compilación exitosa!");
+            System.out.println("\nCódigo generado:");
+            System.out.println(result.generatedCode);
+        } else {
+            System.out.println("\n✗ Compilación fallida");
+        }
+    }
+}
+```
+
+**Salida:**
+
+```
+=== FASE 1: Análisis Léxico ===
+✓ 27 tokens generados
+
+=== FASE 2: Análisis Sintáctico ===
+✓ AST construido exitosamente
+
+=== FASE 3: Análisis Semántico ===
+✓ Verificación semántica completada
+
+=== FASE 4: Generación de Código ===
+✓ Código generado exitosamente
+
+✓ Compilación exitosa!
+
+Código generado:
+    MOV R1, 5
+    MOV R2, 10
+    ADD R3, R1, R2
+    CMP R3, 10
+    JLE L1
+    MUL R3, R3, 2
+L1: ...
+```
+
+---
+
+## Página 20: Herramientas de Debugging - Visualización
+
+### **Visualizador de Tabla de Símbolos:**
+
+```java
+class SymbolTablePrinter {
+    public void print(SymbolTable table) {
+        System.out.println("\n═══════════════════════════════");
+        System.out.println("     TABLA DE SÍMBOLOS");
+        System.out.println("═══════════════════════════════");
+        print(table, 0);
+    }
+
+    private void print(SymbolTable table, int depth) {
+        String indent = "  ".repeat(depth);
+
+        System.out.println(indent + "┌─ Scope nivel " + depth);
+        System.out.println(indent + "│");
+
+        for (Symbol symbol : table.getSymbols()) {
+            System.out.printf(indent + "│  %-15s : %-10s (línea %d)%n",
+                symbol.name,
+                symbol.type.name,
+                symbol.lineNumber
+            );
+        }
+
+        // Scopes hijos
+        for (SymbolTable child : table.getChildren()) {
+            print(child, depth + 1);
+        }
+
+        System.out.println(indent + "└─");
+    }
+}
+```
+
+**Salida:**
+
+```
+═══════════════════════════════
+     TABLA DE SÍMBOLOS
+═══════════════════════════════
+┌─ Scope nivel 0 (Global)
+│
+│  x               : int        (línea 1)
+│  y               : int        (línea 2)
+│  suma            : (int,int)->int  (línea 4)
+│
+  ┌─ Scope nivel 1 (Función suma)
+  │
+  │  a             : int        (línea 4)
+  │  b             : int        (línea 4)
+  └─
+└─
+```
+
+### **Visualizador de AST Anotado:**
+
+```java
+class AnnotatedASTPrinter implements ASTVisitor<Void> {
+    private int indent = 0;
+
+    public void print(ASTNode node) {
+        node.accept(this);
+    }
+
+    @Override
+    public Void visitProgramNode(ProgramNode node) {
+        println("ProgramNode");
+        indent++;
+        for (StatementNode stmt : node.statements) {
+            stmt.accept(this);
+        }
+        indent--;
+        return null;
+    }
+
+    @Override
+    public Void visitDeclarationNode(DeclarationNode node) {
+        println("DeclarationNode: " + node.name + " [type=" + node.type + "]");
+        if (node.initializer != null) {
+            indent++;
+            node.initializer.accept(this);
+            indent--;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitBinaryOpNode(BinaryOpNode node) {
+        println("BinaryOp: " + node.operator + " [type=" + node.type + "]");
+        indent++;
+        node.left.accept(this);
+        node.right.accept(this);
+        indent--;
+        return null;
+    }
+
+    @Override
+    public Void visitIdentifierNode(IdentifierNode node) {
+        println("Identifier: " + node.name +
+               " [type=" + node.type +
+               ", resolvedTo=" + node.resolvedSymbol.name + "]");
+        return null;
+    }
+
+    private void println(String text) {
+        System.out.println("  ".repeat(indent) + text);
+    }
+}
+```
+
+**Salida:**
+
+```
+ProgramNode
+  DeclarationNode: x [type=int]
+    NumberNode: 5 [type=int]
+  DeclarationNode: y [type=int]
+    BinaryOp: + [type=int]
+      Identifier: x [type=int, resolvedTo=x]
+      NumberNode: 10 [type=int]
+```
+
+---
+
+## Página 21: Optimizaciones Semánticas
+
+### **Constant Folding:**
+
+```java
+class ConstantFoldingOptimizer implements ASTVisitor<ExpressionNode> {
+    @Override
+    public ExpressionNode visitBinaryOpNode(BinaryOpNode node) {
+        // Optimizar operandos primero
+        ExpressionNode left = node.left.accept(this);
+        ExpressionNode right = node.right.accept(this);
+
+        // Si ambos son constantes, evaluar en compilación
+        if (left instanceof NumberNode && right instanceof NumberNode) {
+            NumberNode leftNum = (NumberNode) left;
+            NumberNode rightNum = (NumberNode) right;
+
+            double result = switch (node.operator) {
+                case PLUS -> leftNum.value + rightNum.value;
+                case MINUS -> leftNum.value - rightNum.value;
+                case MULTIPLY -> leftNum.value * rightNum.value;
+                case DIVIDE -> leftNum.value / rightNum.value;
+                default -> throw new IllegalStateException();
+            };
+
+            return new NumberNode(result);
+        }
+
+        return new BinaryOpNode(left, node.operator, right);
+    }
+}
+```
+
+**Ejemplo:**
+
+```
+Antes:  x = 2 + 3 * 4;
+Después: x = 2 + 12;  → x = 14;
+```
+
+### **Dead Code Elimination:**
+
+```java
+class DeadCodeEliminator implements ASTVisitor<StatementNode> {
+    @Override
+    public StatementNode visitIfStatementNode(IfStatementNode node) {
+        if (node.condition instanceof BooleanNode) {
+            BooleanNode cond = (BooleanNode) node.condition;
+
+            if (cond.value) {
+                return node.thenBranch;  // Solo mantener then
+            } else {
+                return node.elseBranch;  // Solo mantener else
+            }
+        }
+        return node;
+    }
+}
+```
+
+**Ejemplo:**
+
+```
+Antes:  if (true) { x = 5; } else { y = 10; }
+Después: x = 5;
+```
+
+---
+
+## Página 22: Resumen y Conclusiones
+
+### **🎯 Lo que hemos aprendido:**
+
+1. **Arquitectura del Analizador Semántico**
+   - Componentes: SymbolTable, TypeChecker, ErrorHandler
+   - Patrón Visitor para recorrer el AST
+   - Separación de responsabilidades
+
+2. **Tabla de Símbolos**
+   - Estructura de datos fundamental
+   - Gestión de scopes anidados
+   - Operaciones: insert, lookup, existsInCurrentScope
+
+3. **Scopes y Shadowing**
+   - Reglas de visibilidad
+   - Búsqueda recursiva en scopes padre
+   - Shadowing válido vs redeclaración inválida
+
+4. **Sistema de Tipos**
+   - Jerarquía de tipos (primitivos, arrays, funciones)
+   - Verificación de compatibilidad
+   - Promoción implícita vs cast explícito
+
+5. **Errores Semánticos**
+   - Catálogo completo de errores
+   - Mensajes descriptivos con línea y columna
+   - Manejo de múltiples errores
+
+6. **Patrón Visitor**
+   - Diseño elegante para operaciones sobre AST
+   - Fácil agregar nuevas operaciones
+   - Reutilización del AST
+
+### **💡 Conceptos clave:**
+
+```
+✓ Sintaxis correcta ≠ Semántica correcta
+  - El análisis sintáctico verifica la FORMA
+  - El análisis semántico verifica el SIGNIFICADO
+
+✓ La tabla de símbolos es el "cerebro" del compilador
+  - Almacena TODO sobre identificadores
+  - Permite verificar tipos y scopes
+
+✓ Scopes anidados requieren búsqueda recursiva
+  - Buscar desde scope actual hacia scopes padre
+  - Variables de scope interno "sombrea" a las externas
+
+✓ El patrón Visitor separa estructura de operaciones
+  - AST no cambia
+  - Operaciones se agregan como nuevos Visitors
+```
+
+### **🚀 Diferencias clave:**
+
+| Aspecto | Sintáctico | Semántico |
+|---------|-----------|-----------|
+| **Entrada** | Tokens | AST |
+| **Salida** | AST | AST anotado + Tabla |
+| **Verifica** | Gramática | Tipos, scopes, contexto |
+| **Ejemplo Error** | `if x > 0)` | `int x = "hello"` |
+
+### **🛠️ Habilidades desarrolladas:**
+
+- ✓ Implementar tabla de símbolos con HashMap
+- ✓ Diseñar sistema de tipos robusto
+- ✓ Usar patrón Visitor eficientemente
+- ✓ Manejar scopes anidados correctamente
+- ✓ Detectar y reportar errores semánticos
+- ✓ Integrar análisis en pipeline completo
+
+### **📚 Para profundizar:**
+
+- "Compilers: Principles, Techniques, and Tools" (Dragon Book)
+- "Modern Compiler Implementation in Java" (Tiger Book)
+- "Engineering a Compiler" (Cooper & Torczon)
+- Documentación de ANTLR y herramientas similares
+
+### **🔜 Próximos pasos:**
+
+1. **Generación de Código Intermedio**
+   - Transformar AST a código de 3 direcciones
+   - Optimizaciones de código intermedio
+
+2. **Optimización**
+   - Constant folding
+   - Dead code elimination
+   - Common subexpression elimination
+
+3. **Generación de Código Final**
+   - Asignación de registros
+   - Selección de instrucciones
+   - Código máquina o bytecode
+
+**¡El análisis semántico es donde el compilador realmente "entiende" tu código!** 🧠✨
+
+---
+
+## Página 23: Ejercicios Prácticos y Autoevaluación
+
+### **Ejercicio 1: Análisis Básico**
+
+¿Qué errores semánticos tiene este código?
+
+```java
+int x = 5;
+int x = 10;
+y = x + 5;
+int z = x + "hola";
+```
+
+**Respuesta:**
+```
+Línea 2: Variable 'x' ya declarada en línea 1
+Línea 3: Variable 'y' no declarada
+Línea 4: Operador '+' incompatible: int + String
+```
+
+### **Ejercicio 2: Scoping**
+
+¿Qué imprime este código?
+
+```java
+int x = 10;
+void foo() {
+    int x = 20;
+    System.out.println(x);
+}
+foo();
+System.out.println(x);
+```
+
+**Respuesta:**
+```
+20  (x local de foo)
+10  (x global)
+```
+
+### **Ejercicio 3: Funciones**
+
+¿Qué errores hay?
+
+```java
+int suma(int a, int b) {
+    return a + b;
+}
+int x = suma(5);
+int y = suma(5, 10, 15);
+```
+
+**Respuesta:**
+```
+Línea 4: suma() espera 2 argumentos, se recibieron 1
+Línea 5: suma() espera 2 argumentos, se recibieron 3
+```
+
+### **Ejercicio 4: Diseño**
+
+Implementa un método `visitArrayAccessNode` que verifique:
+1. Que el array existe
+2. Que es realmente un array
+3. Que el índice es int
+
+**Solución:**
+
+```java
+@Override
+public Type visitArrayAccessNode(ArrayAccessNode node) {
+    // 1. Verificar tipo del array
+    Type arrayType = node.array.accept(this);
+
+    // 2. Verificar que es un array
+    if (!(arrayType instanceof ArrayType)) {
+        errors.add(new SemanticException(
+            "No se puede indexar tipo " + arrayType, node
+        ));
+        return Type.ERROR;
+    }
+
+    // 3. Verificar que el índice es entero
+    Type indexType = node.index.accept(this);
+    if (!indexType.isInt()) {
+        errors.add(new SemanticException(
+            "Índice debe ser int, se obtuvo " + indexType, node
+        ));
+    }
+
+    // 4. Retornar tipo de los elementos
+    return ((ArrayType) arrayType).elementType;
+}
+```
+
+### **Autoevaluación:**
+
+```
+□ Entiendo la diferencia entre análisis sintáctico y semántico
+□ Puedo explicar cómo funciona la tabla de símbolos
+□ Comprendo las reglas de scoping y shadowing
+□ Sé cómo funciona el patrón Visitor
+□ Puedo implementar verificación de tipos
+□ Entiendo promoción implícita vs cast explícito
+□ Puedo detectar y reportar errores semánticos
+□ Sé integrar el analizador en un compilador completo
+
+Si marcaste todas: ¡Felicidades! Dominas el análisis semántico ✓
+Si te faltan algunas: Revisa las páginas correspondientes
+```
+
+### **Proyecto Final Sugerido:**
+
+Implementa un analizador semántico completo para un lenguaje simple con:
+- Variables (int, double, boolean)
+- Funciones con parámetros
+- Estructuras de control (if, while)
+- Arrays
+- Scopes anidados
+
+**Entregables:**
+1. Código del analizador
+2. Suite de tests (mínimo 20 casos)
+3. Documentación de errores detectados
+4. Ejemplos de uso
+
+---
+
+**FIN DE LA PRESENTACIÓN**
+
+¡Gracias por estudiar el Analizador Semántico!
+
+Para más información, consulta:
+- Documentación del curso
+- Repositorio de ejemplos
+- Foros de discusión
+
+**Universidad EAM - 2025**
+**Teoría de Lenguajes Formales y Compiladores**
+

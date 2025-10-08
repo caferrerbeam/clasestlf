@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Índice de Contenidos</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .info {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .slides-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .slide-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
+        .slide-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-number {
+            font-size: 0.9rem;
+            color: #FFD700;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide-title {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            color: #FFD700;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .start-button {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.3);
+            border: 2px solid #FFD700;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin: 2rem auto;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .start-button:hover {
+            background: rgba(255, 215, 0, 0.5);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-btn">← Volver al inicio</a>
+
+    <div class="container">
+        <div class="header">
+            <div class="icon">🧠</div>
+            <h1>Análisis Semántico</h1>
+            <p class="subtitle">Dando Significado al Código</p>
+            <p class="info">23 slides • 75-90 minutos • Teoría de Lenguajes Formales y Compiladores</p>
+        </div>
+
+        <div class="button-container">
+            <a href="slide01.html" class="start-button">▶ Comenzar Presentación</a>
+        </div>
+
+        <h2 class="section-header">📋 Contenido del Curso</h2>
+
+        <h3 class="section-header">Introducción y Fundamentos</h3>
+        <div class="slides-grid">
+            <a href="slide01.html" class="slide-card">
+                <div class="slide-number">Slide 01</div>
+                <div class="slide-title">Portada - Analizador Semántico</div>
+            </a>
+            <a href="slide02.html" class="slide-card">
+                <div class="slide-number">Slide 02</div>
+                <div class="slide-title">Arquitectura del Compilador</div>
+            </a>
+            <a href="slide03.html" class="slide-card">
+                <div class="slide-number">Slide 03</div>
+                <div class="slide-title">¿Qué Hace el Analizador Semántico?</div>
+            </a>
+            <a href="slide04.html" class="slide-card">
+                <div class="slide-number">Slide 04</div>
+                <div class="slide-title">Sintáctico vs Semántico</div>
+            </a>
+        </div>
+
+        <h3 class="section-header">Tabla de Símbolos y Scoping</h3>
+        <div class="slides-grid">
+            <a href="slide05.html" class="slide-card">
+                <div class="slide-number">Slide 05</div>
+                <div class="slide-title">Tabla de Símbolos - Conceptos</div>
+            </a>
+            <a href="slide06.html" class="slide-card">
+                <div class="slide-number">Slide 06</div>
+                <div class="slide-title">Implementación Tabla de Símbolos</div>
+            </a>
+            <a href="slide07.html" class="slide-card">
+                <div class="slide-number">Slide 07</div>
+                <div class="slide-title">Scopes y Contextos</div>
+            </a>
+            <a href="slide08.html" class="slide-card">
+                <div class="slide-number">Slide 08</div>
+                <div class="slide-title">Scopes Anidados y Shadowing</div>
+            </a>
+        </div>
+
+        <h3 class="section-header">Sistema de Tipos</h3>
+        <div class="slides-grid">
+            <a href="slide09.html" class="slide-card">
+                <div class="slide-number">Slide 09</div>
+                <div class="slide-title">Sistema de Tipos</div>
+            </a>
+            <a href="slide10.html" class="slide-card">
+                <div class="slide-number">Slide 10</div>
+                <div class="slide-title">Arquitectura Completa del Analizador</div>
+            </a>
+            <a href="slide11.html" class="slide-card">
+                <div class="slide-number">Slide 11</div>
+                <div class="slide-title">Verificación de Tipos</div>
+            </a>
+            <a href="slide12.html" class="slide-card">
+                <div class="slide-number">Slide 12</div>
+                <div class="slide-title">Coerción y Promoción de Tipos</div>
+            </a>
+        </div>
+
+        <h3 class="section-header">Patrones y Errores</h3>
+        <div class="slides-grid">
+            <a href="slide13.html" class="slide-card">
+                <div class="slide-number">Slide 13</div>
+                <div class="slide-title">Errores Semánticos Comunes</div>
+            </a>
+            <a href="slide14.html" class="slide-card">
+                <div class="slide-number">Slide 14</div>
+                <div class="slide-title">Patrón Visitor</div>
+            </a>
+        </div>
+
+        <h3 class="section-header">Ejemplos Prácticos</h3>
+        <div class="slides-grid">
+            <a href="slide15.html" class="slide-card">
+                <div class="slide-number">Slide 15</div>
+                <div class="slide-title">Ejemplo Completo Paso a Paso</div>
+            </a>
+            <a href="slide16.html" class="slide-card">
+                <div class="slide-number">Slide 16</div>
+                <div class="slide-title">Manejo de Funciones</div>
+            </a>
+            <a href="slide17.html" class="slide-card">
+                <div class="slide-number">Slide 17</div>
+                <div class="slide-title">Loops y Control de Flujo</div>
+            </a>
+        </div>
+
+        <h3 class="section-header">Testing e Integración</h3>
+        <div class="slides-grid">
+            <a href="slide18.html" class="slide-card">
+                <div class="slide-number">Slide 18</div>
+                <div class="slide-title">Testing del Analizador Semántico</div>
+            </a>
+            <a href="slide19.html" class="slide-card">
+                <div class="slide-number">Slide 19</div>
+                <div class="slide-title">Integración con el Compilador</div>
+            </a>
+            <a href="slide20.html" class="slide-card">
+                <div class="slide-number">Slide 20</div>
+                <div class="slide-title">Herramientas de Debugging</div>
+            </a>
+        </div>
+
+        <h3 class="section-header">Optimizaciones y Conclusiones</h3>
+        <div class="slides-grid">
+            <a href="slide21.html" class="slide-card">
+                <div class="slide-number">Slide 21</div>
+                <div class="slide-title">Optimizaciones Semánticas</div>
+            </a>
+            <a href="slide22.html" class="slide-card">
+                <div class="slide-number">Slide 22</div>
+                <div class="slide-title">Resumen y Conclusiones</div>
+            </a>
+            <a href="slide23.html" class="slide-card">
+                <div class="slide-number">Slide 23</div>
+                <div class="slide-title">Ejercicios Prácticos y Autoevaluación</div>
+            </a>
+        </div>
+
+        <div class="button-container" style="margin-top: 3rem;">
+            <a href="slide01.html" class="start-button">▶ Comenzar Presentación</a>
+        </div>
+    </div>
+
+    <script>
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.location.href = 'slide01.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

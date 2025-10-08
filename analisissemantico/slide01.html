@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Semántico - Portada</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .subtitle {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .highlight {
+            font-size: 1.3rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .icon-container {
+            font-size: 5rem;
+            margin: 2rem 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .course-info {
+            margin-top: 3rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .course-info p {
+            margin: 0.5rem 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.5rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon-container">
+            🧠
+        </div>
+
+        <h1>Analizador Semántico</h1>
+        <p class="subtitle">Dando Significado al Código</p>
+
+        <div class="highlight">
+            <p><strong>De Árboles Sintácticos a Código con Sentido</strong></p>
+            <p style="margin-top: 1rem; font-size: 1.1rem;">
+                El análisis semántico es el "detector de sentido común" del compilador
+            </p>
+        </div>
+
+        <div style="margin: 2rem 0;">
+            <span class="badge">✓ Verificación de Tipos</span>
+            <span class="badge">✓ Tabla de Símbolos</span>
+            <span class="badge">✓ Gestión de Scopes</span>
+            <span class="badge">✓ Detección de Errores</span>
+        </div>
+
+        <div class="course-info">
+            <p><strong>Teoría de Lenguajes Formales y Compiladores</strong></p>
+            <p>Universidad EAM - 2025</p>
+            <p style="margin-top: 1rem; opacity: 0.7;">23 slides • 75-90 minutos</p>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="../index.html" class="nav-btn">⌂ Inicio</a>
+        <a href="slide02.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') {
+                window.location.href = 'slide02.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

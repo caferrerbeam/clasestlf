@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Sistema de Tipos - Fundamentos y Jerarquía</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 10 de 23</div>
+
+    <div class="container">
+        <h1>Sistema de Tipos - Fundamentos y Jerarquía</h1>
+        <div class="content">
+            <h3>¿Qué es un Tipo?</h3>
+<p>Un <strong>tipo</strong> es un contrato que define:</p>
+<ol>
+<li><strong>Qué valores puede tomar</strong> una variable</li>
+<li><strong>Qué operaciones</strong> se pueden hacer con esos valores</li>
+</ol>
+<p><strong>Analogía:</strong> Los tipos son como categorías de objetos en el mundo real:</p>
+<ul>
+<li><strong>Números (int):</strong> Puedes sumar, restar, multiplicar</li>
+<li><strong>Texto (String):</strong> Puedes concatenar, buscar subcadenas</li>
+<li><strong>Booleanos (boolean):</strong> Puedes hacer AND, OR, NOT</li>
+</ul>
+<p>Intentar sumar un número con un texto no tiene sentido, igual que intentar conducir un libro no tiene sentido en el mundo real.</p>
+<h3>Jerarquía de tipos detallada:</h3>
+<h4>Clase base: Type</h4>
+<div class="code-block">abstract <span class="keyword">class</span> <span class="class">Type</span> {
+    <span class="keyword">String</span> name;  <span class="comment">// "int", "double", "String", etc.</span>
+
+    <span class="comment">// Método abstracto: cada tipo implementa su lógica</span>
+    abstract <span class="keyword">boolean</span> isCompatible(<span class="class">Type</span> other);
+
+    <span class="comment">// Métodos de utilidad</span>
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isNumeric() {
+        <span class="keyword">return</span> <span class="keyword">this</span> instanceof IntType ||
+               <span class="keyword">this</span> instanceof DoubleType ||
+               <span class="keyword">this</span> instanceof FloatType ||
+               <span class="keyword">this</span> instanceof LongType;
+    }
+
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isInt() {
+        <span class="keyword">return</span> <span class="keyword">this</span> instanceof IntType;
+    }
+
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isDouble() {
+        <span class="keyword">return</span> <span class="keyword">this</span> instanceof DoubleType;
+    }
+
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isBoolean() {
+        <span class="keyword">return</span> <span class="keyword">this</span> instanceof BooleanType;
+    }
+
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isString() {
+        <span class="keyword">return</span> <span class="keyword">this</span> instanceof StringType;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">String</span> toString() {
+        <span class="keyword">return</span> name;
+    }
+}
+</div>
+<p><strong>Explicación:</strong></p>
+<ul>
+<li><code>isCompatible()</code>: Determina si dos tipos pueden usarse juntos</li>
+<li><code>isNumeric()</code>: Verifica si es un tipo numérico (para operaciones +, -, *, /)</li>
+<li>Métodos <code>isX()</code>: Atajos para verificar tipos específicos</li>
+</ul>
+<h4>Tipos primitivos:</h4>
+<div class="code-block"><span class="keyword">class</span> PrimitiveType <span class="keyword">extends</span> <span class="class">Type</span> {
+    <span class="comment">// Tipos básicos del lenguaje</span>
+
+    <span class="keyword">public</span> PrimitiveType(<span class="keyword">String</span> name) {
+        <span class="keyword">this</span>.name = name;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isCompatible(<span class="class">Type</span> other) {
+        <span class="comment">// Tipos primitivos son compatibles si son exactamente iguales</span>
+        <span class="comment">// O si hay promoción implícita permitida</span>
+        <span class="keyword">if</span> (<span class="keyword">this</span>.equals(other)) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// int == int, double == double, etc.</span>
+        }
+
+        <span class="comment">// Promoción implícita (widening)</span>
+        <span class="keyword">if</span> (<span class="keyword">this</span>.isInt() &amp;&amp; other.isDouble()) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// int → double (OK)</span>
+        }
+
+        <span class="keyword">if</span> (<span class="keyword">this</span>.isChar() &amp;&amp; other.isInt()) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// char → int (OK)</span>
+        }
+
+        <span class="keyword">return</span> <span class="keyword">false</span>;  <span class="comment">// Otros casos: incompatible</span>
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">boolean</span> equals(Object obj) {
+        <span class="keyword">if</span> (!(obj instanceof PrimitiveType)) <span class="keyword">return</span> <span class="keyword">false</span>;
+        PrimitiveType other = (PrimitiveType) obj;
+        <span class="keyword">return</span> <span class="keyword">this</span>.name.equals(other.name);
+    }
+}
+
+<span class="comment">// Tipos específicos (para mayor claridad)</span>
+<span class="keyword">class</span> IntType <span class="keyword">extends</span> PrimitiveType {
+    <span class="keyword">public</span> IntType() { <span class="keyword">super</span>(<span class="string">"int"</span>); }
+}
+
+<span class="keyword">class</span> DoubleType <span class="keyword">extends</span> PrimitiveType {
+    <span class="keyword">public</span> DoubleType() { <span class="keyword">super</span>(<span class="string">"double"</span>); }
+}
+
+<span class="keyword">class</span> BooleanType <span class="keyword">extends</span> PrimitiveType {
+    <span class="keyword">public</span> BooleanType() { <span class="keyword">super</span>(<span class="string">"boolean"</span>); }
+}
+
+<span class="keyword">class</span> CharType <span class="keyword">extends</span> PrimitiveType {
+    <span class="keyword">public</span> CharType() { <span class="keyword">super</span>(<span class="string">"char"</span>); }
+}
+
+<span class="keyword">class</span> StringType <span class="keyword">extends</span> <span class="class">Type</span> {
+    <span class="keyword">public</span> StringType() { <span class="keyword">this</span>.name = <span class="string">"String"</span>; }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isCompatible(<span class="class">Type</span> other) {
+        <span class="keyword">return</span> other instanceof StringType;
+    }
+}
+</div>
+<p><strong>Ejemplo de uso:</strong></p>
+<div class="code-block"><span class="class">Type</span> intType = <span class="keyword">new</span> IntType();
+<span class="class">Type</span> doubleType = <span class="keyword">new</span> DoubleType();
+<span class="class">Type</span> stringType = <span class="keyword">new</span> StringType();
+
+<span class="comment">// Verificar compatibilidad</span>
+intType.isCompatible(intType);      <span class="comment">// true: int == int</span>
+intType.isCompatible(doubleType);   <span class="comment">// true: int → double (promoción)</span>
+doubleType.isCompatible(intType);   <span class="comment">// false: double ↛ int (pérdida)</span>
+intType.isCompatible(stringType);   <span class="comment">// false: int ↛ String (incompatible)</span>
+</div>
+<h4>Tipos compuestos: Arrays</h4>
+<div class="code-block"><span class="keyword">class</span> ArrayType <span class="keyword">extends</span> <span class="class">Type</span> {
+    <span class="class">Type</span> elementType;  <span class="comment">// Tipo de los elementos del array</span>
+    <span class="keyword">int</span> size;          <span class="comment">// Tamaño del array (-1 si es dinámico)</span>
+
+    <span class="keyword">public</span> ArrayType(<span class="class">Type</span> elementType, <span class="keyword">int</span> size) {
+        <span class="keyword">this</span>.elementType = elementType;
+        <span class="keyword">this</span>.size = size;
+        <span class="keyword">this</span>.name = elementType.name + <span class="string">"[]"</span>;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isCompatible(<span class="class">Type</span> other) {
+        <span class="keyword">if</span> (!(other instanceof ArrayType)) {
+            <span class="keyword">return</span> <span class="keyword">false</span>;  <span class="comment">// Solo compatible con otros arrays</span>
+        }
+
+        ArrayType otherArray = (ArrayType) other;
+
+        <span class="comment">// Los arrays son compatibles si sus elementos son compatibles</span>
+        <span class="keyword">return</span> <span class="keyword">this</span>.elementType.isCompatible(otherArray.elementType);
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">String</span> toString() {
+        <span class="keyword">return</span> elementType.toString() + <span class="string">"["</span> +
+               (size &gt;= <span class="number">0</span> ? size : <span class="string">""</span>) + <span class="string">"]"</span>;
+    }
+}
+</div>
+<p><strong>Ejemplo:</strong></p>
+<div class="code-block"><span class="comment">// int[] array de enteros</span>
+<span class="class">Type</span> intArray = <span class="keyword">new</span> ArrayType(<span class="keyword">new</span> IntType(), <span class="number">10</span>);
+
+<span class="comment">// double[] array de doubles</span>
+<span class="class">Type</span> doubleArray = <span class="keyword">new</span> ArrayType(<span class="keyword">new</span> DoubleType(), <span class="number">5</span>);
+
+<span class="comment">// Verificar compatibilidad</span>
+intArray.isCompatible(intArray);      <span class="comment">// true: int[] == int[]</span>
+intArray.isCompatible(doubleArray);   <span class="comment">// false: int[] != double[]</span>
+
+<span class="comment">// Acceso a elementos</span>
+<span class="comment">// int[] arr → arr[0] es int</span>
+((ArrayType) intArray).elementType;  <span class="comment">// IntType</span>
+</div>
+<h4>Tipos compuestos: Funciones</h4>
+<div class="code-block"><span class="keyword">class</span> FunctionType <span class="keyword">extends</span> <span class="class">Type</span> {
+    <span class="class">Type</span> returnType;              <span class="comment">// Tipo que retorna la función</span>
+    <span class="class">List</span>&lt;<span class="class">Type</span>&gt; parameterTypes;    <span class="comment">// Tipos de los parámetros</span>
+
+    <span class="keyword">public</span> FunctionType(<span class="class">Type</span> returnType, <span class="class">List</span>&lt;<span class="class">Type</span>&gt; parameterTypes) {
+        <span class="keyword">this</span>.returnType = returnType;
+        <span class="keyword">this</span>.parameterTypes = parameterTypes;
+        <span class="keyword">this</span>.name = buildSignature();
+    }
+
+    <span class="keyword">private</span> <span class="keyword">String</span> buildSignature() {
+        StringBuilder sb = <span class="keyword">new</span> StringBuilder();
+        sb.append(<span class="string">"("</span>);
+
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; parameterTypes.size(); i++) {
+            <span class="keyword">if</span> (i &gt; <span class="number">0</span>) sb.append(<span class="string">", "</span>);
+            sb.append(parameterTypes.get(i).name);
+        }
+
+        sb.append(<span class="string">") -&gt; "</span>);
+        sb.append(returnType.name);
+
+        <span class="keyword">return</span> sb.toString();
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">boolean</span> isCompatible(<span class="class">Type</span> other) {
+        <span class="keyword">if</span> (!(other instanceof FunctionType)) {
+            <span class="keyword">return</span> <span class="keyword">false</span>;
+        }
+
+        FunctionType otherFunc = (FunctionType) other;
+
+        <span class="comment">// Verificar tipo de retorno</span>
+        <span class="keyword">if</span> (!<span class="keyword">this</span>.returnType.isCompatible(otherFunc.returnType)) {
+            <span class="keyword">return</span> <span class="keyword">false</span>;
+        }
+
+        <span class="comment">// Verificar número de parámetros</span>
+        <span class="keyword">if</span> (<span class="keyword">this</span>.parameterTypes.size() != otherFunc.parameterTypes.size()) {
+            <span class="keyword">return</span> <span class="keyword">false</span>;
+        }
+
+        <span class="comment">// Verificar cada parámetro</span>
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; parameterTypes.size(); i++) {
+            <span class="keyword">if</span> (!<span class="keyword">this</span>.parameterTypes.get(i).isCompatible(
+                    otherFunc.parameterTypes.get(i))) {
+                <span class="keyword">return</span> <span class="keyword">false</span>;
+            }
+        }
+
+        <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// Todas las verificaciones pasaron</span>
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="keyword">String</span> toString() {
+        <span class="keyword">return</span> name;
+    }
+}
+</div>
+<p><strong>Ejemplo:</strong></p>
+<div class="code-block"><span class="comment">// int suma(int a, int b)</span>
+<span class="class">Type</span> sumaType = <span class="keyword">new</span> FunctionType(
+    <span class="keyword">new</span> IntType(),
+    Arrays.asList(<span class="keyword">new</span> IntType(), <span class="keyword">new</span> IntType())
+);
+<span class="comment">// Signatura: "(int, int) -&gt; int"</span>
+
+<span class="comment">// double promedio(double a, double b, double c)</span>
+<span class="class">Type</span> promedioType = <span class="keyword">new</span> FunctionType(
+    <span class="keyword">new</span> DoubleType(),
+    Arrays.asList(<span class="keyword">new</span> DoubleType(), <span class="keyword">new</span> DoubleType(), <span class="keyword">new</span> DoubleType())
+);
+<span class="comment">// Signatura: "(double, double, double) -&gt; double"</span>
+
+<span class="comment">// Verificar compatibilidad</span>
+sumaType.isCompatible(sumaType);       <span class="comment">// true</span>
+sumaType.isCompatible(promedioType);   <span class="comment">// false (diferentes signaturas)</span>
+</div>
+<h3>Tabla de compatibilidad de tipos:</h3>
+<pre><code class="language-">COMPATIBILIDAD DE ASIGNACIÓN (tipo_destino = tipo_origen)
+
+              int  double  boolean  char  String  int[]
+int           ✓    ✗       ✗        ✗     ✗       ✗
+double        ✓    ✓       ✗        ✗     ✗       ✗
+boolean       ✗    ✗       ✓        ✗     ✗       ✗
+char          ✗    ✗       ✗        ✓     ✗       ✗
+String        ✗    ✗       ✗        ✗     ✓       ✗
+int[]         ✗    ✗       ✗        ✗     ✗       ✓
+
+Leyenda:
+✓ = Compatible (permitido)
+✗ = Incompatible (error)
+
+Nota: int → double es compatible (promoción implícita)
+      double → int NO es compatible (requiere cast explícito)
+</code></pre>
+<h3>Ejemplos concretos de compatibilidad:</h3>
+<div class="code-block"><span class="comment">// ✓ COMPATIBLES</span>
+<span class="keyword">int</span> x = <span class="number">5</span>;           <span class="comment">// int = int</span>
+<span class="keyword">double</span> y = <span class="number">5</span>;        <span class="comment">// double = int (promoción)</span>
+<span class="keyword">double</span> z = <span class="number">3.14</span>;     <span class="comment">// double = double</span>
+<span class="keyword">boolean</span> b = <span class="keyword">true</span>;    <span class="comment">// boolean = boolean</span>
+
+<span class="comment">// ✗ INCOMPATIBLES</span>
+<span class="keyword">int</span> a = <span class="number">3.14</span>;        <span class="comment">// int = double (pérdida de precisión)</span>
+<span class="keyword">boolean</span> c = <span class="number">5</span>;       <span class="comment">// boolean = int (tipos diferentes)</span>
+<span class="keyword">String</span> s = <span class="number">42</span>;       <span class="comment">// String = int (tipos diferentes)</span>
+<span class="keyword">int</span>[] arr = <span class="number">5</span>;       <span class="comment">// int[] = int (tipos diferentes)</span>
+</div>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Cuáles de estas asignaciones son válidas?</p>
+<div class="code-block"><span class="keyword">int</span> a = <span class="number">10</span>;
+<span class="keyword">double</span> b = a;      <span class="comment">// ¿Válido?</span>
+<span class="keyword">int</span> c = b;         <span class="comment">// ¿Válido?</span>
+<span class="keyword">String</span> d = <span class="string">"hola"</span>;
+<span class="keyword">int</span> e = d;         <span class="comment">// ¿Válido?</span>
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">double b = a;  // ✓ VÁLIDO: int → double (promoción implícita)
+int c = b;     // ✗ INVÁLIDO: double → int (pérdida de precisión)
+int e = d;     // ✗ INVÁLIDO: String → int (tipos incompatibles)
+</code></pre>
+        </div>
+        <div class="mermaid">graph LR
+    A[Tipo int] --> B[Valores: -2147483648 a 2147483647]
+    A --> C[Operaciones: +, -, *, /, %]
+
+    D[Tipo boolean] --> E[Valores: true, false]
+    D --> F[Operaciones: &&, ||, !]
+
+    G[Tipo String] --> H[Valores: secuencias de caracteres]
+    G --> I[Operaciones: +, length, substring]</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide09.html" class="nav-btn">← Anterior</a>
+        <a href="slide11.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 10 > 1) {
+                window.location.href = 'slide09.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 10 < 23) {
+                window.location.href = 'slide11.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

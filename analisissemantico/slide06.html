@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Patrón Visitor - Recorriendo el AST de Forma Elegante</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 6 de 23</div>
+
+    <div class="container">
+        <h1>Patrón Visitor - Recorriendo el AST de Forma Elegante</h1>
+        <div class="content">
+            <h3>¿Qué es el patrón Visitor?</h3>
+<p>El patrón Visitor es una técnica para <strong>separar las operaciones de las estructuras de datos</strong> sobre las que operan.</p>
+<p><strong>Analogía del mundo real:</strong> Un inspector de edificios</p>
+<p>Imagina un edificio con diferentes tipos de habitaciones:</p>
+<ul>
+<li>🏠 Habitación → Cocina, Dormitorio, Baño, Sala</li>
+<li>👷 Inspector → Inspector de Seguridad, Inspector Eléctrico, Inspector Sanitario</li>
+</ul>
+<p><strong>Sin Visitor (MALO):</strong></p>
+<p>Cada habitación tiene que saber qué hacer con cada tipo de inspector:</p>
+<div class="code-block"><span class="keyword">class</span> Cocina {
+    <span class="keyword">void</span> inspeccionSeguridad() { ... }
+    <span class="keyword">void</span> inspeccionElectrica() { ... }
+    <span class="keyword">void</span> inspeccionSanitaria() { ... }
+    <span class="comment">// ¿Nuevo inspector? → Modificar TODAS las habitaciones ❌</span>
+}
+</div>
+<p><strong>Con Visitor (BUENO):</strong></p>
+<p>Las habitaciones solo dicen "acepto inspección", el inspector decide qué hacer:</p>
+<div class="code-block"><span class="keyword">class</span> Cocina {
+    <span class="keyword">void</span> aceptar(Inspector inspector) {
+        inspector.inspeccionarCocina(<span class="keyword">this</span>); <span class="comment">// Delegar al inspector</span>
+    }
+}
+</div>
+<h3>¿Por qué necesitamos Visitor en el análisis semántico?</h3>
+<p>En un compilador, el AST (Árbol de Sintaxis Abstracta) tiene <strong>muchos tipos de nodos</strong>:</p>
+<ul>
+<li><code>VariableNode</code>, <code>BinaryOpNode</code>, <code>FunctionNode</code>, <code>IfNode</code>, etc.</li>
+</ul>
+<p>Y necesitamos hacer <strong>múltiples operaciones</strong> sobre el AST:</p>
+<ul>
+<li>✅ Verificación de tipos</li>
+<li>✅ Verificación semántica</li>
+<li>✅ Generación de código</li>
+<li>✅ Optimización</li>
+<li>✅ Pretty printing</li>
+</ul>
+<p><strong>Problema sin Visitor:</strong></p>
+<div class="code-block"><span class="keyword">class</span> <span class="class">BinaryOpNode</span> {
+    <span class="keyword">void</span> typeCheck() { ... }           <span class="comment">// Operación 1</span>
+    <span class="keyword">void</span> generateCode() { ... }        <span class="comment">// Operación 2</span>
+    <span class="keyword">void</span> optimize() { ... }            <span class="comment">// Operación 3</span>
+    <span class="keyword">void</span> prettyPrint() { ... }         <span class="comment">// Operación 4</span>
+    <span class="comment">// ¿Nueva operación? → Modificar TODAS las clases de nodos ❌</span>
+}
+</div>
+<p>❌ <strong>Problemas:</strong></p>
+<ol>
+<li>Si agregamos una nueva operación, debemos modificar <strong>todas las clases de nodos</strong></li>
+<li>Mezcla responsabilidades: cada nodo tiene código de tipos, código de generación, etc.</li>
+<li>Difícil de mantener</li>
+</ol>
+<p><strong>Solución con Visitor:</strong></p>
+<div class="code-block"><span class="keyword">class</span> <span class="class">BinaryOpNode</span> {
+    &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="keyword">return</span> visitor.visitBinaryOp(<span class="keyword">this</span>);
+    }
+}
+
+<span class="comment">// Nueva operación = Nueva clase Visitor</span>
+<span class="keyword">class</span> TypeCheckVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="class">Type</span>&gt; { ... }
+<span class="keyword">class</span> CodeGenVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="keyword">String</span>&gt; { ... }
+<span class="keyword">class</span> OptimizerVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="class">ASTNode</span>&gt; { ... }
+</div>
+<p>✅ <strong>Ventajas:</strong></p>
+<ol>
+<li>Nueva operación = Solo crear nueva clase Visitor</li>
+<li>No modificamos las clases de nodos</li>
+<li>Cada operación está en su propia clase (separación de responsabilidades)</li>
+</ol>
+<h3>Cómo funciona el patrón Visitor: Paso a paso</h3>
+<h4>Paso 1: Definir la interfaz Visitor</h4>
+<div class="code-block"><span class="keyword">interface</span> ASTVisitor&lt;T&gt; {
+    T visitBinaryOp(<span class="class">BinaryOpNode</span> node);
+    T visitVariable(<span class="class">VariableNode</span> node);
+    T visitNumber(NumberNode node);
+    T visitFunction(<span class="class">FunctionNode</span> node);
+    <span class="comment">// Un método por cada tipo de nodo</span>
+}
+</div>
+<h4>Paso 2: Cada nodo tiene un método <code>accept()</code></h4>
+<div class="code-block"><span class="keyword">class</span> <span class="class">BinaryOpNode</span> <span class="keyword">implements</span> <span class="class">ASTNode</span> {
+    <span class="class">ASTNode</span> left;
+    <span class="class">ASTNode</span> right;
+    <span class="keyword">String</span> operator;
+
+    &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="keyword">return</span> visitor.visitBinaryOp(<span class="keyword">this</span>);
+    }
+}
+
+<span class="keyword">class</span> <span class="class">VariableNode</span> <span class="keyword">implements</span> <span class="class">ASTNode</span> {
+    <span class="keyword">String</span> name;
+
+    &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="keyword">return</span> visitor.visitVariable(<span class="keyword">this</span>);
+    }
+}
+</div>
+<h4>Paso 3: Implementar un Visitor concreto</h4>
+<div class="code-block"><span class="keyword">class</span> TypeCheckVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="class">Type</span>&gt; {
+    <span class="class">SymbolTable</span> symbolTable;
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitBinaryOp(<span class="class">BinaryOpNode</span> node) {
+        <span class="comment">// Verificar tipos de operandos</span>
+        <span class="class">Type</span> leftType = node.left.accept(<span class="keyword">this</span>);  <span class="comment">// Recursión: visitar hijo izquierdo</span>
+        <span class="class">Type</span> rightType = node.right.accept(<span class="keyword">this</span>); <span class="comment">// Recursión: visitar hijo derecho</span>
+
+        <span class="comment">// Verificar compatibilidad</span>
+        <span class="keyword">if</span> (!leftType.equals(rightType)) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(<span class="string">"Tipos incompatibles: "</span> + leftType + <span class="string">" y "</span> + rightType);
+        }
+
+        <span class="keyword">return</span> leftType; <span class="comment">// Tipo del resultado</span>
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitVariable(<span class="class">VariableNode</span> node) {
+        <span class="comment">// Buscar variable en tabla de símbolos</span>
+        <span class="class">Symbol</span> symbol = symbolTable.lookup(node.name);
+        <span class="keyword">if</span> (symbol == <span class="keyword">null</span>) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(<span class="string">"Variable no declarada: "</span> + node.name);
+        }
+        <span class="keyword">return</span> symbol.type;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitNumber(NumberNode node) {
+        <span class="keyword">return</span> <span class="class">Type</span>.INT; <span class="comment">// Los números son int</span>
+    }
+}
+</div>
+<h4>Paso 4: Usar el Visitor</h4>
+<div class="code-block"><span class="comment">// Construir AST: x + 5</span>
+<span class="class">ASTNode</span> ast = <span class="keyword">new</span> <span class="class">BinaryOpNode</span>(
+    <span class="keyword">new</span> <span class="class">VariableNode</span>(<span class="string">"x"</span>),  <span class="comment">// left</span>
+    <span class="keyword">new</span> NumberNode(<span class="number">5</span>),      <span class="comment">// right</span>
+    <span class="string">"+"</span>                     <span class="comment">// operator</span>
+);
+
+<span class="comment">// Verificar tipos</span>
+TypeCheckVisitor typeChecker = <span class="keyword">new</span> TypeCheckVisitor(symbolTable);
+<span class="class">Type</span> resultType = ast.accept(typeChecker);
+
+System.out.println(<span class="string">"Tipo del resultado: "</span> + resultType); <span class="comment">// Type.INT</span>
+</div>
+<h3>Diagrama de flujo: ¿Cómo interactúan los componentes?</h3>
+<h3>Ejemplo completo paso a paso</h3>
+<p><strong>Código fuente:</strong></p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">10</span>;
+<span class="keyword">int</span> y = x + <span class="number">5</span>;
+</div>
+<p><strong>AST:</strong></p>
+<pre><code class="language-">Program
+├── VariableDeclaration(x, 10)
+└── VariableDeclaration(y, x + 5)
+    └── BinaryOp(+)
+        ├── Variable("x")
+        └── Number(5)
+</code></pre>
+<p><strong>Ejecución del TypeCheckVisitor:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Paso</th>
+<th>Nodo visitado</th>
+<th>Acción</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>VariableDeclaration(x)</td>
+<td>Insertar x:int en tabla</td>
+<td>✓ OK</td>
+</tr>
+<tr>
+<td>2</td>
+<td>VariableDeclaration(y)</td>
+<td>Visitar expresión (x + 5)</td>
+<td>→ Paso 3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>BinaryOp(+)</td>
+<td>Verificar operandos</td>
+<td>→ Pasos 4 y 5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Variable("x")</td>
+<td>Buscar x en tabla → Type.INT</td>
+<td>Type.INT</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Number(5)</td>
+<td>Literal numérico</td>
+<td>Type.INT</td>
+</tr>
+<tr>
+<td>6</td>
+<td>BinaryOp(+)</td>
+<td>INT + INT = ✓ OK</td>
+<td>Type.INT</td>
+</tr>
+<tr>
+<td>7</td>
+<td>VariableDeclaration(y)</td>
+<td>Insertar y:int en tabla</td>
+<td>✓ OK</td>
+</tr>
+</tbody>
+</table>
+<h3>Ventajas del patrón Visitor</h3>
+<table>
+<thead>
+<tr>
+<th>Sin Visitor</th>
+<th>Con Visitor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modificar cada clase de nodo para nueva operación</td>
+<td>Solo crear nueva clase Visitor</td>
+</tr>
+<tr>
+<td>Código mezclado en nodos</td>
+<td>Operaciones separadas por Visitor</td>
+</tr>
+<tr>
+<td>Difícil agregar operaciones</td>
+<td>Fácil agregar operaciones</td>
+</tr>
+<tr>
+<td>Fácil agregar nuevos tipos de nodos</td>
+<td>Difícil agregar nuevos tipos de nodos</td>
+</tr>
+</tbody>
+</table>
+<h3>¿Cuándo usar Visitor?</h3>
+<p>✅ <strong>USA Visitor cuando:</strong></p>
+<ul>
+<li>Tienes una estructura de datos estable (tipos de nodos no cambian mucho)</li>
+<li>Necesitas agregar muchas operaciones sobre esa estructura</li>
+<li>Quieres separar las operaciones de las estructuras</li>
+</ul>
+<p>❌ <strong>NO uses Visitor cuando:</strong></p>
+<ul>
+<li>La estructura cambia constantemente (agregas nuevos tipos de nodos todo el tiempo)</li>
+<li>Solo tienes 1-2 operaciones</li>
+</ul>
+<h3>Resumen visual</h3>
+<pre><code class="language-">SIN VISITOR:
+┌─────────────────┐     ┌─────────────────┐
+│  BinaryOpNode   │     │  VariableNode   │
+├─────────────────┤     ├─────────────────┤
+│ typeCheck()     │     │ typeCheck()     │
+│ generateCode()  │     │ generateCode()  │
+│ optimize()      │     │ optimize()      │
+│ prettyPrint()   │     │ prettyPrint()   │
+└─────────────────┘     └─────────────────┘
+Nueva operación → Modificar AMBAS clases ❌
+
+CON VISITOR:
+┌─────────────────┐     ┌─────────────────┐
+│  BinaryOpNode   │     │  VariableNode   │
+├─────────────────┤     ├─────────────────┤
+│ accept(visitor) │     │ accept(visitor) │
+└─────────────────┘     └─────────────────┘
+          ↓                       ↓
+┌──────────────────────────────────────┐
+│         TypeCheckVisitor             │
+│  visitBinaryOp()   visitVariable()   │
+└──────────────────────────────────────┘
+Nueva operación → Solo crear nueva clase Visitor ✓
+</code></pre>
+<h3>Pregunta de comprensión</h3>
+<p>¿Qué hace este código?</p>
+<div class="code-block"><span class="keyword">class</span> CountNodesVisitor <span class="keyword">implements</span> ASTVisitor&lt;Integer&gt; {
+    <span class="keyword">public</span> Integer visitBinaryOp(<span class="class">BinaryOpNode</span> node) {
+        <span class="keyword">return</span> <span class="number">1</span> + node.left.accept(<span class="keyword">this</span>) + node.right.accept(<span class="keyword">this</span>);
+    }
+
+    <span class="keyword">public</span> Integer visitVariable(<span class="class">VariableNode</span> node) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+
+    <span class="keyword">public</span> Integer visitNumber(NumberNode node) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+}
+</div>
+<p><strong>Respuesta:</strong> Cuenta el número total de nodos en el AST recursivamente. Para cada nodo binario, cuenta 1 (él mismo) + nodos en subárbol izquierdo + nodos en subárbol derecho.</p>
+        </div>
+        <div class="mermaid">sequenceDiagram
+    participant Main
+    participant AST as BinaryOpNode
+    participant Left as VariableNode "x"
+    participant Right as NumberNode "5"
+    participant Visitor as TypeCheckVisitor
+    participant ST as SymbolTable
+
+    Main->>AST: ast.accept(typeChecker)
+    AST->>Visitor: visitBinaryOp(this)
+    Visitor->>Left: left.accept(this)
+    Left->>Visitor: visitVariable(this)
+    Visitor->>ST: lookup("x")
+    ST-->>Visitor: Symbol(x, Type.INT)
+    Visitor-->>Left: Type.INT
+    Left-->>AST: Type.INT
+    Visitor->>Right: right.accept(this)
+    Right->>Visitor: visitNumber(this)
+    Visitor-->>Right: Type.INT
+    Right-->>AST: Type.INT
+    Visitor->>Visitor: Verificar INT == INT ✓
+    AST-->>Main: Type.INT</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide05.html" class="nav-btn">← Anterior</a>
+        <a href="slide07.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 6 > 1) {
+                window.location.href = 'slide05.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 6 < 23) {
+                window.location.href = 'slide07.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

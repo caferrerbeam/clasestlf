@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Herramientas de Debugging - Visualización</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 21 de 23</div>
+
+    <div class="container">
+        <h1>Herramientas de Debugging - Visualización</h1>
+        <div class="content">
+            <h3>Visualizador de Tabla de Símbolos:</h3>
+<div class="code-block"><span class="keyword">class</span> SymbolTablePrinter {
+    <span class="keyword">public</span> <span class="keyword">void</span> print(<span class="class">SymbolTable</span> table) {
+        System.out.println(<span class="string">"\n═══════════════════════════════"</span>);
+        System.out.println(<span class="string">"     TABLA DE SÍMBOLOS"</span>);
+        System.out.println(<span class="string">"═══════════════════════════════"</span>);
+        print(table, <span class="number">0</span>);
+    }
+
+    <span class="keyword">private</span> <span class="keyword">void</span> print(<span class="class">SymbolTable</span> table, <span class="keyword">int</span> depth) {
+        <span class="keyword">String</span> indent = <span class="string">"  "</span>.repeat(depth);
+
+        System.out.println(indent + <span class="string">"┌─ Scope nivel "</span> + depth);
+        System.out.println(indent + <span class="string">"│"</span>);
+
+        <span class="keyword">for</span> (<span class="class">Symbol</span> symbol : table.getSymbols()) {
+            System.out.printf(indent + <span class="string">"│  %-15s : %-10s (línea %d)%n"</span>,
+                symbol.name,
+                symbol.type.name,
+                symbol.lineNumber
+            );
+        }
+
+        <span class="comment">// Scopes hijos</span>
+        <span class="keyword">for</span> (<span class="class">SymbolTable</span> child : table.getChildren()) {
+            print(child, depth + <span class="number">1</span>);
+        }
+
+        System.out.println(indent + <span class="string">"└─"</span>);
+    }
+}
+</div>
+<p><strong>Salida:</strong></p>
+<pre><code class="language-">═══════════════════════════════
+     TABLA DE SÍMBOLOS
+═══════════════════════════════
+┌─ Scope nivel 0 (Global)
+│
+│  x               : int        (línea 1)
+│  y               : int        (línea 2)
+│  suma            : (int,int)-&gt;int  (línea 4)
+│
+  ┌─ Scope nivel 1 (Función suma)
+  │
+  │  a             : int        (línea 4)
+  │  b             : int        (línea 4)
+  └─
+└─
+</code></pre>
+<h3>Visualizador de AST Anotado:</h3>
+<div class="code-block"><span class="keyword">class</span> AnnotatedASTPrinter <span class="keyword">implements</span> ASTVisitor&lt;Void&gt; {
+    <span class="keyword">private</span> <span class="keyword">int</span> indent = <span class="number">0</span>;
+
+    <span class="keyword">public</span> <span class="keyword">void</span> print(<span class="class">ASTNode</span> node) {
+        node.accept(<span class="keyword">this</span>);
+    }
+
+    @Override
+    <span class="keyword">public</span> Void visitProgramNode(ProgramNode node) {
+        println(<span class="string">"ProgramNode"</span>);
+        indent++;
+        <span class="keyword">for</span> (StatementNode stmt : node.statements) {
+            stmt.accept(<span class="keyword">this</span>);
+        }
+        indent--;
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    @Override
+    <span class="keyword">public</span> Void visitDeclarationNode(DeclarationNode node) {
+        println(<span class="string">"DeclarationNode: "</span> + node.name + <span class="string">" [type="</span> + node.type + <span class="string">"]"</span>);
+        <span class="keyword">if</span> (node.initializer != <span class="keyword">null</span>) {
+            indent++;
+            node.initializer.accept(<span class="keyword">this</span>);
+            indent--;
+        }
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    @Override
+    <span class="keyword">public</span> Void visitBinaryOpNode(<span class="class">BinaryOpNode</span> node) {
+        println(<span class="string">"BinaryOp: "</span> + node.operator + <span class="string">" [type="</span> + node.type + <span class="string">"]"</span>);
+        indent++;
+        node.left.accept(<span class="keyword">this</span>);
+        node.right.accept(<span class="keyword">this</span>);
+        indent--;
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    @Override
+    <span class="keyword">public</span> Void visitIdentifierNode(IdentifierNode node) {
+        println(<span class="string">"Identifier: "</span> + node.name +
+               <span class="string">" [type="</span> + node.type +
+               <span class="string">", resolvedTo="</span> + node.resolvedSymbol.name + <span class="string">"]"</span>);
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    <span class="keyword">private</span> <span class="keyword">void</span> println(<span class="keyword">String</span> text) {
+        System.out.println(<span class="string">"  "</span>.repeat(indent) + text);
+    }
+}
+</div>
+<p><strong>Salida:</strong></p>
+<pre><code class="language-">ProgramNode
+  DeclarationNode: x [type=int]
+    NumberNode: 5 [type=int]
+  DeclarationNode: y [type=int]
+    BinaryOp: + [type=int]
+      Identifier: x [type=int, resolvedTo=x]
+      NumberNode: 10 [type=int]
+</code></pre>
+        </div>
+        
+    </div>
+
+    <div class="navigation">
+        <a href="slide20.html" class="nav-btn">← Anterior</a>
+        <a href="slide22.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 21 > 1) {
+                window.location.href = 'slide20.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 21 < 23) {
+                window.location.href = 'slide22.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

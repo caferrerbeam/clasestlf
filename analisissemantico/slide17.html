@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Manejo de Funciones - Declaración y Llamadas</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 17 de 23</div>
+
+    <div class="container">
+        <h1>Manejo de Funciones - Declaración y Llamadas</h1>
+        <div class="content">
+            <h3>Declaración de funciones:</h3>
+<div class="code-block"><span class="keyword">int</span> suma(<span class="keyword">int</span> a, <span class="keyword">int</span> b) {
+    <span class="keyword">return</span> a + b;
+}
+</div>
+<p><strong>AST:</strong></p>
+<pre><code class="language-">FunctionDeclarationNode
+├── returnType: int
+├── name: "suma"
+├── parameters: [
+│   Parameter(type=int, name="a"),
+│   Parameter(type=int, name="b")
+│ ]
+└── body: BlockNode
+    └── ReturnNode
+        └── BinaryOpNode(+, a, b)
+</code></pre>
+<h3>Implementación del visitFunctionDeclarationNode:</h3>
+<div class="code-block">@Override
+<span class="keyword">public</span> <span class="class">Type</span> visitFunctionDeclarationNode(FunctionDeclarationNode node) {
+    <span class="comment">// PASO 1: Verificar que no existe función con ese nombre</span>
+    <span class="keyword">if</span> (symbolTable.existsInCurrentScope(node.name)) {
+        errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+            <span class="string">"Función '"</span> + node.name + <span class="string">"' ya declarada"</span>, node
+        ));
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    <span class="comment">// PASO 2: Crear tipo de función</span>
+    <span class="class">List</span>&lt;<span class="class">Type</span>&gt; paramTypes = <span class="keyword">new</span> <span class="class">ArrayList</span>&lt;&gt;();
+    <span class="keyword">for</span> (Parameter param : node.parameters) {
+        paramTypes.add(param.type);
+    }
+    FunctionType funcType = <span class="keyword">new</span> FunctionType(node.returnType, paramTypes);
+
+    <span class="comment">// PASO 3: Insertar función en tabla GLOBAL</span>
+    <span class="class">Symbol</span> funcSymbol = <span class="keyword">new</span> <span class="class">Symbol</span>(
+        node.name,
+        funcType,
+        <span class="class">Scope</span>.GLOBAL,
+        node.lineNumber
+    );
+    symbolTable.insert(funcSymbol);
+
+    <span class="comment">// PASO 4: Crear nuevo scope para el cuerpo de la función</span>
+    <span class="class">SymbolTable</span> functionScope = <span class="keyword">new</span> <span class="class">SymbolTable</span>(symbolTable);
+    <span class="class">SymbolTable</span> previousScope = symbolTable;
+    symbolTable = functionScope;
+
+    <span class="comment">// PASO 5: Insertar parámetros en el scope de la función</span>
+    <span class="keyword">for</span> (Parameter param : node.parameters) {
+        <span class="class">Symbol</span> paramSymbol = <span class="keyword">new</span> <span class="class">Symbol</span>(
+            param.name,
+            param.type,
+            <span class="class">Scope</span>.LOCAL,
+            node.lineNumber
+        );
+        functionScope.insert(paramSymbol);
+    }
+
+    <span class="comment">// PASO 6: Guardar tipo de retorno esperado (para verificar returns)</span>
+    <span class="class">Type</span> previousReturnType = currentReturnType;
+    currentReturnType = node.returnType;
+
+    <span class="comment">// PASO 7: Verificar cuerpo de la función</span>
+    node.body.accept(<span class="keyword">this</span>);
+
+    <span class="comment">// PASO 8: Restaurar scope anterior y tipo de retorno</span>
+    symbolTable = previousScope;
+    currentReturnType = previousReturnType;
+
+    <span class="keyword">return</span> funcType;
+}
+</div>
+<p><strong>Traza completa:</strong></p>
+<pre><code class="language-">Declaración: int suma(int a, int b) { return a + b; }
+
+PASO 1: Verificar nombre único
+  └─&gt; symbolTable.existsInCurrentScope("suma") → false ✓
+
+PASO 2: Crear tipo de función
+  └─&gt; paramTypes = [Type.INT, Type.INT]
+  └─&gt; funcType = FunctionType(Type.INT, [Type.INT, Type.INT])
+  └─&gt; Signatura: "(int, int) -&gt; int"
+
+PASO 3: Insertar en tabla global
+  Tabla Global:
+  ┌────────┬──────────────────────┬────────┐
+  │ Nombre │ Tipo                 │ Scope  │
+  ├────────┼──────────────────────┼────────┤
+  │ suma   │ (int, int) -&gt; int   │ global │
+  └────────┴──────────────────────┴────────┘
+
+PASO 4: Crear scope de función
+  └─&gt; functionScope = new SymbolTable(globalScope)
+
+PASO 5: Insertar parámetros
+  Tabla de Función 'suma':
+  ┌────────┬──────┬───────┐
+  │ Nombre │ Tipo │ Scope │
+  ├────────┼──────┼───────┤
+  │ a      │ int  │ local │
+  │ b      │ int  │ local │
+  └────────┴──────┴───────┘
+
+PASO 6: Guardar tipo de retorno esperado
+  └─&gt; currentReturnType = Type.INT
+
+PASO 7: Analizar cuerpo { return a + b; }
+  └─&gt; visitReturnNode(ReturnNode)
+      └─&gt; Verificar expresión: a + b
+          └─&gt; lookup("a") → Symbol(a, int) ✓
+          └─&gt; lookup("b") → Symbol(b, int) ✓
+          └─&gt; Tipo de (a + b) = int
+      └─&gt; Verificar compatibilidad: int = int ✓
+
+PASO 8: Restaurar scope
+  └─&gt; symbolTable = globalScope
+  └─&gt; currentReturnType = null
+
+RESULTADO: ✓ Función declarada correctamente
+</code></pre>
+<h3>Llamadas a funciones:</h3>
+<div class="code-block"><span class="keyword">int</span> resultado = suma(<span class="number">5</span>, <span class="number">10</span>);
+</div>
+<h3>Implementación del visitFunctionCallNode:</h3>
+<div class="code-block">@Override
+<span class="keyword">public</span> <span class="class">Type</span> visitFunctionCallNode(FunctionCallNode node) {
+    <span class="comment">// PASO 1: Buscar la función</span>
+    <span class="class">Symbol</span> funcSymbol = symbolTable.lookup(node.functionName);
+    <span class="keyword">if</span> (funcSymbol == <span class="keyword">null</span>) {
+        errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+            <span class="string">"Función '"</span> + node.functionName + <span class="string">"' no declarada"</span>, node
+        ));
+        <span class="keyword">return</span> <span class="class">Type</span>.ERROR;
+    }
+
+    <span class="comment">// PASO 2: Verificar que es una función</span>
+    <span class="keyword">if</span> (!(funcSymbol.type instanceof FunctionType)) {
+        errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+            <span class="string">"'"</span> + node.functionName + <span class="string">"' no es una función"</span>, node
+        ));
+        <span class="keyword">return</span> <span class="class">Type</span>.ERROR;
+    }
+
+    FunctionType funcType = (FunctionType) funcSymbol.type;
+
+    <span class="comment">// PASO 3: Verificar número de argumentos</span>
+    <span class="keyword">if</span> (node.arguments.size() != funcType.parameterTypes.size()) {
+        errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+            <span class="string">"Función '"</span> + node.functionName + <span class="string">"' espera "</span> +
+            funcType.parameterTypes.size() + <span class="string">" argumentos, se recibieron "</span> +
+            node.arguments.size(), node
+        ));
+        <span class="keyword">return</span> funcType.returnType;
+    }
+
+    <span class="comment">// PASO 4: Verificar tipo de cada argumento</span>
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; node.arguments.size(); i++) {
+        <span class="class">Type</span> argType = node.arguments.get(i).accept(<span class="keyword">this</span>);
+        <span class="class">Type</span> paramType = funcType.parameterTypes.get(i);
+
+        <span class="keyword">if</span> (!argType.isCompatible(paramType)) {
+            errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Argumento "</span> + (i+<span class="number">1</span>) + <span class="string">": se esperaba "</span> + paramType +
+                <span class="string">", se obtuvo "</span> + argType, node
+            ));
+        }
+    }
+
+    <span class="comment">// PASO 5: Retornar tipo de retorno de la función</span>
+    node.type = funcType.returnType;
+    <span class="keyword">return</span> funcType.returnType;
+}
+</div>
+<p><strong>Ejemplo con error:</strong></p>
+<div class="code-block"><span class="keyword">int</span> suma(<span class="keyword">int</span> a, <span class="keyword">int</span> b) { <span class="keyword">return</span> a + b; }
+<span class="keyword">int</span> x = suma(<span class="number">5</span>, <span class="string">"hola"</span>);  <span class="comment">// ✗ Error en argumento 2</span>
+</div>
+<p><strong>Traza:</strong></p>
+<pre><code class="language-">Llamada: suma(5, "hola")
+
+PASO 1: Buscar función
+  └─&gt; lookup("suma") → Symbol(suma, (int, int) -&gt; int) ✓
+
+PASO 2: Verificar que es función
+  └─&gt; funcSymbol.type instanceof FunctionType → true ✓
+
+PASO 3: Verificar cantidad de argumentos
+  └─&gt; Esperados: 2
+  └─&gt; Recibidos: 2
+  └─&gt; 2 == 2 ✓
+
+PASO 4: Verificar tipo de argumentos
+  Argumento 1:
+    └─&gt; checkExpression(NumberNode(5))
+    └─&gt; Retorna: Type.INT
+    └─&gt; Esperado: Type.INT
+    └─&gt; INT.isCompatible(INT) → true ✓
+
+  Argumento 2:
+    └─&gt; checkExpression(StringNode("hola"))
+    └─&gt; Retorna: Type.STRING
+    └─&gt; Esperado: Type.INT
+    └─&gt; STRING.isCompatible(INT) → false ✗
+
+  LANZAR EXCEPCIÓN:
+    "Argumento 2: se esperaba int, se obtuvo String"
+
+RESULTADO: ✗ ERROR SEMÁNTICO
+</code></pre>
+        </div>
+        
+    </div>
+
+    <div class="navigation">
+        <a href="slide16.html" class="nav-btn">← Anterior</a>
+        <a href="slide18.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 17 > 1) {
+                window.location.href = 'slide16.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 17 < 23) {
+                window.location.href = 'slide18.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

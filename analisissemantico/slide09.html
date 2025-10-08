@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Scopes Anidados - Implementación y Shadowing Detallado</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 9 de 23</div>
+
+    <div class="container">
+        <h1>Scopes Anidados - Implementación y Shadowing Detallado</h1>
+        <div class="content">
+            <h3>¿Qué es el Shadowing?</h3>
+<p><strong>Shadowing</strong> (sombreado) ocurre cuando declaras una variable con el mismo nombre que otra en un scope padre. La variable del scope más interno "oculta" a la del scope externo.</p>
+<p><strong>Analogía:</strong> Es como tener dos personas llamadas "Juan" en tu familia:</p>
+<ul>
+<li>Juan (abuelo) - vive en la casa principal</li>
+<li>Juan (nieto) - vive en tu habitación</li>
+</ul>
+<p>Cuando estás en tu habitación y dices "Juan", te refieres al nieto, no al abuelo. El nieto "sombrea" al abuelo.</p>
+<h3>Diagrama visual de shadowing:</h3>
+<h3>Ejemplo paso a paso con shadowing:</h3>
+<p>Analicemos este código en detalle:</p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">10</span>;  <span class="comment">// Línea 1: x global</span>
+
+<span class="keyword">void</span> foo() {
+    <span class="keyword">int</span> x = <span class="number">20</span>;  <span class="comment">// Línea 4: x local (shadowing)</span>
+    System.out.println(<span class="string">"En foo: "</span> + x);  <span class="comment">// Línea 5</span>
+
+    {
+        <span class="keyword">int</span> x = <span class="number">40</span>;  <span class="comment">// Línea 8: x en bloque (shadowing)</span>
+        System.out.println(<span class="string">"En bloque: "</span> + x);  <span class="comment">// Línea 9</span>
+    }
+
+    System.out.println(<span class="string">"De vuelta en foo: "</span> + x);  <span class="comment">// Línea 12</span>
+}
+
+System.out.println(<span class="string">"Global: "</span> + x);  <span class="comment">// Línea 15</span>
+</div>
+<h4>Línea 1: Declarar x global</h4>
+<pre><code class="language-">Código: int x = 10;
+Scope: GLOBAL
+
+Acción:
+1. Crear SymbolTable global (parent = null)
+2. Insertar Symbol("x", int, 10) en tabla global
+</code></pre>
+<p><strong>Tabla Global:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>global</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-">Estado: 1 scope, 1 variable
+</code></pre>
+<h4>Línea 4: Declarar x en foo (SHADOWING)</h4>
+<pre><code class="language-">Código: int x = 20;
+Scope: FUNCIÓN FOO
+
+Preguntas del analizador:
+1. ¿"x" existe en el scope ACTUAL (foo)? → No
+2. ¿"x" existe en algún scope padre? → Sí (global)
+3. ¿Es shadowing? → Sí (mismo nombre, diferente scope)
+
+Decisión: ✓ PERMITIR (shadowing es válido)
+
+Acción:
+1. Crear SymbolTable foo (parent = global)
+2. Insertar Symbol("x", int, 20) en tabla foo
+</code></pre>
+<p><strong>Tabla de foo:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>local</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<p>   ↑ parent ↓</p>
+<p><strong>Tabla Global:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>global</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-">Estado: 2 scopes, 2 variables "x" (diferentes scopes)
+</code></pre>
+<p><strong>Explicación:</strong> El método <code>existsInCurrentScope("x")</code> retorna <code>false</code> porque busca SOLO en foo, no en global. Por eso se permite la declaración.</p>
+<h4>Línea 5: Usar x en foo</h4>
+<pre><code class="language-">Código: System.out.println("En foo: " + x);
+Scope actual: FOO
+
+Búsqueda de "x":
+1. foo.lookup("x")
+   - Buscar en foo.symbols: ✓ ENCONTRADO (x = 20)
+   - return Symbol("x", int, 20)
+
+NO necesita buscar en global porque ya encontró "x" en el scope actual.
+
+Resultado: Imprime "En foo: 20"
+</code></pre>
+<p><strong>Clave:</strong> <code>lookup()</code> siempre retorna la variable del scope MÁS INTERNO primero.</p>
+<h4>Línea 8: Declarar x en bloque (DOBLE SHADOWING)</h4>
+<pre><code class="language-">Código: int x = 40;
+Scope: BLOQUE (hijo de foo)
+
+Preguntas del analizador:
+1. ¿"x" existe en el scope ACTUAL (bloque)? → No
+2. ¿"x" existe en algún scope padre? → Sí (foo Y global)
+3. ¿Es shadowing? → Sí (sombrea a AMBOS)
+
+Decisión: ✓ PERMITIR
+
+Acción:
+1. Crear SymbolTable bloque (parent = foo)
+2. Insertar Symbol("x", int, 40) en tabla bloque
+</code></pre>
+<p><strong>Tabla de bloque:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>local</td>
+<td>40</td>
+</tr>
+</tbody>
+</table>
+<p>   ↑ parent ↓</p>
+<p><strong>Tabla de foo:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>local</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<p>   ↑ parent ↓</p>
+<p><strong>Tabla Global:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>global</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-">Estado: 3 scopes, 3 variables "x" (todas en scopes diferentes)
+</code></pre>
+<h4>Línea 9: Usar x en bloque</h4>
+<pre><code class="language-">Código: System.out.println("En bloque: " + x);
+Scope actual: BLOQUE
+
+Búsqueda de "x":
+1. bloque.lookup("x")
+   - Buscar en bloque.symbols: ✓ ENCONTRADO (x = 40)
+   - return Symbol("x", int, 40)
+
+NO busca en foo ni en global porque ya encontró "x" en scope actual.
+
+Resultado: Imprime "En bloque: 40"
+</code></pre>
+<h4>Línea 10: Salir del bloque</h4>
+<pre><code class="language-">Acción: Al cerrar }, el scope del bloque se DESTRUYE
+
+Efecto:
+1. La tabla de símbolos del bloque se elimina
+2. La variable "x = 40" YA NO EXISTE
+3. Volvemos al scope de foo
+</code></pre>
+<p><strong>Tabla activa ahora: foo</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>int</td>
+<td>local</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-">La x del bloque (40) desapareció.
+</code></pre>
+<h4>Línea 12: Usar x de vuelta en foo</h4>
+<pre><code class="language-">Código: System.out.println("De vuelta en foo: " + x);
+Scope actual: FOO (el bloque ya no existe)
+
+Búsqueda de "x":
+1. foo.lookup("x")
+   - Buscar en foo.symbols: ✓ ENCONTRADO (x = 20)
+   - return Symbol("x", int, 20)
+
+Resultado: Imprime "De vuelta en foo: 20"
+</code></pre>
+<p><strong>Observación:</strong> La x del bloque (40) desapareció. Ahora vemos la x de foo (20).</p>
+<h4>Línea 15: Usar x global (fuera de foo)</h4>
+<pre><code class="language-">Código: System.out.println("Global: " + x);
+Scope actual: GLOBAL (foo ya terminó)
+
+Búsqueda de "x":
+1. global.lookup("x")
+   - Buscar en global.symbols: ✓ ENCONTRADO (x = 10)
+   - return Symbol("x", int, 10)
+
+Resultado: Imprime "Global: 10"
+</code></pre>
+<h3>Salida completa del programa:</h3>
+<pre><code class="language-">En foo: 20
+En bloque: 40
+De vuelta en foo: 20
+Global: 10
+</code></pre>
+<h3>Implementación del algoritmo de búsqueda con shadowing:</h3>
+<div class="code-block"><span class="keyword">public</span> <span class="class">Symbol</span> lookup(<span class="keyword">String</span> name) {
+    <span class="comment">// PASO 1: Buscar en scope ACTUAL primero</span>
+    <span class="class">Symbol</span> symbol = symbols.get(name);
+
+    <span class="keyword">if</span> (symbol != <span class="keyword">null</span>) {
+        <span class="comment">// ENCONTRADO en scope actual</span>
+        <span class="comment">// Esto implementa el shadowing: la variable local</span>
+        <span class="comment">// "sombrea" a las variables con mismo nombre en scopes padre</span>
+        <span class="keyword">return</span> symbol;
+    }
+
+    <span class="comment">// PASO 2: No encontrado en scope actual, buscar en padre</span>
+    <span class="keyword">if</span> (parent != <span class="keyword">null</span>) {
+        <span class="keyword">return</span> parent.lookup(name);
+    }
+
+    <span class="comment">// PASO 3: No encontrado en ningún scope</span>
+    <span class="keyword">return</span> <span class="keyword">null</span>;
+}
+</div>
+<p><strong>Explicación del shadowing en el código:</strong></p>
+<pre><code class="language-">Cuando hacemos lookup("x") desde el bloque:
+
+1. bloque.lookup("x")
+   - symbols.get("x") → Symbol(x, 40) ✓
+   - return Symbol(x, 40) INMEDIATAMENTE
+   - NO busca en foo ni en global
+
+El "if (symbol != null) return symbol;" implementa el shadowing.
+La primera coincidencia (scope más interno) gana.
+</code></pre>
+<h3>Diferencia entre shadowing y redeclaración:</h3>
+<h4>SHADOWING (permitido):</h4>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">10</span>;  <span class="comment">// Scope global</span>
+
+<span class="keyword">void</span> foo() {
+    <span class="keyword">int</span> x = <span class="number">20</span>;  <span class="comment">// ✓ OK: Diferente scope (sombrea a global)</span>
+}
+</div>
+<p><strong>Verificación:</strong></p>
+<div class="code-block"><span class="comment">// Desde scope de foo:</span>
+existsInCurrentScope(<span class="string">"x"</span>) → <span class="keyword">false</span> (no está en foo directamente)
+lookup(<span class="string">"x"</span>) → <span class="class">Symbol</span>(x, <span class="number">10</span>) desde global
+
+<span class="comment">// Por eso se permite declarar x en foo</span>
+</div>
+<h4>REDECLARACIÓN (prohibido):</h4>
+<div class="code-block"><span class="keyword">void</span> foo() {
+    <span class="keyword">int</span> x = <span class="number">10</span>;  <span class="comment">// Línea 2</span>
+    <span class="keyword">int</span> x = <span class="number">20</span>;  <span class="comment">// Línea 3: ✗ ERROR: redeclaración</span>
+}
+</div>
+<p><strong>Verificación:</strong></p>
+<div class="code-block"><span class="comment">// En línea 3, desde scope de foo:</span>
+existsInCurrentScope(<span class="string">"x"</span>) → <span class="keyword">true</span> (x YA está en foo desde línea <span class="number">2</span>)
+
+<span class="comment">// Por eso se rechaza: ERROR</span>
+</div>
+<h3>Reglas de shadowing (MEMORIZA):</h3>
+<pre><code class="language-">✓ PERMITIDO (shadowing):
+  - Mismo nombre
+  - Diferentes scopes (padre e hijo)
+  - La variable más interna "gana"
+
+✗ PROHIBIDO (redeclaración):
+  - Mismo nombre
+  - MISMO scope
+  - Error: variable ya declarada
+</code></pre>
+<h3>Ejemplo de verificación en código:</h3>
+<div class="code-block"><span class="keyword">public</span> <span class="keyword">void</span> visitDeclarationNode(DeclarationNode node) {
+    <span class="comment">// Verificar SOLO en scope actual (no en padres)</span>
+    <span class="keyword">if</span> (symbolTable.existsInCurrentScope(node.name)) {
+        <span class="comment">// ✗ ERROR: Redeclaración en MISMO scope</span>
+        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+            <span class="string">"Variable '"</span> + node.name + <span class="string">"' ya declarada en este scope"</span>
+        );
+    }
+
+    <span class="comment">// No existe en scope actual → OK</span>
+    <span class="comment">// Puede existir en scope padre (shadowing), pero está permitido</span>
+    <span class="class">Symbol</span> symbol = <span class="keyword">new</span> <span class="class">Symbol</span>(node.name, node.type, currentScope, node.line);
+    symbolTable.insert(symbol);
+}
+</div>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué imprime este código?</p>
+<div class="code-block"><span class="keyword">int</span> a = <span class="number">1</span>;
+
+<span class="keyword">void</span> test() {
+    System.out.println(a);  <span class="comment">// Línea 4</span>
+    <span class="keyword">int</span> a = <span class="number">2</span>;
+    System.out.println(a);  <span class="comment">// Línea 6</span>
+
+    {
+        <span class="keyword">int</span> a = <span class="number">3</span>;
+        System.out.println(a);  <span class="comment">// Línea 9</span>
+    }
+
+    System.out.println(a);  <span class="comment">// Línea 12</span>
+}
+
+System.out.println(a);  <span class="comment">// Línea 15</span>
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">Línea 4: Imprime 1 (usa a global, la local aún no se declara)
+Línea 6: Imprime 2 (usa a local de test)
+Línea 9: Imprime 3 (usa a del bloque, sombrea a test)
+Línea 12: Imprime 2 (a del bloque ya no existe, usa a de test)
+Línea 15: Imprime 1 (usa a global)
+</code></pre>
+        </div>
+        <div class="mermaid">graph TB
+    subgraph "Global Scope"
+        G1[x = 10<br/>La variable original]
+        subgraph "Función foo Scope"
+            F1[x = 20<br/>Sombrea a x global]
+            F2[y = 30<br/>Variable única]
+            subgraph "Bloque if Scope"
+                B1[x = 40<br/>Sombrea a x de foo]
+                B2[z = 50<br/>Variable única]
+            end
+        end
+    end
+
+    style G1 fill:#ffebee,stroke:#c62828
+    style F1 fill:#fff3e0,stroke:#ef6c00
+    style F2 fill:#fff3e0,stroke:#ef6c00
+    style B1 fill:#e8f5e9,stroke:#2e7d32
+    style B2 fill:#e8f5e9,stroke:#2e7d32</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide08.html" class="nav-btn">← Anterior</a>
+        <a href="slide10.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 9 > 1) {
+                window.location.href = 'slide08.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 9 < 23) {
+                window.location.href = 'slide10.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

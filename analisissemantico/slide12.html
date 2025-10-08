@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Verificación de Tipos - Type Checking Detallado</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 12 de 23</div>
+
+    <div class="container">
+        <h1>Verificación de Tipos - Type Checking Detallado</h1>
+        <div class="content">
+            <h3>¿Qué es Type Checking?</h3>
+<p><strong>Type Checking</strong> (verificación de tipos) es el proceso de verificar que las operaciones se realizan con tipos compatibles.</p>
+<p><strong>Analogía:</strong> Es como verificar que estás usando las herramientas correctas:</p>
+<ul>
+<li>✓ Martillo + Clavo = OK</li>
+<li>✗ Martillo + Sopa = NO TIENE SENTIDO</li>
+</ul>
+<h3>Tipos de verificación:</h3>
+<p><strong>Nuestro enfoque: Verificación Estática</strong></p>
+<p>Detectamos errores de tipos ANTES de ejecutar el programa (en tiempo de compilación).</p>
+<h3>Implementación completa del TypeChecker:</h3>
+<div class="code-block"><span class="keyword">class</span> TypeChecker {
+    <span class="keyword">private</span> <span class="class">SymbolTable</span> symbolTable;
+
+    <span class="keyword">public</span> TypeChecker(<span class="class">SymbolTable</span> symbolTable) {
+        <span class="keyword">this</span>.symbolTable = symbolTable;
+    }
+
+    <span class="comment">// ━━━ MÉTODO PRINCIPAL ━━━</span>
+    <span class="keyword">public</span> <span class="class">Type</span> checkExpression(ExpressionNode expr) {
+        <span class="keyword">if</span> (expr instanceof NumberNode) {
+            <span class="keyword">return</span> checkNumberNode((NumberNode) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof BooleanNode) {
+            <span class="keyword">return</span> checkBooleanNode((BooleanNode) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof StringNode) {
+            <span class="keyword">return</span> checkStringNode((StringNode) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof IdentifierNode) {
+            <span class="keyword">return</span> checkIdentifierNode((IdentifierNode) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof <span class="class">BinaryOpNode</span>) {
+            <span class="keyword">return</span> checkBinaryOp((<span class="class">BinaryOpNode</span>) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof UnaryOpNode) {
+            <span class="keyword">return</span> checkUnaryOp((UnaryOpNode) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof FunctionCallNode) {
+            <span class="keyword">return</span> checkFunctionCall((FunctionCallNode) expr);
+        }
+        <span class="keyword">else</span> <span class="keyword">if</span> (expr instanceof ArrayAccessNode) {
+            <span class="keyword">return</span> checkArrayAccess((ArrayAccessNode) expr);
+        }
+
+        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(<span class="string">"Tipo de expresión desconocido"</span>);
+    }
+
+    <span class="comment">// ━━━ VERIFICAR NODOS LITERALES ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkNumberNode(NumberNode node) {
+        <span class="comment">// Determinar si es int o double</span>
+        <span class="keyword">if</span> (node.value % <span class="number">1</span> == <span class="number">0</span>) {
+            node.type = <span class="class">Type</span>.INT;
+            <span class="keyword">return</span> <span class="class">Type</span>.INT;
+        } <span class="keyword">else</span> {
+            node.type = <span class="class">Type</span>.DOUBLE;
+            <span class="keyword">return</span> <span class="class">Type</span>.DOUBLE;
+        }
+    }
+
+    <span class="keyword">private</span> <span class="class">Type</span> checkBooleanNode(BooleanNode node) {
+        node.type = <span class="class">Type</span>.BOOLEAN;
+        <span class="keyword">return</span> <span class="class">Type</span>.BOOLEAN;
+    }
+
+    <span class="keyword">private</span> <span class="class">Type</span> checkStringNode(StringNode node) {
+        node.type = <span class="class">Type</span>.STRING;
+        <span class="keyword">return</span> <span class="class">Type</span>.STRING;
+    }
+
+    <span class="comment">// ━━━ VERIFICAR IDENTIFICADORES ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkIdentifierNode(IdentifierNode node) {
+        <span class="comment">// Buscar variable en tabla de símbolos</span>
+        <span class="class">Symbol</span> symbol = symbolTable.lookup(node.name);
+
+        <span class="keyword">if</span> (symbol == <span class="keyword">null</span>) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Variable '"</span> + node.name + <span class="string">"' no declarada"</span>, node
+            );
+        }
+
+        <span class="comment">// Anotar el nodo con el tipo y el símbolo resuelto</span>
+        node.type = symbol.type;
+        node.resolvedSymbol = symbol;
+
+        <span class="keyword">return</span> symbol.type;
+    }
+
+    <span class="comment">// ━━━ VERIFICAR OPERACIONES BINARIAS ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkBinaryOp(<span class="class">BinaryOpNode</span> node) {
+        <span class="comment">// PASO 1: Verificar tipos de operandos</span>
+        <span class="class">Type</span> leftType = checkExpression(node.left);
+        <span class="class">Type</span> rightType = checkExpression(node.right);
+
+        <span class="comment">// PASO 2: Verificar según el operador</span>
+        <span class="keyword">switch</span> (node.operator) {
+            <span class="keyword">case</span> PLUS:
+            <span class="keyword">case</span> MINUS:
+            <span class="keyword">case</span> MULTIPLY:
+            <span class="keyword">case</span> DIVIDE:
+            <span class="keyword">case</span> MODULO:
+                <span class="keyword">return</span> checkArithmeticOp(node, leftType, rightType);
+
+            <span class="keyword">case</span> EQUALS:
+            <span class="keyword">case</span> NOT_EQUALS:
+                <span class="keyword">return</span> checkEqualityOp(node, leftType, rightType);
+
+            <span class="keyword">case</span> LESS_THAN:
+            <span class="keyword">case</span> LESS_EQUAL:
+            <span class="keyword">case</span> GREATER_THAN:
+            <span class="keyword">case</span> GREATER_EQUAL:
+                <span class="keyword">return</span> checkComparisonOp(node, leftType, rightType);
+
+            <span class="keyword">case</span> AND:
+            <span class="keyword">case</span> OR:
+                <span class="keyword">return</span> checkLogicalOp(node, leftType, rightType);
+
+            <span class="keyword">default</span>:
+                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(<span class="string">"Operador desconocido: "</span> + node.operator);
+        }
+    }
+
+    <span class="comment">// ━━━ OPERADORES ARITMÉTICOS (+, -, *, /, %) ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkArithmeticOp(<span class="class">BinaryOpNode</span> node, <span class="class">Type</span> left, <span class="class">Type</span> right) {
+        <span class="comment">// Verificar que ambos operandos sean numéricos</span>
+        <span class="keyword">if</span> (!left.isNumeric()) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Operando izquierdo de '"</span> + node.operator +
+                <span class="string">"' debe ser numérico, se obtuvo "</span> + left, node
+            );
+        }
+
+        <span class="keyword">if</span> (!right.isNumeric()) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Operando derecho de '"</span> + node.operator +
+                <span class="string">"' debe ser numérico, se obtuvo "</span> + right, node
+            );
+        }
+
+        <span class="comment">// Promover al tipo "más amplio"</span>
+        <span class="class">Type</span> resultType = <span class="class">Type</span>.widen(left, right);
+        node.type = resultType;
+
+        <span class="keyword">return</span> resultType;
+    }
+
+    <span class="comment">// ━━━ OPERADORES DE IGUALDAD (==, !=) ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkEqualityOp(<span class="class">BinaryOpNode</span> node, <span class="class">Type</span> left, <span class="class">Type</span> right) {
+        <span class="comment">// Los tipos deben ser compatibles</span>
+        <span class="keyword">if</span> (!left.isCompatible(right)) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"No se pueden comparar "</span> + left + <span class="string">" con "</span> + right, node
+            );
+        }
+
+        node.type = <span class="class">Type</span>.BOOLEAN;
+        <span class="keyword">return</span> <span class="class">Type</span>.BOOLEAN;
+    }
+
+    <span class="comment">// ━━━ OPERADORES DE COMPARACIÓN (&lt;, &lt;=, &gt;, &gt;=) ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkComparisonOp(<span class="class">BinaryOpNode</span> node, <span class="class">Type</span> left, <span class="class">Type</span> right) {
+        <span class="comment">// Ambos deben ser numéricos</span>
+        <span class="keyword">if</span> (!left.isNumeric() || !right.isNumeric()) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Operadores de comparación requieren operandos numéricos"</span>, node
+            );
+        }
+
+        node.type = <span class="class">Type</span>.BOOLEAN;
+        <span class="keyword">return</span> <span class="class">Type</span>.BOOLEAN;
+    }
+
+    <span class="comment">// ━━━ OPERADORES LÓGICOS (&amp;&amp;, ||) ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkLogicalOp(<span class="class">BinaryOpNode</span> node, <span class="class">Type</span> left, <span class="class">Type</span> right) {
+        <span class="comment">// Ambos deben ser booleanos</span>
+        <span class="keyword">if</span> (!left.isBoolean()) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Operando izquierdo de '"</span> + node.operator +
+                <span class="string">"' debe ser boolean, se obtuvo "</span> + left, node
+            );
+        }
+
+        <span class="keyword">if</span> (!right.isBoolean()) {
+            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Operando derecho de '"</span> + node.operator +
+                <span class="string">"' debe ser boolean, se obtuvo "</span> + right, node
+            );
+        }
+
+        node.type = <span class="class">Type</span>.BOOLEAN;
+        <span class="keyword">return</span> <span class="class">Type</span>.BOOLEAN;
+    }
+
+    <span class="comment">// ━━━ OPERADORES UNARIOS (-, !) ━━━</span>
+    <span class="keyword">private</span> <span class="class">Type</span> checkUnaryOp(UnaryOpNode node) {
+        <span class="class">Type</span> operandType = checkExpression(node.operand);
+
+        <span class="keyword">switch</span> (node.operator) {
+            <span class="keyword">case</span> MINUS:
+                <span class="comment">// -x requiere que x sea numérico</span>
+                <span class="keyword">if</span> (!operandType.isNumeric()) {
+                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                        <span class="string">"Operador '-' requiere operando numérico, se obtuvo "</span> +
+                        operandType, node
+                    );
+                }
+                node.type = operandType;
+                <span class="keyword">return</span> operandType;
+
+            <span class="keyword">case</span> NOT:
+                <span class="comment">// !x requiere que x sea booleano</span>
+                <span class="keyword">if</span> (!operandType.isBoolean()) {
+                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(
+                        <span class="string">"Operador '!' requiere operando boolean, se obtuvo "</span> +
+                        operandType, node
+                    );
+                }
+                node.type = <span class="class">Type</span>.BOOLEAN;
+                <span class="keyword">return</span> <span class="class">Type</span>.BOOLEAN;
+
+            <span class="keyword">default</span>:
+                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">SemanticException</span>(<span class="string">"Operador unario desconocido"</span>);
+        }
+    }
+
+    <span class="comment">// ━━━ PROMOCIÓN DE TIPOS ━━━</span>
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class">Type</span> widen(<span class="class">Type</span> t1, <span class="class">Type</span> t2) {
+        <span class="comment">// Si uno de los dos es double, el resultado es double</span>
+        <span class="keyword">if</span> (t1.isDouble() || t2.isDouble()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.DOUBLE;
+        }
+
+        <span class="comment">// Si uno es float, el resultado es float</span>
+        <span class="keyword">if</span> (t1.isFloat() || t2.isFloat()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.FLOAT;
+        }
+
+        <span class="comment">// Si uno es long, el resultado es long</span>
+        <span class="keyword">if</span> (t1.isLong() || t2.isLong()) {
+            <span class="keyword">return</span> <span class="class">Type</span>.LONG;
+        }
+
+        <span class="comment">// Si ambos son int o más pequeños, el resultado es int</span>
+        <span class="keyword">return</span> <span class="class">Type</span>.INT;
+    }
+}
+</div>
+<h3>Ejemplo paso a paso:</h3>
+<p>Analicemos la expresión: <code>5 + 3.14</code></p>
+<pre><code class="language-">INICIO: checkExpression(BinaryOpNode(+, 5, 3.14))
+
+1. Identificar que es BinaryOpNode
+   └─&gt; checkBinaryOp(node)
+
+2. Verificar operando izquierdo (5)
+   └─&gt; checkExpression(NumberNode(5))
+   └─&gt; checkNumberNode(NumberNode(5))
+   └─&gt; 5 % 1 == 0 → true
+   └─&gt; Retorna: Type.INT
+
+3. Verificar operando derecho (3.14)
+   └─&gt; checkExpression(NumberNode(3.14))
+   └─&gt; checkNumberNode(NumberNode(3.14))
+   └─&gt; 3.14 % 1 == 0 → false
+   └─&gt; Retorna: Type.DOUBLE
+
+4. Identificar operador: PLUS (aritmético)
+   └─&gt; checkArithmeticOp(node, INT, DOUBLE)
+
+5. Verificar que left (INT) es numérico
+   └─&gt; INT.isNumeric() → true ✓
+
+6. Verificar que right (DOUBLE) es numérico
+   └─&gt; DOUBLE.isNumeric() → true ✓
+
+7. Promover al tipo más amplio
+   └─&gt; Type.widen(INT, DOUBLE)
+   └─&gt; Uno es DOUBLE → retorna DOUBLE
+
+8. Anotar nodo con tipo resultado
+   └─&gt; node.type = DOUBLE
+
+9. Retornar tipo
+   └─&gt; return DOUBLE
+
+RESULTADO: 5 + 3.14 tiene tipo DOUBLE ✓
+</code></pre>
+<h3>Ejemplo con error:</h3>
+<p>Analicemos la expresión: <code>5 + "hola"</code></p>
+<pre><code class="language-">INICIO: checkExpression(BinaryOpNode(+, 5, "hola"))
+
+1. Identificar que es BinaryOpNode
+   └─&gt; checkBinaryOp(node)
+
+2. Verificar operando izquierdo (5)
+   └─&gt; checkExpression(NumberNode(5))
+   └─&gt; Retorna: Type.INT
+
+3. Verificar operando derecho ("hola")
+   └─&gt; checkExpression(StringNode("hola"))
+   └─&gt; Retorna: Type.STRING
+
+4. Identificar operador: PLUS (aritmético)
+   └─&gt; checkArithmeticOp(node, INT, STRING)
+
+5. Verificar que left (INT) es numérico
+   └─&gt; INT.isNumeric() → true ✓
+
+6. Verificar que right (STRING) es numérico
+   └─&gt; STRING.isNumeric() → false ✗
+
+7. LANZAR EXCEPCIÓN
+   └─&gt; throw new SemanticException(
+       "Operando derecho de '+' debe ser numérico, se obtuvo String"
+   )
+
+RESULTADO: ✗ ERROR SEMÁNTICO
+Error en línea X: Operando derecho de '+' debe ser numérico, se obtuvo String
+</code></pre>
+<h3>Tabla de verificación de operadores:</h3>
+<pre><code class="language-">OPERADOR | OPERANDOS REQUERIDOS    | TIPO RESULTADO | EJEMPLO
+─────────┼─────────────────────────┼────────────────┼─────────────
+   +     | numérico + numérico     | numérico       | 5 + 3 → int
+   -     | numérico + numérico     | numérico       | 5.0 - 2 → double
+   *     | numérico + numérico     | numérico       | 3 * 4 → int
+   /     | numérico + numérico     | numérico       | 10 / 2 → int
+   %     | numérico + numérico     | numérico       | 10 % 3 → int
+─────────┼─────────────────────────┼────────────────┼─────────────
+   ==    | mismo tipo o compatibles| boolean        | 5 == 5 → true
+   !=    | mismo tipo o compatibles| boolean        | 5 != 3 → true
+─────────┼─────────────────────────┼────────────────┼─────────────
+   &lt;     | numérico + numérico     | boolean        | 5 &lt; 10 → true
+   &lt;=    | numérico + numérico     | boolean        | 5 &lt;= 5 → true
+   &gt;     | numérico + numérico     | boolean        | 10 &gt; 5 → true
+   &gt;=    | numérico + numérico     | boolean        | 5 &gt;= 10 → false
+─────────┼─────────────────────────┼────────────────┼─────────────
+   &&    | boolean + boolean       | boolean        | true && false → false
+   ||    | boolean + boolean       | boolean        | true || false → true
+─────────┼─────────────────────────┼────────────────┼─────────────
+   !     | boolean                 | boolean        | !true → false
+   -     | numérico                | numérico       | -5 → -5
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Cuál es el tipo de estas expresiones?</p>
+<div class="code-block"><span class="number">5</span> + <span class="number">10</span>          <span class="comment">// ?</span>
+<span class="number">5</span> + <span class="number">3.14</span>        <span class="comment">// ?</span>
+<span class="number">5</span> &lt; <span class="number">10</span>          <span class="comment">// ?</span>
+<span class="keyword">true</span> &amp;&amp; <span class="keyword">false</span>   <span class="comment">// ?</span>
+<span class="number">5</span> + <span class="string">"hola"</span>      <span class="comment">// ?</span>
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">5 + 10         → int (ambos int)
+5 + 3.14       → double (promoción: int + double → double)
+5 &lt; 10         → boolean (comparación siempre retorna boolean)
+true && false  → boolean (lógico siempre retorna boolean)
+5 + "hola"     → ✗ ERROR (int + String incompatibles)
+</code></pre>
+        </div>
+        <div class="mermaid">graph TB
+    A[Type Checking] --> B[Estática<br/>Compile-time]
+    A --> C[Dinámica<br/>Runtime]
+
+    B --> D[Java, C++, TypeScript]
+    B --> E[Errores encontrados temprano]
+    B --> F[Mejor rendimiento]
+
+    C --> G[Python, JavaScript, Ruby]
+    C --> H[Mayor flexibilidad]
+    C --> I[Errores en ejecución]
+
+    style B fill:#c8e6c9,stroke:#388e3c
+    style C fill:#ffe0b2,stroke:#f57c00</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide11.html" class="nav-btn">← Anterior</a>
+        <a href="slide13.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 12 > 1) {
+                window.location.href = 'slide11.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 12 < 23) {
+                window.location.href = 'slide13.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

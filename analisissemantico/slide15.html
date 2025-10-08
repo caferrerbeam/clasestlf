@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Patrón Visitor - Recorriendo el AST en Detalle</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 15 de 23</div>
+
+    <div class="container">
+        <h1>Patrón Visitor - Recorriendo el AST en Detalle</h1>
+        <div class="content">
+            <h3>¿Por qué necesitamos el patrón Visitor?</h3>
+<p><strong>Problema:</strong> Queremos agregar operaciones al AST sin modificar las clases de los nodos.</p>
+<p><strong>Ejemplo del problema:</strong></p>
+<div class="code-block"><span class="comment">// Sin Visitor - MALO</span>
+<span class="keyword">class</span> ExpressionNode {
+    <span class="comment">// Si queremos agregar type checking, modificamos la clase</span>
+    <span class="keyword">public</span> <span class="class">Type</span> typeCheck() { ... }
+    
+    <span class="comment">// Si luego queremos generar código, modificamos de nuevo</span>
+    <span class="keyword">public</span> <span class="keyword">String</span> generateCode() { ... }
+    
+    <span class="comment">// Si después queremos pretty printing, modificamos de nuevo</span>
+    <span class="keyword">public</span> <span class="keyword">String</span> prettyPrint() { ... }
+    
+    <span class="comment">// ✗ Cada nueva operación requiere modificar TODAS las clases</span>
+}
+</div>
+<p><strong>Solución con Visitor:</strong></p>
+<div class="code-block"><span class="comment">// Con Visitor - BUENO</span>
+<span class="keyword">class</span> ExpressionNode {
+    <span class="comment">// Un solo método que NO cambia</span>
+    <span class="keyword">public</span> &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="keyword">return</span> visitor.visitExpressionNode(<span class="keyword">this</span>);
+    }
+}
+
+<span class="comment">// Agregar operaciones SIN modificar las clases AST</span>
+<span class="keyword">class</span> TypeCheckVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="class">Type</span>&gt; { ... }
+<span class="keyword">class</span> CodeGenVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="keyword">String</span>&gt; { ... }
+<span class="keyword">class</span> PrettyPrintVisitor <span class="keyword">implements</span> ASTVisitor&lt;<span class="keyword">String</span>&gt; { ... }
+</div>
+<h3>Diagrama de componentes del patrón Visitor:</h3>
+<h3>Implementación completa paso a paso:</h3>
+<h4>Paso 1: Definir la interfaz Visitor</h4>
+<div class="code-block"><span class="keyword">interface</span> ASTVisitor&lt;T&gt; {
+    <span class="comment">// Un método por cada tipo de nodo</span>
+
+    <span class="comment">// Statements</span>
+    T visitProgramNode(ProgramNode node);
+    T visitDeclarationNode(DeclarationNode node);
+    T visitAssignmentNode(AssignmentNode node);
+    T visitIfStatementNode(IfStatementNode node);
+    T visitWhileStatementNode(WhileStatementNode node);
+    T visitReturnNode(ReturnNode node);
+    T visitBreakNode(BreakNode node);
+    T visitContinueNode(ContinueNode node);
+
+    <span class="comment">// Expressions</span>
+    T visitBinaryOpNode(<span class="class">BinaryOpNode</span> node);
+    T visitUnaryOpNode(UnaryOpNode node);
+    T visitFunctionCallNode(FunctionCallNode node);
+    T visitArrayAccessNode(ArrayAccessNode node);
+
+    <span class="comment">// Literals</span>
+    T visitIdentifierNode(IdentifierNode node);
+    T visitNumberNode(NumberNode node);
+    T visitBooleanNode(BooleanNode node);
+    T visitStringNode(StringNode node);
+}
+</div>
+<p><strong>Explicación del genérico <code><T></code>:</strong></p>
+<pre><code class="language-">T = Tipo de retorno de cada método visit
+
+Ejemplos:
+- TypeCheckVisitor implements ASTVisitor&lt;Type&gt;
+  → Cada método retorna Type
+  
+- CodeGenVisitor implements ASTVisitor&lt;String&gt;
+  → Cada método retorna String (código generado)
+  
+- PrettyPrintVisitor implements ASTVisitor&lt;String&gt;
+  → Cada método retorna String (código formateado)
+</code></pre>
+<h4>Paso 2: Implementar accept() en cada nodo</h4>
+<div class="code-block"><span class="comment">// Clase base</span>
+abstract <span class="keyword">class</span> <span class="class">ASTNode</span> {
+    <span class="keyword">int</span> lineNumber;
+    <span class="keyword">int</span> columnNumber;
+    <span class="keyword">String</span> sourceLine;  <span class="comment">// Línea de código fuente (para errores)</span>
+
+    <span class="comment">// Método abstracto que cada subclase implementa</span>
+    abstract &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor);
+}
+
+<span class="comment">// Nodo de programa</span>
+<span class="keyword">class</span> ProgramNode <span class="keyword">extends</span> <span class="class">ASTNode</span> {
+    <span class="class">List</span>&lt;StatementNode&gt; statements;
+
+    <span class="keyword">public</span> ProgramNode(<span class="class">List</span>&lt;StatementNode&gt; statements) {
+        <span class="keyword">this</span>.statements = statements;
+    }
+
+    @Override
+    <span class="keyword">public</span> &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="comment">// Delegar al visitor</span>
+        <span class="keyword">return</span> visitor.visitProgramNode(<span class="keyword">this</span>);
+    }
+}
+
+<span class="comment">// Nodo de declaración</span>
+<span class="keyword">class</span> DeclarationNode <span class="keyword">extends</span> StatementNode {
+    <span class="class">Type</span> declaredType;
+    <span class="keyword">String</span> name;
+    ExpressionNode initializer;
+
+    @Override
+    <span class="keyword">public</span> &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="keyword">return</span> visitor.visitDeclarationNode(<span class="keyword">this</span>);
+    }
+}
+
+<span class="comment">// Nodo de operación binaria</span>
+<span class="keyword">class</span> <span class="class">BinaryOpNode</span> <span class="keyword">extends</span> ExpressionNode {
+    ExpressionNode left;
+    Operator operator;
+    ExpressionNode right;
+    <span class="class">Type</span> type;  <span class="comment">// Se llena durante el análisis semántico</span>
+
+    @Override
+    <span class="keyword">public</span> &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        <span class="keyword">return</span> visitor.visitBinaryOpNode(<span class="keyword">this</span>);
+    }
+}
+
+<span class="comment">// ... más nodos</span>
+</div>
+<p><strong>Patrón que se repite:</strong></p>
+<div class="code-block">@Override
+<span class="keyword">public</span> &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+    <span class="keyword">return</span> visitor.visitXXXNode(<span class="keyword">this</span>);
+    <span class="comment">//               ^^^</span>
+    <span class="comment">//               Nombre del método correspondiente</span>
+    <span class="comment">//                              ^^^^</span>
+    <span class="comment">//                              Pasar THIS (el nodo actual)</span>
+}
+</div>
+<h4>Paso 3: Implementar el Visitor concreto (SemanticAnalyzer)</h4>
+<div class="code-block"><span class="keyword">class</span> SemanticAnalyzer <span class="keyword">implements</span> ASTVisitor&lt;<span class="class">Type</span>&gt; {
+    <span class="keyword">private</span> <span class="class">SymbolTable</span> symbolTable;
+    <span class="keyword">private</span> <span class="class">List</span>&lt;<span class="class">SemanticException</span>&gt; errors;
+
+    <span class="keyword">public</span> SemanticAnalyzer() {
+        <span class="keyword">this</span>.symbolTable = <span class="keyword">new</span> <span class="class">SymbolTable</span>(<span class="keyword">null</span>);
+        <span class="keyword">this</span>.errors = <span class="keyword">new</span> <span class="class">ArrayList</span>&lt;&gt;();
+    }
+
+    <span class="comment">// ━━━ MÉTODO PRINCIPAL ━━━</span>
+    <span class="keyword">public</span> <span class="keyword">void</span> analyze(ProgramNode program) {
+        <span class="keyword">try</span> {
+            program.accept(<span class="keyword">this</span>);  <span class="comment">// Iniciar recorrido</span>
+        } <span class="keyword">catch</span> (<span class="class">SemanticException</span> e) {
+            errors.add(e);
+        }
+    }
+
+    <span class="comment">// ━━━ IMPLEMENTAR CADA MÉTODO VISIT ━━━</span>
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitProgramNode(ProgramNode node) {
+        <span class="comment">// Recorrer todos los statements del programa</span>
+        <span class="keyword">for</span> (StatementNode stmt : node.statements) {
+            stmt.accept(<span class="keyword">this</span>);  <span class="comment">// Recursión: visitar cada statement</span>
+        }
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitDeclarationNode(DeclarationNode node) {
+        <span class="comment">// 1. Verificar que no existe en scope actual</span>
+        <span class="keyword">if</span> (symbolTable.existsInCurrentScope(node.name)) {
+            errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Variable '"</span> + node.name + <span class="string">"' ya declarada"</span>, node
+            ));
+            <span class="keyword">return</span> <span class="keyword">null</span>;
+        }
+
+        <span class="comment">// 2. Verificar tipo del inicializador (si existe)</span>
+        <span class="class">Type</span> initType = <span class="keyword">null</span>;
+        <span class="keyword">if</span> (node.initializer != <span class="keyword">null</span>) {
+            initType = node.initializer.accept(<span class="keyword">this</span>);  <span class="comment">// Recursión</span>
+
+            <span class="comment">// Verificar compatibilidad</span>
+            <span class="keyword">if</span> (!initType.isCompatible(node.declaredType)) {
+                errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+                    <span class="string">"No se puede inicializar "</span> + node.declaredType +
+                    <span class="string">" con "</span> + initType, node
+                ));
+            }
+        }
+
+        <span class="comment">// 3. Insertar en tabla de símbolos</span>
+        <span class="class">Symbol</span> symbol = <span class="keyword">new</span> <span class="class">Symbol</span>(
+            node.name,
+            node.declaredType,
+            <span class="class">Scope</span>.CURRENT,
+            node.lineNumber
+        );
+        symbolTable.insert(symbol);
+
+        <span class="keyword">return</span> node.declaredType;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitBinaryOpNode(<span class="class">BinaryOpNode</span> node) {
+        <span class="comment">// 1. Verificar operando izquierdo</span>
+        <span class="class">Type</span> leftType = node.left.accept(<span class="keyword">this</span>);  <span class="comment">// Recursión</span>
+
+        <span class="comment">// 2. Verificar operando derecho</span>
+        <span class="class">Type</span> rightType = node.right.accept(<span class="keyword">this</span>);  <span class="comment">// Recursión</span>
+
+        <span class="comment">// 3. Verificar que la operación es válida</span>
+        <span class="keyword">switch</span> (node.operator) {
+            <span class="keyword">case</span> PLUS:
+            <span class="keyword">case</span> MINUS:
+            <span class="keyword">case</span> MULTIPLY:
+            <span class="keyword">case</span> DIVIDE:
+                <span class="comment">// Ambos deben ser numéricos</span>
+                <span class="keyword">if</span> (!leftType.isNumeric() || !rightType.isNumeric()) {
+                    errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+                        <span class="string">"Operador aritmético requiere operandos numéricos"</span>, node
+                    ));
+                    <span class="keyword">return</span> <span class="class">Type</span>.ERROR;
+                }
+                <span class="comment">// Promover al tipo más amplio</span>
+                <span class="class">Type</span> resultType = <span class="class">Type</span>.widen(leftType, rightType);
+                node.type = resultType;
+                <span class="keyword">return</span> resultType;
+
+            <span class="keyword">case</span> EQUALS:
+            <span class="keyword">case</span> NOT_EQUALS:
+                <span class="comment">// Deben ser compatibles</span>
+                <span class="keyword">if</span> (!leftType.isCompatible(rightType)) {
+                    errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+                        <span class="string">"No se pueden comparar "</span> + leftType + <span class="string">" con "</span> + rightType, node
+                    ));
+                    <span class="keyword">return</span> <span class="class">Type</span>.ERROR;
+                }
+                node.type = <span class="class">Type</span>.BOOLEAN;
+                <span class="keyword">return</span> <span class="class">Type</span>.BOOLEAN;
+
+            <span class="comment">// ... más operadores</span>
+
+            <span class="keyword">default</span>:
+                <span class="keyword">return</span> <span class="class">Type</span>.ERROR;
+        }
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitIdentifierNode(IdentifierNode node) {
+        <span class="comment">// Buscar variable en tabla de símbolos</span>
+        <span class="class">Symbol</span> symbol = symbolTable.lookup(node.name);
+
+        <span class="keyword">if</span> (symbol == <span class="keyword">null</span>) {
+            errors.add(<span class="keyword">new</span> <span class="class">SemanticException</span>(
+                <span class="string">"Variable '"</span> + node.name + <span class="string">"' no declarada"</span>, node
+            ));
+            <span class="keyword">return</span> <span class="class">Type</span>.ERROR;
+        }
+
+        <span class="comment">// Anotar nodo con tipo y símbolo resuelto</span>
+        node.type = symbol.type;
+        node.resolvedSymbol = symbol;
+
+        <span class="keyword">return</span> symbol.type;
+    }
+
+    @Override
+    <span class="keyword">public</span> <span class="class">Type</span> visitNumberNode(NumberNode node) {
+        <span class="comment">// Determinar si es int o double</span>
+        <span class="keyword">if</span> (node.value % <span class="number">1</span> == <span class="number">0</span>) {
+            node.type = <span class="class">Type</span>.INT;
+            <span class="keyword">return</span> <span class="class">Type</span>.INT;
+        } <span class="keyword">else</span> {
+            node.type = <span class="class">Type</span>.DOUBLE;
+            <span class="keyword">return</span> <span class="class">Type</span>.DOUBLE;
+        }
+    }
+
+    <span class="comment">// ... más métodos visit</span>
+}
+</div>
+<h3>Flujo de ejecución con Visitor:</h3>
+<h3>Ejemplo paso a paso:</h3>
+<p>Código:</p>
+<div class="code-block"><span class="keyword">int</span> x = <span class="number">5</span>;
+<span class="keyword">int</span> y = x + <span class="number">10</span>;
+</div>
+<p><strong>Traza completa del Visitor:</strong></p>
+<pre><code class="language-">1. Main.analyze(programNode)
+2. programNode.accept(semanticAnalyzer)
+3. semanticAnalyzer.visitProgramNode(programNode)
+4. Loop: por cada statement
+
+   ━━━ STATEMENT 1: int x = 5; ━━━
+   
+   5. statement[0].accept(semanticAnalyzer)
+   6. declarationNode.accept(semanticAnalyzer)
+   7. semanticAnalyzer.visitDeclarationNode(declarationNode)
+   8.   - Verificar que 'x' no existe: OK
+   9.   - initializer.accept(semanticAnalyzer)
+   10.  - numberNode(5).accept(semanticAnalyzer)
+   11.  - semanticAnalyzer.visitNumberNode(numberNode(5))
+   12.  - Retorna: Type.INT
+   13.  - Verificar compatibilidad: int = int ✓
+   14.  - Insert Symbol('x', INT) en tabla
+   15. Retorna: Type.INT
+
+   ━━━ STATEMENT 2: int y = x + 10; ━━━
+   
+   16. statement[1].accept(semanticAnalyzer)
+   17. declarationNode.accept(semanticAnalyzer)
+   18. semanticAnalyzer.visitDeclarationNode(declarationNode)
+   19.   - Verificar que 'y' no existe: OK
+   20.   - initializer.accept(semanticAnalyzer)
+   21.   - binaryOpNode(+).accept(semanticAnalyzer)
+   22.   - semanticAnalyzer.visitBinaryOpNode(binaryOpNode)
+   23.   - left.accept(semanticAnalyzer)
+   24.   - identifierNode('x').accept(semanticAnalyzer)
+   25.   - semanticAnalyzer.visitIdentifierNode(identifierNode)
+   26.     - lookup('x') → Symbol(x, INT) ✓
+   27.   - Retorna: Type.INT
+   28.   - right.accept(semanticAnalyzer)
+   29.   - numberNode(10).accept(semanticAnalyzer)
+   30.   - Retorna: Type.INT
+   31.   - Verificar operación: INT + INT ✓
+   32.   - Type.widen(INT, INT) → INT
+   33.   - node.type = INT
+   34.   - Retorna: Type.INT
+   35.   - Verificar compatibilidad: int = int ✓
+   36.   - Insert Symbol('y', INT) en tabla
+   37. Retorna: Type.INT
+
+38. Fin del loop
+39. Retorna: null
+40. Análisis completo ✓
+</code></pre>
+<h3>Ventajas del patrón Visitor:</h3>
+<pre><code class="language-">1. SEPARACIÓN DE CONCERNS:
+   - Estructura del AST (nodos) → NO cambia
+   - Operaciones sobre el AST (visitors) → Fácil agregar
+
+2. FÁCIL AGREGAR OPERACIONES:
+   - Nueva operación = Nueva clase Visitor
+   - NO hay que modificar clases AST existentes
+
+3. REUSABILIDAD:
+   - El mismo AST sirve para:
+     * Type checking
+     * Code generation
+     * Pretty printing
+     * Optimización
+     * etc.
+
+4. POLIMORFISMO:
+   - Un solo método accept() en cada nodo
+   - Comportamiento específico delegado al visitor
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué ventaja tiene el patrón Visitor sobre agregar métodos directamente a los nodos?</p>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">SIN Visitor:
+  - Agregar nueva operación → modificar TODAS las clases de nodos
+  - Mezcla estructura con operaciones
+  - Difícil de mantener
+
+CON Visitor:
+  - Agregar nueva operación → crear UNA nueva clase Visitor
+  - Estructura separada de operaciones
+  - Fácil de mantener y extender
+</code></pre>
+        </div>
+        <div class="mermaid">classDiagram
+    class ASTVisitor {
+        <<interface>>
+        +visitProgramNode(node) Type
+        +visitDeclarationNode(node) Type
+        +visitAssignmentNode(node) Type
+        +visitBinaryOpNode(node) Type
+        +visitIdentifierNode(node) Type
+        +visitNumberNode(node) Type
+    }
+
+    class SemanticAnalyzer {
+        -symbolTable SymbolTable
+        -errors List~Error~
+        +analyze(program)
+        +visitProgramNode(node) Type
+        +visitDeclarationNode(node) Type
+    }
+
+    class ASTNode {
+        <<abstract>>
+        +lineNumber int
+        +columnNumber int
+        +accept(visitor) T
+    }
+
+    class ProgramNode {
+        +statements List~Statement~
+        +accept(visitor) T
+    }
+
+    class DeclarationNode {
+        +type Type
+        +name String
+        +initializer Expression
+        +accept(visitor) T
+    }
+
+    class BinaryOpNode {
+        +left Expression
+        +operator Operator
+        +right Expression
+        +accept(visitor) T
+    }
+
+    ASTVisitor <|.. SemanticAnalyzer
+    ASTNode <|-- ProgramNode
+    ASTNode <|-- DeclarationNode
+    ASTNode <|-- BinaryOpNode
+
+    ProgramNode ..> ASTVisitor : accept()
+    DeclarationNode ..> ASTVisitor : accept()
+    BinaryOpNode ..> ASTVisitor : accept()</div>
+        <div class="mermaid">sequenceDiagram
+    participant Main
+    participant SA as SemanticAnalyzer
+    participant PN as ProgramNode
+    participant DN as DeclarationNode
+    participant BO as BinaryOpNode
+    participant ID as IdentifierNode
+
+    Main->>SA: analyze(programNode)
+    SA->>PN: programNode.accept(this)
+    PN->>SA: visitProgramNode(this)
+
+    loop Por cada statement
+        SA->>DN: statement.accept(this)
+        DN->>SA: visitDeclarationNode(this)
+        
+        alt Tiene inicializador
+            SA->>BO: initializer.accept(this)
+            BO->>SA: visitBinaryOpNode(this)
+            SA->>ID: left.accept(this)
+            ID->>SA: visitIdentifierNode(this)
+            SA-->>BO: Type.INT
+            BO-->>SA: Type.INT
+        end
+        
+        SA->>SA: symbolTable.insert(symbol)
+        SA-->>PN: Type
+    end
+
+    PN-->>SA: null
+    SA-->>Main: Análisis completo</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide14.html" class="nav-btn">← Anterior</a>
+        <a href="slide16.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 15 > 1) {
+                window.location.href = 'slide14.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 15 < 23) {
+                window.location.href = 'slide16.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

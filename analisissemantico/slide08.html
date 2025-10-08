@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico - Scopes y Contextos - Entendiendo el Alcance</title>
+    <link rel="stylesheet" href="syntax-highlight.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #FFD700;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #FFF;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            color: #E0E0E0;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin: 0.8rem 0;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8e6cf;
+        }
+
+        pre code {
+            color: #a8e6cf;
+        }
+
+        .content code {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FFD700;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #FFD700;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #FFD700;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            max-width: 1400px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            margin: 1rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-number">Página 8 de 23</div>
+
+    <div class="container">
+        <h1>Scopes y Contextos - Entendiendo el Alcance</h1>
+        <div class="content">
+            <h3>¿Qué es un Scope (Ámbito)?</h3>
+<p>Un <strong>scope</strong> es la región del código donde un identificador es válido y puede ser usado.</p>
+<p><strong>Analogía:</strong> Piensa en los scopes como habitaciones en una casa:</p>
+<ul>
+<li>Puedes ver lo que está en tu habitación (scope local)</li>
+<li>Puedes ver lo que está en el pasillo (scope padre)</li>
+<li>Puedes ver lo que está en la sala (scope global)</li>
+<li>NO puedes ver lo que está en la habitación de tu hermano (scope hermano)</li>
+</ul>
+<h3>Ejemplo paso a paso con múltiples scopes:</h3>
+<p>Analicemos este código línea por línea:</p>
+<div class="code-block"><span class="comment">// SCOPE GLOBAL</span>
+<span class="keyword">int</span> global = <span class="number">100</span>;           <span class="comment">// Línea 1: Scope global</span>
+
+<span class="keyword">void</span> foo() {                <span class="comment">// Línea 3: Inicio scope función</span>
+    <span class="keyword">int</span> local = <span class="number">50</span>;         <span class="comment">// Línea 4: Scope función foo</span>
+
+    <span class="keyword">if</span> (local &gt; <span class="number">0</span>) {        <span class="comment">// Línea 6: Inicio scope bloque if</span>
+        <span class="keyword">int</span> nested = <span class="number">25</span>;    <span class="comment">// Línea 7: Scope bloque if</span>
+        System.out.println(global);  <span class="comment">// Línea 8</span>
+        System.out.println(local);   <span class="comment">// Línea 9</span>
+        System.out.println(nested);  <span class="comment">// Línea 10</span>
+    }                       <span class="comment">// Línea 11: Fin scope bloque if</span>
+
+    System.out.println(nested);  <span class="comment">// Línea 13: ✗ ERROR</span>
+}                           <span class="comment">// Línea 14: Fin scope función</span>
+
+<span class="keyword">void</span> bar() {                <span class="comment">// Línea 16: Inicio scope función bar</span>
+    System.out.println(local);   <span class="comment">// Línea 17: ✗ ERROR</span>
+}
+</div>
+<p><strong>Análisis detallado:</strong></p>
+<h4>Línea 1: <code>int global = 100;</code></h4>
+<p><strong>Scope:</strong> GLOBAL</p>
+<p><strong>Acción:</strong> Crear variable "global" en scope global</p>
+<p><strong>Tabla de Símbolos Global:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global</td>
+<td>int</td>
+<td>global</td>
+</tr>
+</tbody>
+</table>
+<h4>Línea 4: <code>int local = 50;</code> (dentro de <code>foo</code>)</h4>
+<p><strong>Scope:</strong> FUNCIÓN FOO (hijo de global)</p>
+<p><strong>Acción:</strong> Crear variable "local" en scope de foo</p>
+<p><strong>Tabla de Símbolos de foo:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>local</td>
+<td>int</td>
+<td>local</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tabla Global (padre de foo):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global</td>
+<td>int</td>
+<td>global</td>
+</tr>
+</tbody>
+</table>
+<h4>Línea 7: <code>int nested = 25;</code> (dentro del <code>if</code>)</h4>
+<p><strong>Scope:</strong> BLOQUE IF (hijo de foo, nieto de global)</p>
+<p><strong>Acción:</strong> Crear variable "nested" en scope del if</p>
+<p><strong>Tabla de Símbolos del bloque if:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nested</td>
+<td>int</td>
+<td>local</td>
+</tr>
+</tbody>
+</table>
+<h4>Línea 8: <code>System.out.println(global);</code></h4>
+<pre><code class="language-">Scope actual: BLOQUE IF
+Pregunta: ¿Existe "global"?
+
+Búsqueda:
+1. Buscar en scope if → No encontrado
+2. Buscar en scope foo (padre) → No encontrado
+3. Buscar en scope global (abuelo) → ✓ ENCONTRADO
+
+Resultado: ✓ OK, usar global = 100
+</code></pre>
+<h4>Línea 9: <code>System.out.println(local);</code></h4>
+<pre><code class="language-">Scope actual: BLOQUE IF
+Pregunta: ¿Existe "local"?
+
+Búsqueda:
+1. Buscar en scope if → No encontrado
+2. Buscar en scope foo (padre) → ✓ ENCONTRADO
+
+Resultado: ✓ OK, usar local = 50
+</code></pre>
+<h4>Línea 10: <code>System.out.println(nested);</code></h4>
+<pre><code class="language-">Scope actual: BLOQUE IF
+Pregunta: ¿Existe "nested"?
+
+Búsqueda:
+1. Buscar en scope if → ✓ ENCONTRADO
+
+Resultado: ✓ OK, usar nested = 25
+</code></pre>
+<h4>Línea 13: <code>System.out.println(nested);</code> (fuera del <code>if</code>)</h4>
+<pre><code class="language-">Scope actual: FUNCIÓN FOO
+Pregunta: ¿Existe "nested"?
+
+Búsqueda:
+1. Buscar en scope foo → No encontrado
+2. Buscar en scope global (padre) → No encontrado
+3. No hay más scopes padre
+
+Resultado: ✗ ERROR
+Error: Variable 'nested' no declarada en línea 13
+</code></pre>
+<p><strong>¿Por qué?</strong> Porque <code>nested</code> fue declarada en el scope del <code>if</code>, y ya salimos de ese scope (línea 11).</p>
+<h4>Línea 17: <code>System.out.println(local);</code> (en función <code>bar</code>)</h4>
+<pre><code class="language-">Scope actual: FUNCIÓN BAR
+Pregunta: ¿Existe "local"?
+
+Búsqueda:
+1. Buscar en scope bar → No encontrado
+2. Buscar en scope global (padre) → No encontrado
+3. No hay más scopes padre
+
+Resultado: ✗ ERROR
+Error: Variable 'local' no declarada en línea 17
+</code></pre>
+<p><strong>¿Por qué?</strong> Porque <code>local</code> fue declarada en el scope de <code>foo</code>, y <code>bar</code> es una función HERMANA (no hija) de <code>foo</code>. Los scopes hermanos NO pueden verse entre sí.</p>
+<h3>Reglas de scope (MEMORIZA ESTO):</h3>
+<pre><code class="language-">1. SCOPE ACTUAL:
+   ✓ Puedes ver todas las variables declaradas en el scope actual
+
+2. SCOPES PADRE (hacia arriba):
+   ✓ Puedes ver todas las variables de scopes padre/abuelo/etc.
+   Buscar desde el más interno hacia el más externo
+
+3. SCOPES HIJO (hacia abajo):
+   ✗ NO puedes ver variables de scopes hijos
+
+4. SCOPES HERMANO (lateral):
+   ✗ NO puedes ver variables de scopes hermanos
+</code></pre>
+<h3>Diagrama de visibilidad:</h3>
+<pre><code class="language-">Global Scope {global}
+   ↓ (visible hacia abajo)
+   ├─ Función foo {local}
+   │    ↓ (visible hacia abajo)
+   │    └─ Bloque if {nested}
+   │         ↑ (busca hacia arriba)
+   │         ✓ Puede ver: nested, local, global
+   │
+   └─ Función bar {}
+        ✗ NO puede ver: local (está en foo, scope hermano)
+        ✓ PUEDE ver: global (scope padre)
+</code></pre>
+<h3>Pregunta de comprensión:</h3>
+<p>¿Qué imprime este código y dónde hay errores?</p>
+<div class="code-block"><span class="keyword">int</span> a = <span class="number">10</span>;
+
+<span class="keyword">void</span> test() {
+    <span class="keyword">int</span> b = <span class="number">20</span>;
+
+    {
+        <span class="keyword">int</span> c = <span class="number">30</span>;
+        System.out.println(a);  <span class="comment">// Línea 7</span>
+        System.out.println(b);  <span class="comment">// Línea 8</span>
+        System.out.println(c);  <span class="comment">// Línea 9</span>
+    }
+
+    System.out.println(c);      <span class="comment">// Línea 12</span>
+}
+</div>
+<p><strong>Respuesta:</strong></p>
+<pre><code class="language-">Línea 7: ✓ OK - Imprime 10 (a está en global, visible)
+Línea 8: ✓ OK - Imprime 20 (b está en test, visible)
+Línea 9: ✓ OK - Imprime 30 (c está en scope actual)
+Línea 12: ✗ ERROR - c no visible (declarada en bloque interno que ya terminó)
+</code></pre>
+        </div>
+        <div class="mermaid">graph TB
+    A[Global Scope<br/>Casa completa] --> B[Función main<br/>Habitación 1]
+    A --> C[Función foo<br/>Habitación 2]
+    B --> D[Bloque if<br/>Closet en Hab.1]
+    B --> E[Bloque while<br/>Baño en Hab.1]
+    D --> F[Bloque anidado<br/>Cajón en Closet]
+
+    style A fill:#e3f2fd,stroke:#1976d2
+    style B fill:#fff3e0,stroke:#f57c00
+    style C fill:#fff3e0,stroke:#f57c00
+    style D fill:#fce4ec,stroke:#c2185b
+    style E fill:#fce4ec,stroke:#c2185b
+    style F fill:#f3e5f5,stroke:#7b1fa2</div>
+    </div>
+
+    <div class="navigation">
+        <a href="slide07.html" class="nav-btn">← Anterior</a>
+        <a href="slide09.html" class="nav-btn">Siguiente →</a>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && 8 > 1) {
+                window.location.href = 'slide07.html';
+            } else if ((e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') && 8 < 23) {
+                window.location.href = 'slide09.html';
+            } else if (e.key === 'Escape') {
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>
