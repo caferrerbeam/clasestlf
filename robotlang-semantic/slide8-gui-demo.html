@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 8: GUI - Probando tu Implementación</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --font-mono: 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-gradient);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 3rem;
+        }
+
+        .gui-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-purple);
+        }
+
+        .gui-section h3 {
+            color: var(--primary-purple);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .screenshot {
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--border-color);
+        }
+
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .description {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .description h4 {
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .steps {
+            background: #ede9fe;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .steps h4 {
+            color: var(--primary-purple);
+            margin-bottom: 1rem;
+        }
+
+        .steps ol {
+            margin-left: 1.5rem;
+            line-height: 2;
+        }
+
+        .steps ol li {
+            margin: 0.5rem 0;
+        }
+
+        .steps code {
+            background: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: var(--font-mono);
+            color: var(--primary-purple);
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+            border: 3px solid var(--accent-orange);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent-orange);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-purple);
+        }
+
+        .feature-card h5 {
+            color: var(--primary-purple);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary-purple);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: var(--font-mono);
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .intro-box h4 {
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ GUI de RoboLang IDE</h1>
+            <p>Probando tu implementación de análisis semántico</p>
+        </div>
+
+        <div class="content">
+            <!-- Introducción -->
+            <div class="intro-box">
+                <h4>📚 ¿Para qué sirve la GUI?</h4>
+                <p>
+                    La GUI de RoboLang IDE te permite <strong>visualizar y probar</strong> todos los componentes
+                    del lenguaje que has implementado: lexer, parser, AST, y análisis semántico.
+                    Es una herramienta visual para <strong>verificar</strong> que tu código funciona correctamente.
+                </p>
+            </div>
+
+            <!-- Cómo ejecutar la GUI -->
+            <div class="steps">
+                <h4>🚀 Cómo Ejecutar la GUI</h4>
+                <ol>
+                    <li>Abre el proyecto en tu IDE (IntelliJ IDEA, Eclipse, VS Code)</li>
+                    <li>Navega al archivo: <code>src/main/java/gui/RoboLangIDE.java</code></li>
+                    <li>Ejecuta el método <code>main()</code></li>
+                    <li>Se abrirá la ventana de la aplicación</li>
+                </ol>
+            </div>
+
+            <!-- 1. Pantalla Inicial -->
+            <div class="gui-section">
+                <h3>1️⃣ Pantalla Inicial</h3>
+
+                <div class="screenshot">
+                    <img src="images/guiinicio.png" alt="Pantalla inicial de RoboLang IDE">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué ves aquí?</h4>
+                    <p>
+                        La pantalla inicial te muestra el <strong>editor de código</strong> donde puedes escribir
+                        programas en RoboLang. En la parte superior están las pestañas para ver diferentes vistas
+                        del análisis.
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>Editor:</strong> Escribe tu código RoboLang aquí</li>
+                        <li><strong>Pestañas superiores:</strong> Tokens, AST, Consola, Símbolos, Visitors</li>
+                        <li><strong>Botones:</strong> Analizar, Limpiar, Cargar archivo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 2. Menú y Opciones -->
+            <div class="gui-section">
+                <h3>2️⃣ Menú y Opciones</h3>
+
+                <div class="screenshot">
+                    <img src="images/guimenu.png" alt="Menú de opciones">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué opciones hay?</h4>
+                    <p>
+                        El menú superior te permite:
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>Archivo:</strong> Abrir, guardar, cerrar programas</li>
+                        <li><strong>Analizar:</strong> Ejecutar el análisis léxico, sintáctico y semántico</li>
+                        <li><strong>Ver:</strong> Cambiar entre diferentes vistas (Tokens, AST, Consola, etc.)</li>
+                        <li><strong>Ayuda:</strong> Documentación y acerca de</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 3. Vista de Tokens -->
+            <div class="gui-section">
+                <h3>3️⃣ Vista de Tokens (Análisis Léxico)</h3>
+
+                <div class="screenshot">
+                    <img src="images/guitokens.png" alt="Vista de tokens">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué ves aquí?</h4>
+                    <p>
+                        Esta vista muestra la salida del <strong>lexer</strong>. Cada token identificado se muestra
+                        con su tipo, valor y posición en el código.
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>Tipo:</strong> KEYWORD_VAR, IDENTIFIER, NUMBER, etc.</li>
+                        <li><strong>Valor:</strong> El texto literal del token</li>
+                        <li><strong>Posición:</strong> Línea y columna donde aparece</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>💡 Tip de Debugging</h4>
+                    <p>
+                        Si tu programa no se analiza correctamente, <strong>revisa primero la vista de tokens</strong>.
+                        Verifica que todos los tokens se hayan identificado correctamente.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 4. Vista de AST -->
+            <div class="gui-section">
+                <h3>4️⃣ Vista de AST (Árbol Sintáctico Abstracto)</h3>
+
+                <div class="screenshot">
+                    <img src="images/guiast.png" alt="Vista del AST">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué ves aquí?</h4>
+                    <p>
+                        Esta vista muestra el <strong>AST generado por el parser</strong>. Puedes ver la estructura
+                        jerárquica de tu programa en forma de árbol visual.
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>Nodos del árbol:</strong> Cada nodo representa un elemento del programa</li>
+                        <li><strong>Estructura jerárquica:</strong> Los nodos hijos están indentados</li>
+                        <li><strong>Información del nodo:</strong> Tipo de nodo, valor, línea</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>💡 Tip de Debugging</h4>
+                    <p>
+                        Usa esta vista para verificar que el parser construyó el AST correctamente.
+                        Si ves nodos inesperados o faltantes, revisa tu implementación del parser.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 5. Vista de Consola -->
+            <div class="gui-section">
+                <h3>5️⃣ Vista de Consola (Errores y Warnings)</h3>
+
+                <div class="screenshot">
+                    <img src="images/guiconsola.png" alt="Vista de consola">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué ves aquí?</h4>
+                    <p>
+                        La consola muestra todos los <strong>errores y warnings</strong> del análisis semántico.
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>Errores (rojo):</strong> Variable no declarada, redeclaración, etc.</li>
+                        <li><strong>Warnings (amarillo):</strong> Variable no inicializada, etc.</li>
+                        <li><strong>Ubicación:</strong> Línea y columna del error</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>⚠️ Importante</h4>
+                    <p>
+                        Esta es la salida de tu <code>SemanticAnalyzerVisitor</code>.
+                        Si no ves los errores esperados, revisa tu implementación de los métodos <code>visitXXX()</code>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 6. Vista de Tabla de Símbolos -->
+            <div class="gui-section">
+                <h3>6️⃣ Vista de Tabla de Símbolos</h3>
+
+                <div class="screenshot">
+                    <img src="images/guisimbolos.png" alt="Vista de tabla de símbolos">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué ves aquí?</h4>
+                    <p>
+                        Esta vista muestra el contenido de la <strong>tabla de símbolos</strong> después del análisis.
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>Nombre:</strong> Nombre de la variable</li>
+                        <li><strong>Tipo:</strong> UNKNOWN, NUMBER, BOOLEAN, etc.</li>
+                        <li><strong>Inicializada:</strong> Si o No</li>
+                        <li><strong>Declaración:</strong> Línea y columna donde se declaró</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>💡 Cómo Verificar tu Implementación</h4>
+                    <p>
+                        Verifica que:
+                    </p>
+                    <ul style="margin-top: 0.5rem; line-height: 1.8;">
+                        <li>Todas las variables declaradas aparecen en la tabla</li>
+                        <li>Las variables asignadas están marcadas como inicializadas</li>
+                        <li>La posición de declaración es correcta</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7. Vista de Estadísticas de Visitors -->
+            <div class="gui-section">
+                <h3>7️⃣ Vista de Estadísticas de Visitors</h3>
+
+                <div class="screenshot">
+                    <img src="images/guivisitorscount.png" alt="Vista de estadísticas de visitors">
+                </div>
+
+                <div class="description">
+                    <h4>¿Qué ves aquí?</h4>
+                    <p>
+                        Esta vista muestra las <strong>estadísticas recopiladas por los visitors</strong> que implementaste.
+                    </p>
+                    <ul style="margin-top: 1rem; line-height: 1.8;">
+                        <li><strong>CommandCounterVisitor:</strong> Conteo de comandos (UP, DOWN, etc.)</li>
+                        <li><strong>SensorUsageVisitor:</strong> Sensores usados y en qué líneas</li>
+                        <li><strong>Análisis útil:</strong> Estadísticas del programa</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>✅ Verificación de tu Ejercicio</h4>
+                    <p>
+                        Esta vista te permite verificar que tu <code>SensorUsageVisitor</code> funciona correctamente.
+                        Debes ver:
+                    </p>
+                    <ul style="margin-top: 0.5rem; line-height: 1.8;">
+                        <li>Lista de sensores detectados (BATTERY, TEMP, LIGHT, etc.)</li>
+                        <li>Número de veces que se usó cada sensor</li>
+                        <li>Líneas donde aparece cada sensor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Características Principales -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: var(--primary-purple); margin-bottom: 2rem;">✨ Características Principales de la GUI</h3>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h5>📝 Editor de Código</h5>
+                        <p>Escribe y edita programas RoboLang con numeración de líneas.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h5>🔍 Análisis en Tiempo Real</h5>
+                        <p>Analiza tu código y ve los resultados inmediatamente.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h5>🌳 Visualización de AST</h5>
+                        <p>Ve el árbol sintáctico en formato gráfico interactivo.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h5>📊 Tabla de Símbolos</h5>
+                        <p>Inspecciona todas las variables declaradas y su estado.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h5>🚨 Detección de Errores</h5>
+                        <p>Ve errores y warnings con ubicación precisa.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h5>📈 Estadísticas</h5>
+                        <p>Analiza el uso de comandos y sensores en tu programa.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flujo de Trabajo Recomendado -->
+            <div class="steps">
+                <h4>🔄 Flujo de Trabajo Recomendado</h4>
+                <ol>
+                    <li><strong>Escribe el código:</strong> Usa el editor para escribir tu programa RoboLang</li>
+                    <li><strong>Analiza:</strong> Presiona el botón "Analizar" (o usa el menú)</li>
+                    <li><strong>Revisa Tokens:</strong> Verifica que el lexer funcionó correctamente</li>
+                    <li><strong>Revisa AST:</strong> Verifica que el parser construyó el árbol correctamente</li>
+                    <li><strong>Revisa Consola:</strong> Ve si hay errores o warnings semánticos</li>
+                    <li><strong>Revisa Símbolos:</strong> Verifica que las variables están en la tabla</li>
+                    <li><strong>Revisa Estadísticas:</strong> Ve el análisis de uso de comandos y sensores</li>
+                    <li><strong>Corrige errores:</strong> Si hay problemas, modifica el código y vuelve a analizar</li>
+                </ol>
+            </div>
+
+            <!-- Tips de Debugging -->
+            <div style="background: #fef2f2; border-left: 4px solid var(--accent-red); padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0;">
+                <h4 style="color: var(--accent-red); margin-bottom: 1rem;">🐛 Tips de Debugging</h4>
+                <ul style="line-height: 2;">
+                    <li><strong>Si no ves tokens:</strong> Revisa tu implementación del lexer</li>
+                    <li><strong>Si el AST está vacío:</strong> Revisa tu implementación del parser</li>
+                    <li><strong>Si no ves errores semánticos:</strong> Revisa los métodos <code>visitXXX()</code> en tu SemanticAnalyzerVisitor</li>
+                    <li><strong>Si la tabla está vacía:</strong> Verifica que <code>visitVariableDeclaration()</code> llame a <code>symbolTable.declare()</code></li>
+                    <li><strong>Si no hay estadísticas:</strong> Revisa tu implementación de CommandCounterVisitor y SensorUsageVisitor</li>
+                </ul>
+            </div>
+
+            <!-- Navegación -->
+            <div class="nav-buttons">
+                <a href="slide7-semantic-analyzer.html" class="btn btn-secondary">← Anterior: SemanticAnalyzerVisitor</a>
+                <a href="index.html" class="btn btn-primary">🏠 Volver al Índice</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Highlight code blocks
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    </script>
+</body>
+</html>
