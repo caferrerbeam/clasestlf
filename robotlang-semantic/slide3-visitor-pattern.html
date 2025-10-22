@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 3: Patrón Visitor - Fundamentos | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .pattern-explanation {
+            background: linear-gradient(to right, #ede9fe, #ddd6fe);
+            border-left: 4px solid var(--accent-purple);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+        }
+
+        .problem-solution {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .problem-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
+
+        .solution-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
+
+        .visitor-flow {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            position: relative;
+            padding-left: 4rem;
+        }
+
+        .flow-step::before {
+            content: "→";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        .code-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-panel {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: var(--accent-purple);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .panel-content {
+            padding: 1rem;
+        }
+
+        .benefit-card {
+            background: white;
+            border-left: 4px solid var(--secondary-green);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .method-signature {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-family: var(--font-mono);
+            margin: 0.5rem 0;
+        }
+
+        .visitor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .visitor-table th {
+            background: var(--accent-purple);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .visitor-table td {
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .visitor-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .problem-solution {
+                grid-template-columns: 1fr;
+            }
+
+            .code-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🎨 Patrón Visitor - Fundamentos</h1>
+                <p class="subtitle">Slide 3 - El patrón de diseño que hace posible el análisis semántico</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 3 DE 7</div>
+            <h2>El Patrón Visitor</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                Aprende cómo separar algoritmos de estructuras de datos para crear análisis reutilizables
+            </p>
+        </div>
+
+        <!-- El Problema que Resuelve Visitor -->
+        <div class="content-section">
+            <h3>🤔 El Problema que Resuelve Visitor</h3>
+            <p>
+                Imagina que tienes tu AST perfectamente construido. Ahora quieres hacer diferentes
+                operaciones sobre él: contar comandos, analizar sensores, verificar variables, generar código, etc.
+            </p>
+
+            <div class="problem-solution">
+                <div class="problem-box">
+                    <h4>❌ Enfoque Tradicional (Problemático)</h4>
+                    <p>Agregar métodos directamente a cada clase de nodo:</p>
+                    <pre style="margin-top: 1rem;"><code class="language-java">class RepeatStatementNode {
+    void count() { ... }
+    void analyzeSensors() { ... }
+    void checkVariables() { ... }
+    void generateCode() { ... }
+    // ¡Cada nueva operación
+    // requiere modificar TODAS
+    // las clases!
+}</code></pre>
+                    <p style="margin-top: 1rem; color: #dc2626; font-weight: 600;">
+                        Problemas:
+                    </p>
+                    <ul style="color: #7f1d1d; line-height: 1.8;">
+                        <li>Viola el principio Open/Closed</li>
+                        <li>Mezla responsabilidades</li>
+                        <li>Dificulta el mantenimiento</li>
+                        <li>Código esparcido en muchas clases</li>
+                    </ul>
+                </div>
+
+                <div class="solution-box">
+                    <h4>✅ Solución con Visitor</h4>
+                    <p>Separar las operaciones en clases Visitor independientes:</p>
+                    <pre style="margin-top: 1rem;"><code class="language-java">class CounterVisitor {
+    void visitRepeat(...) { ... }
+    void visitIf(...) { ... }
+    // Toda la lógica de
+    // conteo en UN SOLO LUGAR
+}
+
+class AnalysisVisitor {
+    void visitRepeat(...) { ... }
+    void visitIf(...) { ... }
+    // Toda la lógica de
+    // análisis en UN SOLO LUGAR
+}</code></pre>
+                    <p style="margin-top: 1rem; color: #047857; font-weight: 600;">
+                        Beneficios:
+                    </p>
+                    <ul style="color: #064e3b; line-height: 1.8;">
+                        <li>Agregar operaciones sin modificar nodos</li>
+                        <li>Cada visitor tiene una responsabilidad</li>
+                        <li>Código organizado y mantenible</li>
+                        <li>Fácil de testear</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Definición Formal del Patrón -->
+        <div class="content-section">
+            <h3>📖 Definición Formal del Patrón Visitor</h3>
+
+            <div class="pattern-explanation">
+                <h4 style="color: var(--accent-purple);">¿Qué es el Patrón Visitor?</h4>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">
+                    El patrón Visitor <strong>separa un algoritmo de la estructura de objetos</strong>
+                    sobre la que opera. Permite definir <strong>nuevas operaciones</strong> sin cambiar
+                    las clases de los elementos sobre los que opera.
+                </p>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Componentes del Patrón:</h4>
+
+            <div class="benefit-card">
+                <h5>1. Visitor (Interface)</h5>
+                <p>
+                    Declara un método <code>visit()</code> para cada tipo de elemento que puede visitar.
+                    En RoboLang: <code>ASTVisitor&lt;T&gt;</code>
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>2. ConcreteVisitor (Implementación)</h5>
+                <p>
+                    Implementa cada operación específica definida en Visitor.
+                    En RoboLang: <code>CounterVisitor</code>, <code>AnalysisVisitor</code>, <code>ValidationVisitor</code>, etc.
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>3. Element (Interfaz de Elemento)</h5>
+                <p>
+                    Define un método <code>accept(Visitor)</code> que recibe un visitor.
+                    En RoboLang: la clase base <code>ASTNode</code>
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>4. ConcreteElement (Implementación)</h5>
+                <p>
+                    Implementa <code>accept()</code> llamando al método visit correspondiente.
+                    En RoboLang: <code>RepeatStatementNode</code>, <code>IfStatementNode</code>, etc.
+                </p>
+            </div>
+        </div>
+
+        <!-- Diagrama UML del Patrón -->
+        <div class="content-section">
+            <h3>📐 Estructura del Patrón Visitor (Diagrama UML)</h3>
+            <p>
+                Esta es la estructura general del patrón Visitor aplicada a RoboLang:
+            </p>
+
+            <div class="mermaid">
+graph TB
+    subgraph "Visitor Interface"
+        ASTVisitor["ASTVisitor&lt;T&gt;<br/><i>interface</i>"]
+    end
+
+    subgraph "Concrete Visitors"
+        CounterVisitor["CounterVisitor<br/>-counter: int<br/>+analyze()<br/>+getCount()"]
+        ValidationVisitor["ValidationVisitor<br/>-errors: List<br/>+analyze()<br/>+validate()"]
+    end
+
+    subgraph "AST Elements"
+        ASTNode["ASTNode<br/><i>abstract</i><br/>+accept(visitor)"]
+        RepeatNode["RepeatStatementNode<br/>+accept(visitor)"]
+        IfNode["IfStatementNode<br/>+accept(visitor)"]
+        MoveNode["MovementCommandNode<br/>+accept(visitor)"]
+    end
+
+    %% Implements relationships
+    ASTVisitor -.implements.- CounterVisitor
+    ASTVisitor -.implements.- ValidationVisitor
+
+    %% Extends relationships
+    ASTNode -->|extends| RepeatNode
+    ASTNode -->|extends| IfNode
+    ASTNode -->|extends| MoveNode
+
+    %% Uses relationships
+    ASTNode -.uses.- ASTVisitor
+    CounterVisitor -.visits.- ASTNode
+    ValidationVisitor -.visits.- ASTNode
+
+    style ASTVisitor fill:#8b5cf6,color:#fff,stroke:#6d28d9,stroke-width:3px
+    style ASTNode fill:#3b82f6,color:#fff,stroke:#1d4ed8,stroke-width:3px
+    style CounterVisitor fill:#10b981,color:#fff,stroke:#047857,stroke-width:2px
+    style ValidationVisitor fill:#10b981,color:#fff,stroke:#047857,stroke-width:2px
+    style RepeatNode fill:#60a5fa,color:#fff
+    style IfNode fill:#60a5fa,color:#fff
+    style MoveNode fill:#60a5fa,color:#fff
+            </div>
+        </div>
+
+        <!-- La Interface ASTVisitor -->
+        <div class="content-section">
+            <h3>🔍 La Interface ASTVisitor&lt;T&gt;</h3>
+            <p>
+                Esta es la interfaz central del patrón en RoboLang. Veamos su estructura completa:
+            </p>
+
+            <pre><code class="language-java">/**
+ * Interfaz Visitor para recorrer el AST de RoboLang.
+ *
+ * @param &lt;T&gt; El tipo de resultado que retorna el visitor
+ */
+public interface ASTVisitor&lt;T&gt; {
+
+    // ========== Program ==========
+    T visitProgram(ProgramNode node);
+
+    // ========== Statements ==========
+    T visitStatementList(StatementListNode node);
+    T visitRepeatStatement(RepeatStatementNode node);
+    T visitIfStatement(IfStatementNode node);
+    T visitWhileStatement(WhileStatementNode node);
+    T visitVariableDeclaration(VariableDeclarationNode node);
+    T visitAssignment(AssignmentNode node);
+
+    // ========== Commands ==========
+    T visitMovementCommand(MovementCommandNode node);
+    T visitPenCommand(PenCommandNode node);
+
+    // ========== Expressions ==========
+    T visitCondition(ConditionNode node);
+    T visitOrExpression(OrExpressionNode node);
+    T visitAndExpression(AndExpressionNode node);
+    T visitComparisonExpression(ComparisonExpressionNode node);
+
+    // ========== Literals ==========
+    T visitNumber(NumberNode node);
+    T visitBoolean(BooleanNode node);
+    T visitIdentifier(IdentifierNode node);
+    T visitSensor(SensorNode node);
+
+    // ... y más métodos para cada tipo de nodo
+}</code></pre>
+
+            <div class="highlight-box">
+                <h4>💡 Observaciones Clave:</h4>
+                <ol style="line-height: 2;">
+                    <li><strong>Genérico &lt;T&gt;:</strong> Permite que cada visitor retorne un tipo diferente
+                        <ul style="margin-top: 0.5rem;">
+                            <li><code>CounterVisitor implements ASTVisitor&lt;Void&gt;</code> - no retorna nada</li>
+                            <li><code>ValidationVisitor implements ASTVisitor&lt;List&lt;String&gt;&gt;</code> - retorna lista de errores</li>
+                            <li><code>TypeAnalyzer implements ASTVisitor&lt;Type&gt;</code> - retorna el tipo detectado</li>
+                        </ul>
+                    </li>
+                    <li style="margin-top: 1rem;"><strong>Un método por tipo de nodo:</strong> Hay un método <code>visitXXX()</code> específico para cada tipo de nodo del AST</li>
+                    <li style="margin-top: 1rem;"><strong>Type-safe:</strong> El compilador garantiza que implementes todos los métodos necesarios</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Relación con los Nodos del AST -->
+        <div class="content-section">
+            <h3>🔗 Relación entre Métodos Visit y Nodos del AST</h3>
+            <p>
+                Cada método de la interfaz <code>ASTVisitor</code> se corresponde con un tipo de nodo del AST:
+            </p>
+
+            <table class="visitor-table">
+                <thead>
+                    <tr>
+                        <th>Método del Visitor</th>
+                        <th>Tipo de Nodo AST</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>visitProgram(ProgramNode)</code></td>
+                        <td>ProgramNode</td>
+                        <td>Procesar el programa completo</td>
+                    </tr>
+                    <tr>
+                        <td><code>visitRepeatStatement(RepeatStatementNode)</code></td>
+                        <td>RepeatStatementNode</td>
+                        <td>Procesar una sentencia REPEAT</td>
+                    </tr>
+                    <tr>
+                        <td><code>visitIfStatement(IfStatementNode)</code></td>
+                        <td>IfStatementNode</td>
+                        <td>Procesar una sentencia IF</td>
+                    </tr>
+                    <tr>
+                        <td><code>visitMovementCommand(MovementCommandNode)</code></td>
+                        <td>MovementCommandNode</td>
+                        <td>Procesar comandos UP/DOWN/LEFT/RIGHT</td>
+                    </tr>
+                    <tr>
+                        <td><code>visitVariableDeclaration(VariableDeclarationNode)</code></td>
+                        <td>VariableDeclarationNode</td>
+                        <td>Procesar declaración VAR</td>
+                    </tr>
+                    <tr>
+                        <td><code>visitCondition(ConditionNode)</code></td>
+                        <td>ConditionNode</td>
+                        <td>Procesar expresiones booleanas</td>
+                    </tr>
+                    <tr>
+                        <td><code>visitIdentifier(IdentifierNode)</code></td>
+                        <td>IdentifierNode</td>
+                        <td>Procesar uso de variables</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin-top: 1.5rem;">
+                <strong>Regla importante:</strong> Si agregas un nuevo tipo de nodo al AST,
+                debes agregar el método <code>visitNuevoNodo()</code> correspondiente a la interfaz.
+            </p>
+        </div>
+
+        <!-- Flujo de Ejecución: accept() y visit() -->
+        <div class="content-section">
+            <h3>🔄 Flujo de Ejecución: accept() y visit()</h3>
+            <p>
+                El patrón Visitor utiliza un mecanismo de <strong>doble dispatch</strong>.
+                Veamos cómo funciona paso a paso:
+            </p>
+
+            <div class="visitor-flow">
+                <div class="flow-step">
+                    <h5>Paso 1: El cliente llama a accept() en un nodo</h5>
+                    <pre><code class="language-java">RepeatStatementNode repeatNode = ...; // Algún nodo del AST
+CounterVisitor visitor = new CounterVisitor();
+
+repeatNode.accept(visitor);  // ← El cliente inicia el proceso</code></pre>
+                </div>
+
+                <div class="flow-step">
+                    <h5>Paso 2: El nodo llama al método visit específico del visitor</h5>
+                    <pre><code class="language-java">// Dentro de RepeatStatementNode.java
+@Override
+public &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+    return visitor.visitRepeatStatement(this);  // ← Delega al visitor
+}</code></pre>
+                    <p style="margin-top: 1rem; color: var(--accent-purple); font-weight: 600;">
+                        ¡Aquí está la magia! El nodo se pasa a sí mismo (<code>this</code>) al visitor.
+                    </p>
+                </div>
+
+                <div class="flow-step">
+                    <h5>Paso 3: El visitor ejecuta su lógica específica</h5>
+                    <pre><code class="language-java">// Dentro de CounterVisitor.java
+@Override
+public Void visitRepeatStatement(RepeatStatementNode node) {
+    // Aquí el visitor hace su trabajo específico
+    // Por ejemplo: contar elementos dentro del REPEAT
+
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);  // ← Recursión: visita los hijos
+    }
+
+    return null;
+}</code></pre>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Diagrama de Secuencia del Flujo:</h4>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client as Cliente
+    participant Node as RepeatStatementNode
+    participant Visitor as CounterVisitor
+
+    Client->>Node: accept(visitor)
+    activate Node
+    Note over Node: Recibe el visitor
+
+    Node->>Visitor: visitRepeatStatement(this)
+    activate Visitor
+    Note over Visitor: Ejecuta lógica específica<br/>para RepeatStatement
+
+    Visitor->>Visitor: Procesar nodo
+
+    Note over Visitor: Visitar hijos recursivamente
+    loop Para cada hijo
+        Visitor->>Node: child.accept(this)
+        Note over Node,Visitor: Mismo proceso recursivamente
+    end
+
+    Visitor-->>Node: return result
+    deactivate Visitor
+
+    Node-->>Client: return result
+    deactivate Node
+            </div>
+        </div>
+
+        <!-- Ejemplo Práctico: Código Real -->
+        <div class="content-section">
+            <h3>💻 Ejemplo Práctico: Visitor en Acción</h3>
+            <p>
+                Veamos un ejemplo conceptual completo de cómo se usa el patrón Visitor con un programa RoboLang:
+            </p>
+
+            <h4>Programa RoboLang:</h4>
+            <pre><code class="language-robolang">REPEAT 3 {
+    UP;
+    RIGHT;
+}
+DOWN;</code></pre>
+
+            <h4 style="margin-top: 1.5rem;">Uso de un Visitor (ejemplo genérico):</h4>
+            <pre><code class="language-java">// 1. Crear el visitor
+CounterVisitor visitor = new CounterVisitor();
+
+// 2. Parsear el código y obtener el AST
+ProgramNode ast = parser.parse(tokens);
+
+// 3. Iniciar el recorrido
+visitor.analyze(ast);  // Internamente llama ast.accept(visitor)
+
+// 4. Obtener resultados
+int totalElements = visitor.getCount();
+System.out.println("Total de elementos procesados: " + totalElements);
+
+// Salida:
+// Total de elementos procesados: 7</code></pre>
+
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <h4>🎯 ¿Qué pasó internamente?</h4>
+                <ol style="line-height: 1.8;">
+                    <li><code>analyze(ast)</code> llamó a <code>ast.accept(visitor)</code></li>
+                    <li><code>ProgramNode</code> llamó a <code>visitor.visitProgram(this)</code></li>
+                    <li><code>visitProgram()</code> recorrió los hijos, encontrando el <code>RepeatStatementNode</code></li>
+                    <li><code>RepeatStatementNode</code> llamó a <code>visitor.visitRepeatStatement(this)</code></li>
+                    <li><code>visitRepeatStatement()</code> visitó los comandos <code>UP</code> y <code>RIGHT</code></li>
+                    <li>Cada <code>MovementCommandNode</code> llamó a <code>visitor.visitMovementCommand(this)</code></li>
+                    <li><code>visitMovementCommand()</code> procesó cada nodo según su lógica</li>
+                    <li>El proceso continuó recursivamente hasta completar todo el árbol</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Ventajas del Patrón -->
+        <div class="content-section">
+            <h3>🌟 Ventajas del Patrón Visitor</h3>
+
+            <div class="benefit-card">
+                <h5>✅ 1. Separación de Responsabilidades</h5>
+                <p>
+                    Cada visitor tiene una responsabilidad clara. Los nodos del AST solo conocen su estructura,
+                    no las operaciones que se pueden hacer sobre ellos.
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>✅ 2. Fácil Agregar Nuevas Operaciones</h5>
+                <p>
+                    ¿Quieres un nuevo análisis? Solo crea un nuevo visitor. No modificas ningún nodo del AST.
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>✅ 3. Código Organizado</h5>
+                <p>
+                    Toda la lógica de una operación está en un solo lugar (la clase visitor),
+                    no esparcida en 20+ clases de nodos.
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>✅ 4. Reutilización</h5>
+                <p>
+                    Puedes componer visitors o reutilizar partes de uno en otro.
+                    Por ejemplo, varios visitors pueden usar la misma lógica de navegación.
+                </p>
+            </div>
+
+            <div class="benefit-card">
+                <h5>✅ 5. Type Safety</h5>
+                <p>
+                    El compilador te obliga a implementar todos los métodos <code>visitXXX()</code>.
+                    No puedes olvidarte de manejar algún tipo de nodo.
+                </p>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Lo que has aprendido:</h4>
+                <ul style="line-height: 1.8;">
+                    <li>✅ El patrón Visitor <strong>separa algoritmos de estructuras de datos</strong></li>
+                    <li>✅ Permite <strong>agregar nuevas operaciones</strong> sin modificar los nodos del AST</li>
+                    <li>✅ La interfaz <code>ASTVisitor&lt;T&gt;</code> define <strong>un método por cada tipo de nodo</strong></li>
+                    <li>✅ El flujo usa <strong>doble dispatch</strong>: <code>node.accept(visitor)</code> → <code>visitor.visitXXX(node)</code></li>
+                    <li>✅ Cada <strong>ConcreteVisitor</strong> implementa una operación específica (contar, analizar, etc.)</li>
+                    <li>✅ El patrón es <strong>type-safe</strong> y promueve código organizado</li>
+                </ul>
+
+                <div class="highlight-box" style="margin-top: 1.5rem;">
+                    <h4>🎯 Próximo Paso</h4>
+                    <p>
+                        Ahora que entiendes la <strong>teoría del patrón Visitor</strong>,
+                        en el siguiente slide verás la <strong>implementación completa</strong> de un visitor real:
+                        <code>CommandCounterVisitor</code>. Aprenderás cómo implementar cada método y
+                        cómo recorrer el árbol recursivamente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide2-astnode-construction.html" class="btn" style="background: var(--text-secondary);">
+                ← Anterior: Construcción del AST
+            </a>
+            <a href="slide4-commandcounter-visitor.html" class="btn btn-primary">
+                Siguiente: CommandCounterVisitor →
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 3: Patrón Visitor - Fundamentos
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#8b5cf6',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#6d28d9',
+                lineColor: '#94a3b8',
+                secondaryColor: '#10b981',
+                tertiaryColor: '#3b82f6'
+            }
+        });
+    </script>
+</body>
+</html>

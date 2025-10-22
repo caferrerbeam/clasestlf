@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 5: SensorUsageVisitor - Ejercicio Práctico | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .exercise-badge {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 3px solid #3b82f6;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .no-solution-warning {
+            background: linear-gradient(to right, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+        }
+
+        .requirement-card {
+            background: white;
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .example-io {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .input-panel {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .output-panel {
+            background: #f0fdf4;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .input-panel .panel-header {
+            background: var(--primary-blue);
+        }
+
+        .output-panel .panel-header {
+            background: var(--secondary-green);
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+        }
+
+        .hint-box {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border-left: 4px solid var(--accent-purple);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .method-guide {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .checklist {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .checklist-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .checklist-item::before {
+            content: "☐";
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+        }
+
+        .test-case {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .similarity-hint {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .data-structure-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .example-io {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🛠️ Ejercicio Práctico</h1>
+                <p class="subtitle">Slide 5 - Implementa tu primer Visitor: SensorUsageVisitor</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 5 DE 7 - EJERCICIO PRÁCTICO</div>
+            <h2>SensorUsageVisitor</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                Aplica todo lo aprendido implementando un visitor que analiza el uso de sensores
+            </p>
+        </div>
+
+        <div class="exercise-badge">
+            <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">🎓 EJERCICIO DE APRENDIZAJE</h3>
+            <p style="color: var(--text-secondary); margin: 0;">
+                Este slide es una actividad práctica. ¡Intenta implementar el visitor tú mismo antes de ver soluciones!
+            </p>
+        </div>
+
+        <div class="no-solution-warning">
+            <h4 style="color: #f59e0b;">⚠️ NO SE PROPORCIONA CÓDIGO COMPLETO</h4>
+            <p>
+                Este slide te guía a través del proceso de implementación, pero <strong>no muestra el código completo</strong>.
+                El objetivo es que apliques lo aprendido en los slides anteriores para crear tu propia solución.
+            </p>
+        </div>
+
+        <!-- Ubicación y Estado del Código -->
+        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0;">
+            <h4 style="color: #1e40af; margin-bottom: 1rem;">📁 Ubicación del Ejercicio</h4>
+            <p style="margin: 0; color: var(--text-secondary);">
+                El archivo base para este ejercicio está en:
+            </p>
+            <pre style="background: #1e293b; color: #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.95rem;"><code>src/main/java/semantic/statistics/SensorUsageVisitor.java</code></pre>
+        </div>
+
+        <!-- Lo que está hecho y lo que falta -->
+        <div class="content-section">
+            <h3>✅ Estado del Código Base</h3>
+
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1.5rem; border-radius: 0.75rem; margin: 1.5rem 0;">
+                <h4 style="color: #047857;">✅ Ya Implementado (Infraestructura)</h4>
+                <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+                    <strong>Estructura de Datos Simplificada (sin clase interna):</strong>
+                </p>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li>✅ <code>Map&lt;String, Integer&gt; sensorCounts</code> - Contador de usos por sensor</li>
+                    <li>✅ <code>Map&lt;String, List&lt;Integer&gt;&gt; sensorLines</code> - Líneas donde aparece cada sensor</li>
+                    <li>✅ Método <code>recordSensorUsage(String, int)</code> - auxiliar privado para registrar</li>
+                    <li>✅ Método <code>printReport()</code> - imprime reporte usando los Maps</li>
+                    <li>✅ Método <code>getReport()</code> - obtiene reporte como String</li>
+                    <li>✅ Método <code>getMostUsedSensor()</code> - encuentra el más usado iterando los Maps</li>
+                    <li>✅ Getters: <code>getSensorCounts()</code>, <code>getSensorLines()</code>, <code>isSensorUsed()</code>, etc.</li>
+                </ul>
+            </div>
+
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 0.75rem; margin: 1.5rem 0;">
+                <h4 style="color: #991b1b;">❌ Lo que DEBES Implementar</h4>
+                <ol style="line-height: 2; color: var(--text-secondary);">
+                    <li><strong>Implementar la interfaz ASTVisitor:</strong>
+                        <pre style="background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem;"><code>public class SensorUsageVisitor implements ASTVisitor&lt;Void&gt; {</code></pre>
+                    </li>
+                    <li style="margin-top: 1rem;"><strong>Descomentar línea en analyze():</strong>
+                        <pre style="background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem;"><code>root.accept(this);  // Quitar el comentario</code></pre>
+                    </li>
+                    <li style="margin-top: 1rem;"><strong>Implementar métodos visitor:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li><code>visitNumericSensor()</code> - Detectar sensores numéricos</li>
+                            <li><code>visitBooleanSensor()</code> - Detectar sensores booleanos</li>
+                            <li>Métodos de navegación para todos los tipos de nodos</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 0.75rem; margin: 1.5rem 0;">
+                <h4 style="color: #1e40af;">🧪 Prueba tu Implementación</h4>
+                <p style="margin: 0; color: var(--text-secondary);">
+                    Ya existe un test para validar tu implementación:
+                </p>
+                <pre style="background: #1e293b; color: #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.95rem;"><code>src/test/java/semantic/SensorUsageVisitorTest.java</code></pre>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    💡 Ejecuta el test para verificar que tu implementación funciona correctamente.
+                </p>
+            </div>
+        </div>
+
+        <!-- Descripción del Problema -->
+        <div class="content-section">
+            <h3>📋 Descripción del Problema</h3>
+            <p>
+                Necesitas implementar un visitor que <strong>analice el uso de sensores</strong> en un programa RoboLang.
+                El visitor debe rastrear:
+            </p>
+
+            <ul style="line-height: 1.8; margin: 1rem 0;">
+                <li>Qué sensores se utilizan en el programa</li>
+                <li>Cuántas veces se usa cada sensor</li>
+                <li>En qué líneas del código aparece cada sensor</li>
+            </ul>
+
+            <h4 style="margin-top: 2rem;">Sensores de RoboLang:</h4>
+            <div class="requirement-card">
+                <h5>📡 Sensores Numéricos</h5>
+                <ul>
+                    <li><code>BATTERY</code> - Nivel de batería del robot (0-100)</li>
+                    <li><code>TEMP</code> - Temperatura ambiente</li>
+                    <li><code>LIGHT</code> - Nivel de luz</li>
+                    <li><code>DIST</code> - Distancia a obstáculo más cercano</li>
+                </ul>
+            </div>
+
+            <div class="requirement-card">
+                <h5>🔌 Sensores Booleanos</h5>
+                <ul>
+                    <li><code>OBSTACLE</code> - ¿Hay un obstáculo detectado? (true/false)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Requisitos -->
+        <div class="content-section">
+            <h3>✅ Requisitos Funcionales</h3>
+            <p>
+                Tu <code>SensorUsageVisitor</code> debe cumplir con los siguientes requisitos:
+            </p>
+
+            <div class="requirement-card">
+                <h5>1. Detectar todos los sensores usados</h5>
+                <p>
+                    El visitor debe identificar cada aparición de sensores en el código,
+                    sin importar dónde aparezcan (en condiciones, asignaciones, etc.)
+                </p>
+            </div>
+
+            <div class="requirement-card">
+                <h5>2. Contar el número de usos</h5>
+                <p>
+                    Para cada sensor, mantener un contador de cuántas veces aparece en el programa.
+                </p>
+            </div>
+
+            <div class="requirement-card">
+                <h5>3. Registrar las líneas de uso</h5>
+                <p>
+                    Guardar una lista de las líneas donde aparece cada sensor para facilitar el debugging.
+                </p>
+            </div>
+
+            <div class="requirement-card">
+                <h5>4. Generar un reporte</h5>
+                <p>
+                    Proporcionar métodos para imprimir o obtener un reporte legible del análisis.
+                </p>
+            </div>
+
+            <div class="requirement-card">
+                <h5>5. Identificar el sensor más usado</h5>
+                <p>
+                    Determinar cuál es el sensor que aparece con mayor frecuencia en el programa.
+                </p>
+            </div>
+        </div>
+
+        <!-- Ejemplos de Entrada/Salida -->
+        <div class="content-section">
+            <h3>📝 Ejemplos de Entrada/Salida</h3>
+
+            <h4>Ejemplo 1: Uso Básico de Sensores</h4>
+            <div class="example-io">
+                <div class="input-panel">
+                    <div class="panel-header">ENTRADA - Programa RoboLang</div>
+                    <div class="panel-content">
+                        <pre><code class="language-robolang">IF (BATTERY > 50) {
+    UP;
+}
+
+WHILE (OBSTACLE) {
+    LEFT;
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="output-panel">
+                    <div class="panel-header">SALIDA ESPERADA</div>
+                    <div class="panel-content">
+                        <pre>
+=== ANÁLISIS DE USO DE SENSORES ===
+
+Sensores detectados: 2
+
+📡 BATTERY
+   Usado: 1 vez/veces
+   Líneas: 1
+
+📡 OBSTACLE
+   Usado: 1 vez/veces
+   Líneas: 5
+
+🏆 Sensor más usado: BATTERY (1 usos)
+                        </pre>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Ejemplo 2: Múltiples Usos del Mismo Sensor</h4>
+            <div class="example-io">
+                <div class="input-panel">
+                    <div class="panel-header">ENTRADA - Programa RoboLang</div>
+                    <div class="panel-content">
+                        <pre><code class="language-robolang">VAR nivel
+nivel := BATTERY
+
+IF (BATTERY > 20 AND BATTERY < 80) {
+    UP;
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="output-panel">
+                    <div class="panel-header">SALIDA ESPERADA</div>
+                    <div class="panel-content">
+                        <pre>
+=== ANÁLISIS DE USO DE SENSORES ===
+
+Sensores detectados: 1
+
+📡 BATTERY
+   Usado: 3 vez/veces
+   Líneas: 2, 4, 4
+
+🏆 Sensor más usado: BATTERY (3 usos)
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guía de Implementación -->
+        <div class="content-section">
+            <h3>🗺️ Guía de Implementación</h3>
+
+            <h4>Paso 1: Estructura de la Clase</h4>
+            <div class="method-guide">
+                <p><strong>¿Qué necesitas?</strong></p>
+                <ul style="line-height: 1.8;">
+                    <li>Una clase que implemente <code>ASTVisitor&lt;Void&gt;</code></li>
+                    <li>Dos Maps para almacenar información de cada sensor</li>
+                    <li>Un método <code>analyze()</code> que inicie el recorrido</li>
+                </ul>
+
+                <div class="hint-box">
+                    <h5>💡 Estructura de Datos Simplificada</h5>
+                    <p>
+                        Para cada sensor necesitas rastrear:
+                    </p>
+                    <ul>
+                        <li>El número de veces que se usa</li>
+                        <li>Una lista de las líneas donde aparece</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">
+                        <strong>Solución Simple:</strong> Usa <strong>DOS Maps</strong>:
+                    </p>
+                    <pre style="background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;"><code>// Contador de usos por sensor
+private Map&lt;String, Integer&gt; sensorCounts;
+
+// Líneas donde aparece cada sensor
+private Map&lt;String, List&lt;Integer&gt;&gt; sensorLines;</code></pre>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        <strong>Ventaja:</strong> No necesitas clase auxiliar, todo es directo y simple.
+                    </p>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Paso 2: Método Auxiliar recordSensorUsage()</h4>
+            <div class="data-structure-card">
+                <h5>¿Qué debe hacer este método?</h5>
+                <p style="margin-bottom: 1rem;">
+                    Este método privado registra el uso de un sensor actualizando ambos Maps:
+                </p>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Incrementar contador:</strong> Actualiza <code>sensorCounts</code></li>
+                    <li><strong>Agregar línea:</strong> Agrega la línea a la lista en <code>sensorLines</code></li>
+                </ol>
+
+                <div class="hint-box">
+                    <h5>💡 Métodos Útiles de Map</h5>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><code>getOrDefault(key, defaultValue)</code> - Obtiene valor o retorna default</li>
+                        <li><code>computeIfAbsent(key, mappingFunction)</code> - Crea entrada si no existe</li>
+                        <li><code>put(key, value)</code> - Inserta o actualiza valor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Paso 3: Métodos visit a Implementar</h4>
+            <p>
+                Estos son los métodos clave que necesitas implementar:
+            </p>
+
+            <div class="method-guide" style="border: 3px solid #f59e0b; background: linear-gradient(135deg, #fef3c7, #fef9e7); padding: 1.5rem; border-radius: 0.75rem;">
+                <h5 style="color: #92400e;">⚠️ EJERCICIO: visitNumericSensor(NumericSensorNode node)</h5>
+                <p><strong>¿QUÉ debe hacer?</strong></p>
+                <ul>
+                    <li>Obtener el tipo de sensor del nodo (BATTERY, TEMP, LIGHT, DIST)</li>
+                    <li>Obtener la línea donde aparece el sensor</li>
+                    <li>Llamar a <code>recordSensorUsage()</code> con el nombre y línea</li>
+                    <li>Retornar <code>null</code></li>
+                </ul>
+
+                <p style="margin-top: 1rem;"><strong>¿POR QUÉ?</strong></p>
+                <p>
+                    Este método se llama cada vez que el visitor encuentra un sensor numérico en el AST.
+                    Es el momento perfecto para registrar su uso.
+                </p>
+
+                <div class="hint-box">
+                    <h5>💡 Pistas</h5>
+                    <ul style="margin-top: 0.5rem; line-height: 1.8;">
+                        <li><code>node.getSensorType().toString()</code> - obtiene el nombre</li>
+                        <li><code>node.getLine()</code> - obtiene la línea</li>
+                        <li><code>recordSensorUsage(nombre, línea)</code> - ya está implementado</li>
+                    </ul>
+                </div>
+
+                <div style="background: #fffbeb; border: 2px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                    <strong>📝 Firma del método:</strong>
+                    <pre style="background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem;"><code>@Override
+public Void visitNumericSensor(NumericSensorNode node) {
+    // TODO: Obtener nombre del sensor
+    // TODO: Obtener línea
+    // TODO: Llamar a recordSensorUsage()
+    return null;
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="method-guide" style="margin-top: 1.5rem; border: 3px solid #f59e0b; background: linear-gradient(135deg, #fef3c7, #fef9e7); padding: 1.5rem; border-radius: 0.75rem;">
+                <h5 style="color: #92400e;">⚠️ EJERCICIO: visitBooleanSensor(BooleanSensorNode node)</h5>
+                <p><strong>¿QUÉ debe hacer?</strong></p>
+                <ul>
+                    <li>Obtener el tipo de sensor booleano (OBSTACLE)</li>
+                    <li>Obtener la línea donde aparece</li>
+                    <li>Llamar a <code>recordSensorUsage()</code> con el nombre y línea</li>
+                    <li>Retornar <code>null</code></li>
+                </ul>
+
+                <p style="margin-top: 1rem;"><strong>💡 Similitud con visitNumericSensor:</strong></p>
+                <p>
+                    Este método es <strong>casi idéntico</strong> a <code>visitNumericSensor()</code>.
+                    La única diferencia es el tipo de nodo que recibe (<code>BooleanSensorNode</code> vs <code>NumericSensorNode</code>).
+                </p>
+
+                <div style="background: #fffbeb; border: 2px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                    <strong>📝 Firma del método:</strong>
+                    <pre style="background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem;"><code>@Override
+public Void visitBooleanSensor(BooleanSensorNode node) {
+    // TODO: Implementar (muy similar a visitNumericSensor)
+    return null;
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="method-guide" style="margin-top: 1.5rem;">
+                <h5>Métodos de Navegación</h5>
+                <p><strong>¿QUÉ deben hacer?</strong></p>
+                <p>
+                    Para recorrer todo el árbol, necesitas implementar métodos que propaguen la visita a los hijos:
+                </p>
+                <ul>
+                    <li><code>visitProgram()</code> - Visitar hijos del programa</li>
+                    <li><code>visitCondition()</code> - Visitar expresiones dentro de condiciones</li>
+                    <li><code>visitIfStatement()</code> - Visitar condición y bloques del IF</li>
+                    <li><code>visitWhileStatement()</code> - Visitar condición y bloque del WHILE</li>
+                    <li><code>visitAssignment()</code> - Visitar el valor asignado</li>
+                    <li>Y otros métodos de navegación...</li>
+                </ul>
+
+                <div class="similarity-hint">
+                    <h5>🔄 Patrón Repetitivo</h5>
+                    <p>
+                        Recuerda el patrón que viste en <code>CommandCounterVisitor</code>:
+                    </p>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">@Override
+public Void visitXXX(XXXNode node) {
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);
+    }
+    return null;
+}</code></pre>
+                    <p style="margin-top: 1rem;">
+                        Este patrón se repite para todos los nodos "contenedores" que no contienen sensores directamente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips y Consideraciones -->
+        <div class="content-section">
+            <h3>💭 Tips y Consideraciones Especiales</h3>
+
+            <div class="hint-box">
+                <h5>1. Método auxiliar recordSensorUsage()</h5>
+                <p>
+                    Considera crear un método privado auxiliar:
+                </p>
+                <pre style="margin-top: 0.5rem;"><code class="language-java">private void recordSensorUsage(String sensorName, int line) {
+    // Lógica para registrar el uso del sensor
+}</code></pre>
+                <p style="margin-top: 0.5rem;">
+                    Este método puede ser llamado tanto por <code>visitNumericSensor()</code> como por
+                    <code>visitBooleanSensor()</code>, evitando duplicación de código.
+                </p>
+            </div>
+
+            <div class="hint-box">
+                <h5>2. ¿Cómo actualizar los dos Maps?</h5>
+                <p>
+                    En <code>recordSensorUsage()</code> necesitas actualizar ambos Maps:
+                </p>
+                <ul style="margin-top: 0.5rem;">
+                    <li><strong>Para el contador:</strong> Usa <code>getOrDefault()</code> para incrementar</li>
+                    <li><strong>Para las líneas:</strong> Usa <code>computeIfAbsent()</code> para crear lista si no existe</li>
+                </ul>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Ejemplo conceptual:</strong>
+                </p>
+                <pre style="background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem;"><code>// Incrementar contador
+sensorCounts.put(name, sensorCounts.getOrDefault(name, 0) + 1);
+
+// Agregar línea (crea ArrayList si no existe)
+sensorLines.computeIfAbsent(name, k -> new ArrayList&lt;&gt;()).add(line);</code></pre>
+            </div>
+
+            <div class="hint-box">
+                <h5>3. Nodos que NO contienen sensores</h5>
+                <p>
+                    Algunos nodos nunca contienen sensores y no necesitan lógica especial:
+                </p>
+                <ul>
+                    <li>Comandos de movimiento (UP, DOWN, etc.)</li>
+                    <li>Declaraciones de variables (VAR)</li>
+                    <li>Números y booleanos literales</li>
+                </ul>
+                <p style="margin-top: 0.5rem;">
+                    Para estos, puedes simplemente retornar <code>null</code>.
+                </p>
+            </div>
+
+            <div class="hint-box">
+                <h5>4. Determinar el sensor más usado</h5>
+                <p>
+                    Para implementar <code>getMostUsedSensor()</code>, necesitas:
+                </p>
+                <ol style="line-height: 1.8; margin-top: 0.5rem;">
+                    <li>Iterar sobre todos los sensores en el Map</li>
+                    <li>Mantener un contador del máximo</li>
+                    <li>Retornar el sensor con el mayor contador de usos</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Checklist de Implementación -->
+        <div class="content-section">
+            <h3>✓ Checklist de Funcionalidades Requeridas</h3>
+            <p>
+                Usa esta lista para verificar que tu implementación está completa:
+            </p>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    Implementa <code>ASTVisitor&lt;Void&gt;</code>
+                </div>
+                <div class="checklist-item">
+                    Tiene una estructura de datos para almacenar información de sensores
+                </div>
+                <div class="checklist-item">
+                    Implementa <code>visitNumericSensor()</code> correctamente
+                </div>
+                <div class="checklist-item">
+                    Implementa <code>visitBooleanSensor()</code> correctamente
+                </div>
+                <div class="checklist-item">
+                    Implementa métodos de navegación para recorrer el árbol
+                </div>
+                <div class="checklist-item">
+                    Tiene un método <code>analyze(ASTNode root)</code>
+                </div>
+                <div class="checklist-item">
+                    Tiene un método <code>printReport()</code> o <code>getReport()</code>
+                </div>
+                <div class="checklist-item">
+                    Puede identificar el sensor más usado
+                </div>
+                <div class="checklist-item">
+                    Registra las líneas donde aparece cada sensor
+                </div>
+                <div class="checklist-item">
+                    Maneja correctamente el caso de programas sin sensores
+                </div>
+            </div>
+        </div>
+
+        <!-- Casos de Prueba -->
+        <div class="content-section">
+            <h3>🧪 Casos de Prueba</h3>
+            <p>
+                Prueba tu implementación con estos casos:
+            </p>
+
+            <div class="test-case">
+                <h5>Test 1: Programa sin sensores</h5>
+                <pre><code class="language-robolang">UP;
+DOWN;
+LEFT;</code></pre>
+                <p><strong>Resultado esperado:</strong> Ningún sensor detectado</p>
+            </div>
+
+            <div class="test-case">
+                <h5>Test 2: Un solo sensor</h5>
+                <pre><code class="language-robolang">IF (BATTERY > 50) {
+    UP;
+}</code></pre>
+                <p><strong>Resultado esperado:</strong> BATTERY usado 1 vez en línea 1</p>
+            </div>
+
+            <div class="test-case">
+                <h5>Test 3: Múltiples sensores diferentes</h5>
+                <pre><code class="language-robolang">IF (BATTERY > 50 AND TEMP < 30) {
+    IF (OBSTACLE) {
+        LEFT;
+    }
+}</code></pre>
+                <p><strong>Resultado esperado:</strong> BATTERY (1 uso), TEMP (1 uso), OBSTACLE (1 uso)</p>
+            </div>
+
+            <div class="test-case">
+                <h5>Test 4: Mismo sensor múltiples veces</h5>
+                <pre><code class="language-robolang">WHILE (BATTERY > 10) {
+    IF (BATTERY < 50) {
+        UP;
+    }
+}</code></pre>
+                <p><strong>Resultado esperado:</strong> BATTERY usado 2 veces (líneas 1 y 2)</p>
+            </div>
+        </div>
+
+        <!-- Criterios de Evaluación -->
+        <div class="content-section">
+            <h3>📊 Criterios de Evaluación</h3>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="background: var(--accent-purple); color: white;">
+                        <th style="padding: 1rem; text-align: left;">Criterio</th>
+                        <th style="padding: 1rem; text-align: center; width: 100px;">Puntos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Implementa correctamente la interfaz <code>ASTVisitor</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">10</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Detecta todos los sensores numéricos</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">15</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Detecta todos los sensores booleanos</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">15</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Cuenta correctamente el número de usos</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">15</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Registra las líneas de aparición</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">15</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Genera un reporte legible</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">10</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Identifica el sensor más usado</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">10</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Código bien estructurado y comentado</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">10</td>
+                    </tr>
+                    <tr style="background: #10b981; color: white; font-weight: 600;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">TOTAL</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">100</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sugerencias de Debugging -->
+        <div class="content-section">
+            <h3>🐛 Sugerencias de Debugging</h3>
+
+            <div class="hint-box">
+                <h5>Si no detecta ningún sensor:</h5>
+                <ul>
+                    <li>Verifica que estás visitando recursivamente todos los hijos</li>
+                    <li>Asegúrate de que los métodos de navegación llaman a <code>child.accept(this)</code></li>
+                    <li>Revisa que implementaste <code>visitCondition()</code> y métodos de expresiones</li>
+                </ul>
+            </div>
+
+            <div class="hint-box">
+                <h5>Si cuenta mal el número de usos:</h5>
+                <ul>
+                    <li>Verifica que no estás reseteando contadores en lugares incorrectos</li>
+                    <li>Asegúrate de incrementar el contador cada vez que se llama <code>addUsage()</code></li>
+                    <li>Revisa que no estás visitando el mismo nodo múltiples veces accidentalmente</li>
+                </ul>
+            </div>
+
+            <div class="hint-box">
+                <h5>Si las líneas están incorrectas:</h5>
+                <ul>
+                    <li>Verifica que estás usando <code>node.getLine()</code> y no otro atributo</li>
+                    <li>Asegúrate de que los nodos del AST tienen la información de línea correctamente asignada</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Lo que debes hacer:</h4>
+                <ul style="line-height: 1.8;">
+                    <li>✅ Implementar <code>SensorUsageVisitor</code> que detecte y analice sensores</li>
+                    <li>✅ Crear una estructura de datos para almacenar información de cada sensor</li>
+                    <li>✅ Implementar <code>visitNumericSensor()</code> y <code>visitBooleanSensor()</code></li>
+                    <li>✅ Implementar métodos de navegación para recorrer el AST</li>
+                    <li>✅ Generar un reporte legible con los resultados</li>
+                    <li>✅ Probar con los casos de prueba proporcionados</li>
+                </ul>
+
+                <div class="no-solution-warning" style="margin-top: 1.5rem;">
+                    <h4>🎯 Próximo Paso</h4>
+                    <p>
+                        Una vez que hayas implementado tu <code>SensorUsageVisitor</code> y validado que funciona,
+                        en el siguiente slide aprenderás sobre la <strong>Tabla de Símbolos</strong>,
+                        una estructura fundamental para el análisis semántico de variables.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide4-commandcounter-visitor.html" class="btn" style="background: var(--text-secondary);">
+                ← Anterior: CommandCounterVisitor
+            </a>
+            <a href="slide6-symbol-table.html" class="btn btn-primary">
+                Siguiente: Tabla de Símbolos →
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 5: SensorUsageVisitor - Ejercicio Práctico
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#f59e0b',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#d97706',
+                lineColor: '#94a3b8',
+                secondaryColor: '#10b981',
+                tertiaryColor: '#3b82f6'
+            }
+        });
+    </script>
+</body>
+</html>

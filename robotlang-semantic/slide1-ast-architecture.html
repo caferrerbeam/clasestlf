@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 1: Arquitectura del AST - RoboLang | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .slide-number {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .key-concept {
+            background: linear-gradient(to right, #fef3c7, #fde68a);
+            border-left: 4px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .ast-category {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .ast-category h4 {
+            color: var(--primary-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        .node-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .node-item {
+            background: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .example-program {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .derivation-step {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 0.75rem 0;
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🏗️ Arquitectura del AST</h1>
+                <p class="subtitle">Slide 1 - Estructura del Árbol de Sintaxis Abstracta</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 1 DE 7</div>
+            <h2>Arquitectura del AST de RoboLang</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                Comprender la estructura completa del árbol de sintaxis abstracta y cómo representa un programa RoboLang
+            </p>
+        </div>
+
+        <!-- Introducción -->
+        <div class="content-section">
+            <h3>🎯 Objetivo de este Slide</h3>
+            <p>
+                El <strong>Árbol de Sintaxis Abstracta (AST)</strong> es la representación estructurada de tu código.
+                Es el resultado del análisis sintáctico y la base para todo análisis posterior (semántico, optimización, generación de código).
+            </p>
+
+            <div class="key-concept">
+                <h4>💡 Concepto Clave</h4>
+                <p>
+                    El AST es como un "mapa mental" de tu programa. Cada nodo representa una construcción del lenguaje
+                    (una expresión, un comando, una declaración) y los nodos hijos representan sus componentes.
+                </p>
+            </div>
+        </div>
+
+        <!-- ¿Qué es el AST? -->
+        <div class="content-section">
+            <h3>📚 ¿Qué es un AST?</h3>
+            <p>
+                Un Árbol de Sintaxis Abstracta (Abstract Syntax Tree) es una estructura de datos en forma de árbol que:
+            </p>
+            <ul>
+                <li>✅ Representa la estructura sintáctica del código fuente</li>
+                <li>✅ Elimina detalles innecesarios de la sintaxis concreta (paréntesis, punto y coma, etc.)</li>
+                <li>✅ Preserva la jerarquía y semántica del programa</li>
+                <li>✅ Facilita el análisis y transformación del código</li>
+            </ul>
+
+            <h4 style="margin-top: 2rem;">Diferencia clave: Árbol de Parsing vs AST</h4>
+            <table style="width: 100%; margin-top: 1rem; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #e2e8f0;">Árbol de Parsing</th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #e2e8f0;">AST</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Incluye todos los tokens</td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Solo nodos semánticamente relevantes</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Sigue la gramática exactamente</td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Estructura optimizada para análisis</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Muy detallado</td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Abstracto y simplificado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Jerarquía Completa del AST -->
+        <div class="content-section">
+            <h3>🌳 Jerarquía Completa del AST de RoboLang</h3>
+            <p>
+                Todos los nodos del AST de RoboLang heredan de la clase base <code>ASTNode</code>.
+                La siguiente jerarquía muestra la organización completa:
+            </p>
+
+            <div class="mermaid">
+classDiagram
+    ASTNode <|-- ProgramNode
+    ASTNode <|-- StatementNode
+    ASTNode <|-- ExpressionNode
+    ASTNode <|-- CommandNode
+
+    %% Program Level
+    ProgramNode <|-- MainFunctionNode
+    ProgramNode <|-- FunctionDeclarationNode
+
+    %% Statements
+    StatementNode <|-- StatementListNode
+    StatementNode <|-- StatementBlockNode
+    StatementNode <|-- VariableDeclarationNode
+    StatementNode <|-- AssignmentNode
+    StatementNode <|-- RepeatStatementNode
+    StatementNode <|-- IfStatementNode
+    StatementNode <|-- WhileStatementNode
+    StatementNode <|-- ReturnStatementNode
+    StatementNode <|-- ValueNode
+
+    %% Expressions
+    ExpressionNode <|-- ConditionNode
+    ExpressionNode <|-- OrExpressionNode
+    ExpressionNode <|-- AndExpressionNode
+    ExpressionNode <|-- NotExpressionNode
+    ExpressionNode <|-- PrimaryExpressionNode
+    ExpressionNode <|-- ComparisonExpressionNode
+    ExpressionNode <|-- FunctionCallNode
+
+    %% Commands
+    CommandNode <|-- SimpleCommandNode
+    CommandNode <|-- MovementCommandNode
+    CommandNode <|-- PenCommandNode
+
+    %% Literals
+    ASTNode <|-- LiteralNode
+    LiteralNode <|-- NumberNode
+    LiteralNode <|-- BooleanNode
+    LiteralNode <|-- IdentifierNode
+    LiteralNode <|-- SensorNode
+
+    SensorNode <|-- NumericSensorNode
+    SensorNode <|-- BooleanSensorNode
+
+    class ASTNode {
+        <<abstract>>
+        #line: int
+        #column: int
+        #children: List~ASTNode~
+        +addChild(ASTNode)
+        +getChildren() List~ASTNode~
+        +accept(ASTVisitor) T
+    }
+
+    class ProgramNode {
+        +MainFunctionNode main
+        +List~FunctionDeclarationNode~ functions
+    }
+
+    class StatementNode {
+        <<abstract>>
+    }
+
+    class ExpressionNode {
+        <<abstract>>
+    }
+
+    class CommandNode {
+        <<abstract>>
+    }
+
+    class LiteralNode {
+        <<interface>>
+    }
+            </div>
+        </div>
+
+        <!-- Clasificación de Nodos por Categoría -->
+        <div class="content-section">
+            <h3>📋 Clasificación de Nodos por Categoría</h3>
+            <p>
+                Los nodos del AST se organizan en categorías según su propósito semántico:
+            </p>
+
+            <!-- Categoría: Program Level -->
+            <div class="ast-category">
+                <h4>🏛️ Program Level (Nivel de Programa)</h4>
+                <p>Nodos que representan la estructura principal del programa</p>
+                <div class="node-list">
+                    <div class="node-item">ProgramNode</div>
+                    <div class="node-item">MainFunctionNode</div>
+                    <div class="node-item">FunctionDeclarationNode</div>
+                </div>
+            </div>
+
+            <!-- Categoría: Statements -->
+            <div class="ast-category">
+                <h4>📝 Statements (Sentencias)</h4>
+                <p>Nodos que representan instrucciones y declaraciones</p>
+                <div class="node-list">
+                    <div class="node-item">StatementListNode</div>
+                    <div class="node-item">StatementBlockNode</div>
+                    <div class="node-item">VariableDeclarationNode</div>
+                    <div class="node-item">AssignmentNode</div>
+                    <div class="node-item">RepeatStatementNode</div>
+                    <div class="node-item">IfStatementNode</div>
+                    <div class="node-item">WhileStatementNode</div>
+                    <div class="node-item">ReturnStatementNode</div>
+                </div>
+            </div>
+
+            <!-- Categoría: Expressions -->
+            <div class="ast-category">
+                <h4>🧮 Expressions (Expresiones)</h4>
+                <p>Nodos que representan expresiones lógicas y comparaciones</p>
+                <div class="node-list">
+                    <div class="node-item">ConditionNode</div>
+                    <div class="node-item">OrExpressionNode</div>
+                    <div class="node-item">AndExpressionNode</div>
+                    <div class="node-item">NotExpressionNode</div>
+                    <div class="node-item">PrimaryExpressionNode</div>
+                    <div class="node-item">ComparisonExpressionNode</div>
+                    <div class="node-item">ComparisonOperatorNode</div>
+                    <div class="node-item">FunctionCallNode</div>
+                </div>
+            </div>
+
+            <!-- Categoría: Commands -->
+            <div class="ast-category">
+                <h4>🤖 Commands (Comandos del Robot)</h4>
+                <p>Nodos que representan acciones del robot</p>
+                <div class="node-list">
+                    <div class="node-item">SimpleCommandNode</div>
+                    <div class="node-item">MovementCommandNode</div>
+                    <div class="node-item">PenCommandNode</div>
+                </div>
+            </div>
+
+            <!-- Categoría: Literals -->
+            <div class="ast-category">
+                <h4>🔢 Literals (Valores Literales)</h4>
+                <p>Nodos que representan valores constantes y sensores</p>
+                <div class="node-list">
+                    <div class="node-item">NumberNode</div>
+                    <div class="node-item">BooleanNode</div>
+                    <div class="node-item">IdentifierNode</div>
+                    <div class="node-item">NumericSensorNode</div>
+                    <div class="node-item">BooleanSensorNode</div>
+                    <div class="node-item">ParameterNode</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ejemplo: Programa y su Derivación -->
+        <div class="content-section">
+            <h3>🔍 Ejemplo: De Código a AST</h3>
+            <p>
+                Veamos cómo un programa RoboLang sencillo se convierte en un AST paso a paso.
+            </p>
+
+            <h4 style="margin-top: 1.5rem;">Programa RoboLang de Ejemplo:</h4>
+            <div class="example-program">
+<span style="color: #c792ea;">VAR</span> <span style="color: #ffcb6b;">pasos</span>
+<span style="color: #ffcb6b;">pasos</span> <span style="color: #89ddff;">:=</span> <span style="color: #f78c6c;">5</span>
+
+<span style="color: #c792ea;">REPEAT</span> <span style="color: #ffcb6b;">pasos</span> <span style="color: #89ddff;">{</span>
+    <span style="color: #82aaff;">UP</span><span style="color: #89ddff;">;</span>
+    <span style="color: #82aaff;">RIGHT</span><span style="color: #89ddff;">;</span>
+<span style="color: #89ddff;">}</span>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Derivación desde la Gramática BNF:</h4>
+            <div class="derivation-step">
+                <strong>Paso 1:</strong> El programa completo es un <code>&lt;statement_list&gt;</code>
+                <pre style="margin: 0.5rem 0; font-family: var(--font-mono);">&lt;program&gt; ::= &lt;statement_list&gt;</pre>
+            </div>
+
+            <div class="derivation-step">
+                <strong>Paso 2:</strong> La lista de sentencias contiene 3 statements
+                <pre style="margin: 0.5rem 0; font-family: var(--font-mono);">&lt;statement_list&gt; ::= &lt;statement&gt; &lt;statement&gt; &lt;statement&gt;</pre>
+            </div>
+
+            <div class="derivation-step">
+                <strong>Paso 3:</strong> Primera sentencia es una declaración de variable
+                <pre style="margin: 0.5rem 0; font-family: var(--font-mono);">&lt;statement&gt; ::= &lt;variable_declaration&gt;
+&lt;variable_declaration&gt; ::= VAR &lt;identifier&gt;</pre>
+            </div>
+
+            <div class="derivation-step">
+                <strong>Paso 4:</strong> Segunda sentencia es una asignación
+                <pre style="margin: 0.5rem 0; font-family: var(--font-mono);">&lt;statement&gt; ::= &lt;assignment&gt;
+&lt;assignment&gt; ::= &lt;identifier&gt; := &lt;value&gt;</pre>
+            </div>
+
+            <div class="derivation-step">
+                <strong>Paso 5:</strong> Tercera sentencia es un REPEAT
+                <pre style="margin: 0.5rem 0; font-family: var(--font-mono);">&lt;statement&gt; ::= &lt;repeat_statement&gt;
+&lt;repeat_statement&gt; ::= REPEAT &lt;value&gt; &lt;statement_block&gt;</pre>
+            </div>
+        </div>
+
+        <!-- AST Visual Resultante -->
+        <div class="content-section">
+            <h3>🌲 AST Resultante (Visualización)</h3>
+            <p>
+                Este es el árbol de sintaxis abstracta que representa el programa anterior:
+            </p>
+
+            <div class="mermaid">
+graph TD
+    Program[🏛️ ProgramNode]
+    StmtList[📝 StatementListNode]
+    VarDecl[📦 VariableDeclarationNode]
+    Assign[✏️ AssignmentNode]
+    Repeat[🔄 RepeatStatementNode]
+
+    Program --> StmtList
+    StmtList --> VarDecl
+    StmtList --> Assign
+    StmtList --> Repeat
+
+    VarDecl --> Id1[🏷️ IdentifierNode: 'pasos']
+
+    Assign --> Id2[🏷️ IdentifierNode: 'pasos']
+    Assign --> Num1[🔢 NumberNode: 5]
+
+    Repeat --> Id3[🏷️ IdentifierNode: 'pasos']
+    Repeat --> Block[📋 StatementBlockNode]
+
+    Block --> UpCmd[⬆️ MovementCommandNode: UP]
+    Block --> RightCmd[➡️ MovementCommandNode: RIGHT]
+
+    style Program fill:#667eea,color:#fff
+    style StmtList fill:#764ba2,color:#fff
+    style VarDecl fill:#10b981,color:#fff
+    style Assign fill:#3b82f6,color:#fff
+    style Repeat fill:#f59e0b,color:#fff
+    style Block fill:#8b5cf6,color:#fff
+            </div>
+
+            <div class="key-concept" style="margin-top: 2rem;">
+                <h4>🎯 Observa Cómo:</h4>
+                <ul style="margin: 0.5rem 0;">
+                    <li>El <strong>ProgramNode</strong> es la raíz del árbol</li>
+                    <li>Cada sentencia del código se convierte en un nodo del árbol</li>
+                    <li>Las sentencias compuestas (como REPEAT) tienen hijos que representan su contenido</li>
+                    <li>Los identificadores y números son hojas del árbol (no tienen hijos)</li>
+                    <li>La estructura del AST refleja la jerarquía del programa</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Atributos de los Nodos -->
+        <div class="content-section">
+            <h3>🔍 Atributos Principales de los Nodos</h3>
+            <p>
+                Todos los nodos del AST heredan de <code>ASTNode</code> y tienen estos atributos comunes:
+            </p>
+
+            <pre><code class="language-java">public abstract class ASTNode {
+    protected int line;              // Línea en el código fuente
+    protected int column;            // Columna en el código fuente
+    protected List&lt;ASTNode&gt; children; // Nodos hijos
+
+    // Métodos comunes
+    public void addChild(ASTNode child)
+    public List&lt;ASTNode&gt; getChildren()
+    public abstract &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor)
+}</code></pre>
+
+            <p style="margin-top: 1.5rem;">
+                Además, cada tipo de nodo tiene sus propios atributos específicos:
+            </p>
+
+            <table style="width: 100%; margin-top: 1rem; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #e2e8f0;">Tipo de Nodo</th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #e2e8f0;">Atributos Específicos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>RepeatStatementNode</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">
+                            <code>repeatCount</code> (número de iteraciones),<br>
+                            <code>statementBlock</code> (bloque de código a repetir)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>IfStatementNode</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">
+                            <code>condition</code> (expresión booleana),<br>
+                            <code>thenBlock</code>, <code>elseBlock</code> (bloques de código)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>FunctionDeclarationNode</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">
+                            <code>functionName</code> (String),<br>
+                            <code>parameters</code> (List), <code>body</code> (StatementBlockNode)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>NumberNode</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">
+                            <code>value</code> (int) - el valor numérico
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Resumen y Conclusión -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Lo que has aprendido:</h4>
+                <ul>
+                    <li>✅ El AST es la representación estructurada del código, resultado del análisis sintáctico</li>
+                    <li>✅ Todos los nodos heredan de <code>ASTNode</code> y pueden tener nodos hijos</li>
+                    <li>✅ Los nodos se clasifican en 5 categorías: Program, Statements, Expressions, Commands y Literals</li>
+                    <li>✅ Cada tipo de nodo representa una construcción sintáctica del lenguaje</li>
+                    <li>✅ El AST preserva la jerarquía y semántica del programa</li>
+                </ul>
+
+                <div class="key-concept" style="margin-top: 1.5rem;">
+                    <h4>🎯 Próximo Paso</h4>
+                    <p>
+                        Ahora que entiendes <strong>qué es el AST y cómo está estructurado</strong>,
+                        en el siguiente slide verás <strong>cómo se construye dinámicamente</strong> durante el parsing.
+                        Aprenderás el papel crucial de la clase <code>ASTNode</code> y el método <code>addChild()</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="index.html" class="btn" style="background: var(--text-secondary);">
+                ← Volver al Índice
+            </a>
+            <a href="slide2-astnode-construction.html" class="btn btn-primary">
+                Siguiente: Construcción del AST →
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 1: Arquitectura del AST - RoboLang v3.0
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#94a3b8',
+                secondaryColor: '#10b981',
+                tertiaryColor: '#f59e0b'
+            }
+        });
+    </script>
+</body>
+</html>

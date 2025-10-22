@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 2: ASTNode - Construcción del Árbol | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .important-section {
+            background: linear-gradient(to right, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+        }
+
+        .code-explanation {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .step-by-step {
+            counter-reset: step-counter;
+        }
+
+        .construction-step {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            position: relative;
+            padding-left: 4rem;
+        }
+
+        .construction-step:before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 1rem;
+            top: 1.5rem;
+            background: var(--primary-blue);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .memory-diagram {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: var(--font-mono);
+            margin: 1rem 0;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .key-insight {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .code-with-annotations {
+            position: relative;
+        }
+
+        .annotation {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+        }
+
+        table.comparison {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        table.comparison th {
+            background: var(--primary-blue);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        table.comparison td {
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        table.comparison tr:nth-child(even) {
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🔨 ASTNode - Construcción del Árbol</h1>
+                <p class="subtitle">Slide 2 - Cómo se construye el AST dinámicamente</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 2 DE 7 - ⭐ SECCIÓN ESENCIAL</div>
+            <h2>Construcción Dinámica del AST</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                Entender cómo se arma el árbol pieza por pieza es fundamental para dominar
+                el análisis semántico con el patrón Visitor
+            </p>
+        </div>
+
+        <!-- Introducción -->
+        <div class="important-section">
+            <h3>⚠️ ¿Por qué es tan importante este slide?</h3>
+            <p>
+                Este es el slide más importante de toda la guía. Si no entiendes cómo se construye
+                el AST dinámicamente, no podrás entender completamente cómo funcionan los Visitors.
+            </p>
+            <ul style="margin-top: 1rem;">
+                <li>✅ El AST se construye <strong>durante el parsing</strong>, no está predefinido</li>
+                <li>✅ Cada nodo se crea individualmente y se "ensambla" con sus hijos</li>
+                <li>✅ El método <code>addChild()</code> es la pieza clave que conecta todo</li>
+                <li>✅ El patrón Composite permite tratar todos los nodos de forma uniforme</li>
+            </ul>
+        </div>
+
+        <!-- Análisis de ASTNode.java -->
+        <div class="content-section">
+            <h3>🔍 Análisis Profundo de ASTNode.java</h3>
+            <p>
+                La clase <code>ASTNode</code> es la base de <strong>TODOS</strong> los nodos del AST.
+                Veamos su estructura completa:
+            </p>
+
+            <pre><code class="language-java">public abstract class ASTNode {
+    // ========== ATRIBUTOS ==========
+    protected int line;              // Línea en el código fuente
+    protected int column;            // Columna en el código fuente
+    protected List&lt;ASTNode&gt; children; // Lista de nodos hijos
+
+    // ========== CONSTRUCTORES ==========
+    public ASTNode() {
+        this.children = new ArrayList&lt;&gt;();
+        this.line = -1;
+        this.column = -1;
+    }
+
+    public ASTNode(int line, int column) {
+        this.children = new ArrayList&lt;&gt;();
+        this.line = line;
+        this.column = column;
+    }
+
+    public ASTNode(Token token) {
+        this.children = new ArrayList&lt;&gt;();
+        if (token != null) {
+            this.line = token.getLine();
+            this.column = token.getColumn();
+        }
+    }
+
+    // ========== MÉTODO CLAVE: addChild() ==========
+    public void addChild(ASTNode child) {
+        if (child != null) {
+            children.add(child);
+        }
+    }
+
+    // ========== OTROS MÉTODOS ==========
+    public List&lt;ASTNode&gt; getChildren() {
+        return new ArrayList&lt;&gt;(children);
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public int getColumn() {
+        return column;
+    }
+
+    // Método abstracto que todas las subclases deben implementar
+    public abstract &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor);
+}</code></pre>
+
+            <div class="code-explanation">
+                <h4>📝 Explicación de cada atributo:</h4>
+
+                <h5 style="margin-top: 1rem;">1. <code>protected int line</code> y <code>protected int column</code></h5>
+                <p>
+                    Estos atributos guardan la <strong>posición en el código fuente</strong> donde apareció
+                    esta construcción. Son fundamentales para:
+                </p>
+                <ul>
+                    <li>Reportar errores con ubicación precisa ("Error en línea 5, columna 10")</li>
+                    <li>Debugging y trazabilidad</li>
+                    <li>Herramientas de IDE (ir a definición, mostrar errores, etc.)</li>
+                </ul>
+
+                <h5 style="margin-top: 1.5rem;">2. <code>protected List&lt;ASTNode&gt; children</code></h5>
+                <p>
+                    Esta es la <strong>lista de nodos hijos</strong>. Es el corazón del patrón Composite:
+                </p>
+                <ul>
+                    <li>Permite que cada nodo contenga otros nodos</li>
+                    <li>Crea la estructura de árbol</li>
+                    <li>Es genérica: acepta cualquier tipo de <code>ASTNode</code> (polimorfismo)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- El Método addChild() - El Corazón de Todo -->
+        <div class="content-section">
+            <h3>💎 El Método addChild() - El Corazón de la Construcción</h3>
+
+            <pre><code class="language-java">public void addChild(ASTNode child) {
+    if (child != null) {
+        children.add(child);
+    }
+}</code></pre>
+
+            <div class="important-section">
+                <h4>🎯 ¿Qué hace este método?</h4>
+                <p style="margin-bottom: 1rem;">
+                    Parece simple, pero es LA pieza fundamental. Este método:
+                </p>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Agrega un nodo hijo a la lista de hijos</strong> del nodo actual</li>
+                    <li><strong>Crea la relación padre-hijo</strong> que forma el árbol</li>
+                    <li><strong>Valida que el hijo no sea null</strong> (programación defensiva)</li>
+                    <li><strong>Acepta cualquier tipo de ASTNode</strong> (gracias al polimorfismo)</li>
+                </ol>
+
+                <div class="key-insight" style="margin-top: 1.5rem;">
+                    <h4>💡 Insight Clave</h4>
+                    <p>
+                        Cada vez que veas <code>addChild()</code> en el código, estás viendo el momento exacto
+                        en que se está <strong>"armando" el árbol</strong>. Es como poner un ladrillo en una pared.
+                    </p>
+                </div>
+            </div>
+
+            <div class="analogy-box">
+                <h4>🌳 Analogía: El Árbol Genealógico</h4>
+                <p>
+                    Piensa en el AST como un árbol genealógico:
+                </p>
+                <ul>
+                    <li>El <strong>nodo raíz</strong> (ProgramNode) es el antepasado más antiguo</li>
+                    <li>Cada <strong>nodo</strong> es una persona en el árbol familiar</li>
+                    <li>La <strong>lista children</strong> son los hijos de esa persona</li>
+                    <li>El método <strong>addChild()</strong> es como "tener un hijo" - añades un descendiente directo</li>
+                    <li>El <strong>recorrido del árbol</strong> (que veremos en Visitor) es como recorrer el árbol genealógico visitando a cada miembro</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Ejemplo 1: ConditionNode -->
+        <div class="content-section">
+            <h3>🔬 Ejemplo 1: ConditionNode - Paso a Paso</h3>
+            <p>
+                Veamos cómo se construye un <code>ConditionNode</code> en la práctica.
+                Este es el nodo que representa una condición booleana.
+            </p>
+
+            <h4 style="margin-top: 1.5rem;">El Código del Nodo:</h4>
+            <pre><code class="language-java">public class ConditionNode extends ASTNode {
+    private OrExpressionNode orExpression;
+
+    // Constructor
+    public ConditionNode(Token token) {
+        super(token);  // Llama al constructor de ASTNode
+    }
+
+    // Método que establece la expresión OR y la agrega como hijo
+    public void setOrExpression(OrExpressionNode orExpression) {
+        this.orExpression = orExpression;
+        if (orExpression != null) {
+            addChild(orExpression);  // ← ¡Aquí está la magia!
+        }
+    }
+
+    @Override
+    public &lt;T&gt; T accept(ASTVisitor&lt;T&gt; visitor) {
+        return visitor.visitCondition(this);
+    }
+}</code></pre>
+
+            <div class="annotation">
+                <strong>📌 Nota clave:</strong> Observa cómo <code>setOrExpression()</code> hace DOS cosas:
+                <ol>
+                    <li>Guarda la referencia en el atributo <code>orExpression</code> (para acceso directo)</li>
+                    <li>Llama a <code>addChild(orExpression)</code> (para agregar al árbol)</li>
+                </ol>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Ejemplo de Código RoboLang:</h4>
+            <pre><code class="language-robolang">IF (BATTERY > 50) {
+    UP;
+}</code></pre>
+
+            <h4 style="margin-top: 1.5rem;">Construcción del AST - Paso a Paso:</h4>
+
+            <div class="step-by-step">
+                <div class="construction-step">
+                    <h5>El parser encuentra el IF</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">// Parser crea el nodo IF
+IfStatementNode ifNode = new IfStatementNode(token);</code></pre>
+                    <div class="memory-diagram">
+┌─────────────────┐
+│ IfStatementNode │
+├─────────────────┤
+│ line: 1         │
+│ column: 1       │
+│ children: []    │ ← Lista vacía
+└─────────────────┘
+                    </div>
+
+                    <div class="mermaid" style="margin-top: 1rem;">
+graph TD
+    IfNode[🔀 IfStatementNode<br/>children: vacio]
+
+    style IfNode fill:#3b82f6,color:#fff,stroke:#1d4ed8,stroke-width:3px
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        <em>Paso 1: Nodo IF creado, sin hijos todavía</em>
+                    </p>
+                </div>
+
+                <div class="construction-step">
+                    <h5>El parser parsea la condición (BATTERY > 50)</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">// Parser crea el ConditionNode
+ConditionNode condition = new ConditionNode(token);
+
+// Parser crea la expresión OR (que contiene la comparación)
+OrExpressionNode orExpr = new OrExpressionNode(token);
+
+// ¡Aquí se arma el árbol!
+condition.setOrExpression(orExpr);
+// Internamente esto hace: addChild(orExpr)</code></pre>
+                    <div class="memory-diagram">
+┌────────────────┐
+│ ConditionNode  │
+├────────────────┤
+│ line: 1        │
+│ column: 5      │
+│ children: [───────┐
+│   orExpression ─┤ │
+└────────────────┘ │
+                   │
+                   ↓
+        ┌──────────────────┐
+        │ OrExpressionNode │
+        └──────────────────┘
+                    </div>
+
+                    <div class="mermaid" style="margin-top: 1rem;">
+graph TD
+    Condition[🎯 ConditionNode]
+    OrExpr[🔗 OrExpressionNode]
+
+    Condition --> OrExpr
+
+    style Condition fill:#8b5cf6,color:#fff,stroke:#7c3aed,stroke-width:3px
+    style OrExpr fill:#a78bfa,color:#fff
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        <em>Paso 2: ConditionNode creado con OrExpressionNode como hijo (aún no conectado al IF)</em>
+                    </p>
+                </div>
+
+                <div class="construction-step">
+                    <h5>El parser conecta la condición al IF</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">// El IF recibe la condición completa
+ifNode.setCondition(condition);
+// Internamente: addChild(condition)</code></pre>
+                    <div class="memory-diagram">
+┌─────────────────┐
+│ IfStatementNode │
+├─────────────────┤
+│ children: [─────────┐
+│   condition ────┤   │
+└─────────────────┘   │
+                      ↓
+            ┌────────────────┐
+            │ ConditionNode  │
+            ├────────────────┤
+            │ children: [────────┐
+            │   orExpression ─┤  │
+            └────────────────┘  │
+                                ↓
+                    ┌──────────────────┐
+                    │ OrExpressionNode │
+                    └──────────────────┘
+                    </div>
+
+                    <div class="mermaid" style="margin-top: 1rem;">
+graph TD
+    IfNode[🔀 IfStatementNode]
+    Condition[🎯 ConditionNode]
+    OrExpr[🔗 OrExpressionNode]
+
+    IfNode -->|condition| Condition
+    Condition --> OrExpr
+
+    style IfNode fill:#3b82f6,color:#fff,stroke:#1d4ed8,stroke-width:3px
+    style Condition fill:#8b5cf6,color:#fff
+    style OrExpr fill:#a78bfa,color:#fff
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        <em>Paso 3: IfStatementNode ahora tiene la condición como hijo</em>
+                    </p>
+                </div>
+
+                <div class="construction-step">
+                    <h5>El parser parsea el bloque { UP; }</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">// Crea el bloque de statements
+StatementBlockNode block = new StatementBlockNode(token);
+
+// Crea el comando UP
+MovementCommandNode upCmd = new MovementCommandNode("UP", token);
+
+// Conecta el comando al bloque
+block.addStatement(upCmd);  // Usa addChild() internamente
+
+// Conecta el bloque al IF
+ifNode.setThenBlock(block);  // Usa addChild() internamente</code></pre>
+                    <div class="memory-diagram">
+┌─────────────────┐
+│ IfStatementNode │ ← ÁRBOL COMPLETO
+├─────────────────┤
+│ children: [─────────────────┬────────┐
+│   condition ────┐           │        │
+│   thenBlock ────┼───────────┘        │
+└─────────────────┘           │        │
+          │                   │        │
+          ↓                   ↓        │
+    ┌────────────┐   ┌──────────────┐ │
+    │ Condition  │   │ StatementBlk │ │
+    └────────────┘   ├──────────────┤ │
+          │          │ children: [──────┘
+          │          └──────────────┘ │
+          │                           ↓
+          │              ┌────────────────────┐
+          │              │ MovementCommandNode│
+          │              │    command: "UP"   │
+          ↓              └────────────────────┘
+   ┌──────────────┐
+   │ OrExpression │
+   └──────────────┘
+                    </div>
+
+                    <h5 style="margin-top: 2rem;">Visualización del Árbol AST Completo:</h5>
+                    <div class="mermaid">
+graph TD
+    IfNode[🔀 IfStatementNode]
+    Condition[🎯 ConditionNode]
+    OrExpr[🔗 OrExpressionNode]
+    ThenBlock[📦 StatementBlockNode]
+    UpCmd[⬆️ MovementCommandNode: UP]
+
+    IfNode -->|condition| Condition
+    IfNode -->|thenBlock| ThenBlock
+    Condition --> OrExpr
+    ThenBlock --> UpCmd
+
+    style IfNode fill:#3b82f6,color:#fff,stroke:#1d4ed8,stroke-width:3px
+    style Condition fill:#8b5cf6,color:#fff
+    style OrExpr fill:#a78bfa,color:#fff
+    style ThenBlock fill:#10b981,color:#fff
+    style UpCmd fill:#f59e0b,color:#fff
+                    </div>
+
+                    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-top: 1rem; border-radius: 0.5rem;">
+                        <strong>📌 Observa:</strong>
+                        <ul style="margin-top: 0.5rem; line-height: 1.8;">
+                            <li>El <strong>IfStatementNode</strong> es la raíz de este subárbol</li>
+                            <li>Tiene dos hijos: <strong>condition</strong> (ConditionNode) y <strong>thenBlock</strong> (StatementBlockNode)</li>
+                            <li>El bloque contiene un solo comando: <strong>UP</strong></li>
+                            <li>Cada conexión representa una llamada a <code>addChild()</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-insight">
+                <h4>🎯 ¿Qué acabamos de ver?</h4>
+                <p>
+                    Observa cómo en cada paso, <code>addChild()</code> se usa para <strong>conectar</strong>
+                    un nodo con su padre. El árbol se va <strong>construyendo de abajo hacia arriba</strong>:
+                    primero los nodos hoja, luego los nodos intermedios, y finalmente la raíz.
+                </p>
+            </div>
+        </div>
+
+        <!-- Ejemplo 2: RepeatStatementNode -->
+        <div class="content-section">
+            <h3>🔬 Ejemplo 2: RepeatStatementNode</h3>
+
+            <h4>El Código del Nodo:</h4>
+            <pre><code class="language-java">public class RepeatStatementNode extends ASTNode {
+    private NumberNode repeatCount;
+    private IdentifierNode repeatCountIdentifier;
+    private StatementBlockNode statementBlock;
+
+    public void setRepeatCount(NumberNode repeatCount) {
+        this.repeatCount = repeatCount;
+        if (repeatCount != null) {
+            addChild(repeatCount);  // ← Agrega el número como hijo
+        }
+    }
+
+    public void setRepeatCountIdentifier(IdentifierNode id) {
+        this.repeatCountIdentifier = id;
+        if (id != null) {
+            addChild(id);  // ← O agrega el identificador
+        }
+    }
+
+    public void setStatementBlock(StatementBlockNode block) {
+        this.statementBlock = block;
+        if (block != null) {
+            addChild(block);  // ← Agrega el bloque de código
+        }
+    }
+}</code></pre>
+
+            <h4 style="margin-top: 1.5rem;">Ejemplo de Código RoboLang:</h4>
+            <pre><code class="language-robolang">VAR pasos
+pasos := 5
+
+REPEAT pasos {
+    UP;
+    RIGHT;
+}</code></pre>
+
+            <h4 style="margin-top: 1.5rem;">Construcción Paso a Paso:</h4>
+
+            <div class="step-by-step">
+                <div class="construction-step">
+                    <h5>El parser crea el RepeatStatementNode</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">RepeatStatementNode repeat = new RepeatStatementNode(token);</code></pre>
+
+                    <div class="mermaid" style="margin-top: 1rem;">
+graph TD
+    Repeat[🔄 RepeatStatementNode<br/>children: vacio]
+
+    style Repeat fill:#f59e0b,color:#fff,stroke:#d97706,stroke-width:3px
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        <em>Paso 1: Nodo REPEAT creado, sin hijos todavía</em>
+                    </p>
+                </div>
+
+                <div class="construction-step">
+                    <h5>El parser parsea el identificador "pasos"</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">IdentifierNode id = new IdentifierNode("pasos", token);
+repeat.setRepeatCountIdentifier(id);
+// Internamente: addChild(id)</code></pre>
+
+                    <div class="mermaid" style="margin-top: 1rem;">
+graph TD
+    Repeat[🔄 RepeatStatementNode]
+    Id[🏷️ IdentifierNode: 'pasos']
+
+    Repeat -->|repeatCountIdentifier| Id
+
+    style Repeat fill:#f59e0b,color:#fff,stroke:#d97706,stroke-width:3px
+    style Id fill:#10b981,color:#fff
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        <em>Paso 2: RepeatStatementNode ahora tiene el identificador "pasos" como hijo</em>
+                    </p>
+                </div>
+
+                <div class="construction-step">
+                    <h5>El parser parsea el bloque { UP; RIGHT; }</h5>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">StatementBlockNode block = new StatementBlockNode(token);
+
+// Agregar UP
+MovementCommandNode up = new MovementCommandNode("UP", token);
+block.addStatement(up);  // addChild() internamente
+
+// Agregar RIGHT
+MovementCommandNode right = new MovementCommandNode("RIGHT", token);
+block.addStatement(right);  // addChild() internamente
+
+// Conectar el bloque al REPEAT
+repeat.setStatementBlock(block);
+// Internamente: addChild(block)</code></pre>
+
+                    <div class="mermaid" style="margin-top: 1rem;">
+graph TD
+    Repeat[🔄 RepeatStatementNode]
+    Id[🏷️ IdentifierNode: 'pasos']
+    Block[📦 StatementBlockNode]
+    Up[⬆️ MovementCommandNode: UP]
+    Right[➡️ MovementCommandNode: RIGHT]
+
+    Repeat -->|repeatCountIdentifier| Id
+    Repeat -->|statementBlock| Block
+    Block -->|statement 1| Up
+    Block -->|statement 2| Right
+
+    style Repeat fill:#f59e0b,color:#fff,stroke:#d97706,stroke-width:3px
+    style Id fill:#10b981,color:#fff
+    style Block fill:#3b82f6,color:#fff
+    style Up fill:#8b5cf6,color:#fff
+    style Right fill:#8b5cf6,color:#fff
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        <em>Paso 3: Árbol completo con el bloque de statements y sus comandos</em>
+                    </p>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Visualización del Árbol AST Final:</h4>
+            <div class="mermaid">
+graph TD
+    Repeat[🔄 RepeatStatementNode]
+    Id[🏷️ IdentifierNode: 'pasos']
+    Block[📦 StatementBlockNode]
+    Up[⬆️ MovementCommandNode: UP]
+    Right[➡️ MovementCommandNode: RIGHT]
+
+    Repeat -->|repeatCountIdentifier| Id
+    Repeat -->|statementBlock| Block
+    Block -->|statement 1| Up
+    Block -->|statement 2| Right
+
+    style Repeat fill:#f59e0b,color:#fff,stroke:#d97706,stroke-width:3px
+    style Id fill:#10b981,color:#fff
+    style Block fill:#3b82f6,color:#fff
+    style Up fill:#8b5cf6,color:#fff
+    style Right fill:#8b5cf6,color:#fff
+            </div>
+
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1rem; border-radius: 0.5rem;">
+                <strong>📌 Observa en este ejemplo:</strong>
+                <ul style="margin-top: 0.5rem; line-height: 1.8;">
+                    <li>El <strong>RepeatStatementNode</strong> tiene un identificador ("pasos") como contador</li>
+                    <li>El <strong>StatementBlockNode</strong> contiene dos comandos (UP y RIGHT)</li>
+                    <li>Cada <code>addChild()</code> creó una de estas conexiones</li>
+                    <li>El árbol refleja la estructura: <code>REPEAT pasos { UP; RIGHT; }</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Por qué Polimorfismo -->
+        <div class="content-section">
+            <h3>🎨 El Poder del Polimorfismo</h3>
+
+            <div class="important-section">
+                <h4>¿Por qué todos los nodos heredan de ASTNode?</h4>
+                <p>La herencia de <code>ASTNode</code> nos da <strong>3 superpoderes</strong>:</p>
+            </div>
+
+            <table class="comparison">
+                <thead>
+                    <tr>
+                        <th>Superpoder</th>
+                        <th>Qué permite</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Tratamiento uniforme</strong></td>
+                        <td>Tratar todos los nodos de la misma forma</td>
+                        <td><code>List&lt;ASTNode&gt; children</code> puede contener cualquier tipo de nodo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Composición flexible</strong></td>
+                        <td>Cualquier nodo puede tener cualquier tipo de hijo</td>
+                        <td>Un <code>StatementBlockNode</code> puede contener IF, REPEAT, comandos, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Recorrido genérico</strong></td>
+                        <td>Visitor puede recorrer el árbol sin conocer tipos específicos</td>
+                        <td><code>for (ASTNode child : node.getChildren())</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="code-explanation">
+                <h4>Ejemplo del poder del polimorfismo:</h4>
+                <pre><code class="language-java">// Todos estos son válidos gracias al polimorfismo:
+ASTNode node1 = new RepeatStatementNode();
+ASTNode node2 = new ConditionNode();
+ASTNode node3 = new MovementCommandNode();
+
+// Podemos tratarlos uniformemente:
+List&lt;ASTNode&gt; nodes = Arrays.asList(node1, node2, node3);
+
+// Y recorrerlos sin conocer su tipo específico:
+for (ASTNode node : nodes) {
+    node.accept(visitor);  // Esto funciona para TODOS
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Diagrama de Secuencia -->
+        <div class="content-section">
+            <h3>📊 Diagrama de Secuencia de Construcción</h3>
+            <p>
+                Este diagrama muestra el flujo temporal de cómo se construye el AST:
+            </p>
+
+            <div class="mermaid">
+sequenceDiagram
+    participant Parser
+    participant IfNode as IfStatementNode
+    participant CondNode as ConditionNode
+    participant BlockNode as StatementBlockNode
+
+    Note over Parser: Encuentra token "IF"
+    Parser->>IfNode: new IfStatementNode(token)
+    activate IfNode
+    Note over IfNode: children = []
+
+    Parser->>CondNode: new ConditionNode(token)
+    activate CondNode
+    Note over CondNode: children = []
+
+    Note over Parser: Parsea expresión booleana
+    Parser->>CondNode: setOrExpression(orExpr)
+    CondNode->>CondNode: addChild(orExpr)
+    Note over CondNode: children = [orExpr]
+
+    Parser->>IfNode: setCondition(condition)
+    IfNode->>IfNode: addChild(condition)
+    Note over IfNode: children = [condition]
+
+    Parser->>BlockNode: new StatementBlockNode(token)
+    activate BlockNode
+    Note over BlockNode: children = []
+
+    Note over Parser: Parsea comandos...
+    Parser->>BlockNode: addStatement(upCmd)
+    BlockNode->>BlockNode: addChild(upCmd)
+
+    Parser->>IfNode: setThenBlock(block)
+    IfNode->>IfNode: addChild(block)
+    Note over IfNode: children = [condition, block]
+
+    deactivate BlockNode
+    deactivate CondNode
+    deactivate IfNode
+            </div>
+        </div>
+
+        <!-- Ejercicio de Reflexión -->
+        <div class="content-section">
+            <h3>💭 Ejercicio de Reflexión</h3>
+
+            <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #f59e0b;">
+                <h4>🤔 Pregúntate:</h4>
+                <ol style="line-height: 2;">
+                    <li>¿Qué pasaría si <code>addChild()</code> no validara si el hijo es null?</li>
+                    <li>¿Por qué es importante que <code>children</code> sea una lista y no un array?</li>
+                    <li>¿En qué orden se agregan los hijos? ¿Importa?</li>
+                    <li>¿Cómo se relaciona esto con el recorrido del árbol que haremos con Visitor?</li>
+                </ol>
+
+                <details style="margin-top: 1rem;">
+                    <summary style="cursor: pointer; font-weight: 600; color: var(--primary-blue);">
+                        Ver respuestas →
+                    </summary>
+                    <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 0.5rem;">
+                        <p><strong>1.</strong> Tendríamos nulls en la lista, causando NullPointerException al recorrer</p>
+                        <p><strong>2.</strong> Las listas son dinámicas - no sabemos cuántos hijos tendrá cada nodo</p>
+                        <p><strong>3.</strong> Sí importa - el orden preserva la estructura del código original</p>
+                        <p><strong>4.</strong> El Visitor recorrerá los hijos en el orden en que fueron agregados</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Has aprendido:</h4>
+                <ul style="line-height: 1.8;">
+                    <li>✅ El AST se construye <strong>dinámicamente</strong> durante el parsing</li>
+                    <li>✅ <code>ASTNode</code> es la clase base de todos los nodos</li>
+                    <li>✅ El método <code>addChild()</code> es el que <strong>"arma" el árbol</strong></li>
+                    <li>✅ Cada nodo específico tiene setters que llaman a <code>addChild()</code></li>
+                    <li>✅ El polimorfismo permite tratar todos los nodos uniformemente</li>
+                    <li>✅ El árbol se construye de <strong>abajo hacia arriba</strong> (hojas → raíz)</li>
+                </ul>
+
+                <div class="key-insight" style="margin-top: 1.5rem;">
+                    <h4>🎯 Próximo Paso</h4>
+                    <p>
+                        Ahora que entiendes cómo se <strong>construye</strong> el AST, en el siguiente slide
+                        verás cómo <strong>recorrerlo y operarlo</strong> usando el patrón Visitor.
+                        El Visitor aprovecha exactamente esta estructura de árbol que acabamos de entender.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide1-ast-architecture.html" class="btn" style="background: var(--text-secondary);">
+                ← Anterior: Arquitectura del AST
+            </a>
+            <a href="slide3-visitor-pattern.html" class="btn btn-primary">
+                Siguiente: Patrón Visitor →
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 2: ASTNode - Construcción del Árbol
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#f59e0b',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#d97706',
+                lineColor: '#94a3b8',
+                secondaryColor: '#10b981',
+                tertiaryColor: '#3b82f6'
+            }
+        });
+    </script>
+</body>
+</html>

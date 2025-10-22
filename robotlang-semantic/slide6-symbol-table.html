@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 6: Tabla de Símbolos | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .concept-card {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-left: 4px solid #ef4444;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+        }
+
+        .operation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .operation-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .operation-card h5 {
+            color: var(--primary-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        .symbol-table-viz {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            font-family: var(--font-mono);
+            margin: 2rem 0;
+        }
+
+        .table-entry {
+            background: #334155;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .error-example {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .success-example {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .use-case-section {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .use-case-example {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        .data-flow {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary-blue);
+        }
+
+        .timeline-item {
+            position: relative;
+            background: white;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -2.5rem;
+            top: 1.5rem;
+            width: 1rem;
+            height: 1rem;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary-blue);
+        }
+
+        .code-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-invalid {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .comparison-valid {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .comparison-header {
+            padding: 1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .comparison-invalid .comparison-header {
+            background: #ef4444;
+        }
+
+        .comparison-valid .comparison-header {
+            background: #10b981;
+        }
+
+        .comparison-content {
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .code-comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .operation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>📚 Tabla de Símbolos</h1>
+                <p class="subtitle">Slide 6 - Estructura fundamental para el análisis semántico</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 6 DE 7</div>
+            <h2>Tabla de Símbolos para Análisis Semántico</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                La estructura de datos que permite rastrear y validar variables en el programa
+            </p>
+        </div>
+
+        <!-- ¿Qué es una Tabla de Símbolos? -->
+        <div class="content-section">
+            <h3>🤔 ¿Qué es una Tabla de Símbolos?</h3>
+
+            <div class="concept-card">
+                <h4 style="color: #dc2626;">Definición</h4>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">
+                    Una <strong>Tabla de Símbolos (Symbol Table)</strong> es una estructura de datos utilizada
+                    por compiladores e intérpretes para <strong>almacenar información sobre los identificadores</strong>
+                    (variables, funciones, etc.) declarados en un programa.
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; padding: 2rem; border-radius: 0.75rem; margin-top: 2rem;">
+                <h4>🎯 Propósito Principal</h4>
+                <p>
+                    La tabla de símbolos permite al compilador/intérprete:
+                </p>
+                <ul style="line-height: 1.8; margin-top: 1rem;">
+                    <li>✅ <strong>Rastrear</strong> qué variables han sido declaradas</li>
+                    <li>✅ <strong>Validar</strong> que las variables usadas existan</li>
+                    <li>✅ <strong>Detectar</strong> declaraciones duplicadas</li>
+                    <li>✅ <strong>Verificar</strong> que las variables estén inicializadas antes de usarse</li>
+                    <li>✅ <strong>Mantener</strong> información de tipo (integer, boolean, etc.)</li>
+                    <li>✅ <strong>Localizar</strong> errores semánticos con línea y columna precisas</li>
+                </ul>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Analogía: El Registro de Estudiantes</h4>
+            <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 2rem; border-radius: 0.75rem; margin-top: 1rem;">
+                <p>
+                    Imagina la tabla de símbolos como un <strong>registro de estudiantes</strong> en una universidad:
+                </p>
+                <ul style="line-height: 1.8; margin-top: 1rem;">
+                    <li>📝 Cuando un estudiante se matricula → <strong>Declaración de variable</strong></li>
+                    <li>🔍 Verificar si un estudiante está inscrito → <strong>Lookup en la tabla</strong></li>
+                    <li>❌ Intentar matricular el mismo estudiante dos veces → <strong>Error de redeclaración</strong></li>
+                    <li>⚠️ Referenciar un estudiante no inscrito → <strong>Error de variable no declarada</strong></li>
+                    <li>📊 Información del estudiante (carrera, año, etc.) → <strong>Metadata (tipo, valor, etc.)</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ¿Qué Información Almacena? -->
+        <div class="content-section">
+            <h3>📦 ¿Qué Información Almacena?</h3>
+            <p>
+                Cada entrada en la tabla de símbolos contiene información detallada sobre una variable:
+            </p>
+
+            <div class="symbol-table-viz">
+                <div style="margin-bottom: 1.5rem;">
+                    <strong style="color: #10b981;">Ejemplo de Entrada en la Tabla:</strong>
+                </div>
+                <div class="table-entry">
+                    <div><strong style="color: #fbbf24;">name:</strong> "contador"</div>
+                    <div><strong style="color: #fbbf24;">type:</strong> INTEGER</div>
+                    <div><strong style="color: #fbbf24;">declarationLine:</strong> 5</div>
+                    <div><strong style="color: #fbbf24;">declarationColumn:</strong> 4</div>
+                    <div><strong style="color: #fbbf24;">initialized:</strong> true</div>
+                    <div><strong style="color: #fbbf24;">value:</strong> 10</div>
+                </div>
+
+                <div class="table-entry">
+                    <div><strong style="color: #fbbf24;">name:</strong> "activo"</div>
+                    <div><strong style="color: #fbbf24;">type:</strong> BOOLEAN</div>
+                    <div><strong style="color: #fbbf24;">declarationLine:</strong> 8</div>
+                    <div><strong style="color: #fbbf24;">declarationColumn:</strong> 4</div>
+                    <div><strong style="color: #fbbf24;">initialized:</strong> false</div>
+                    <div><strong style="color: #fbbf24;">value:</strong> null</div>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Campos de SymbolTableEntry:</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="background: var(--primary-blue); color: white;">
+                        <th style="padding: 1rem; text-align: left;">Campo</th>
+                        <th style="padding: 1rem; text-align: left;">Tipo</th>
+                        <th style="padding: 1rem; text-align: left;">Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>name</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">String</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Nombre de la variable</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>type</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">SymbolType</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Tipo de dato (INTEGER, BOOLEAN, SENSOR, UNKNOWN)</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>declarationLine</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">int</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Línea donde se declaró</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>declarationColumn</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">int</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Columna donde se declaró</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>initialized</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">boolean</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">¿Ha sido inicializada con un valor?</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>value</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Object</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Valor actual (si está disponible)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Operaciones Básicas -->
+        <div class="content-section">
+            <h3>⚙️ Operaciones Básicas</h3>
+            <p>
+                La tabla de símbolos proporciona operaciones fundamentales para el análisis semántico:
+            </p>
+
+            <div class="operation-grid">
+                <div class="operation-card">
+                    <h5>1. declare(name, line, column)</h5>
+                    <p><strong>Qué hace:</strong></p>
+                    <p>Agrega una nueva variable a la tabla de símbolos.</p>
+                    <p style="margin-top: 1rem;"><strong>Cuándo se usa:</strong></p>
+                    <p>Cuando el visitor visita un <code>VariableDeclarationNode</code> (VAR).</p>
+                    <p style="margin-top: 1rem;"><strong>Validación:</strong></p>
+                    <p>Retorna <code>false</code> si la variable ya existe (error de redeclaración).</p>
+                </div>
+
+                <div class="operation-card">
+                    <h5>2. isDeclared(name)</h5>
+                    <p><strong>Qué hace:</strong></p>
+                    <p>Verifica si una variable existe en la tabla.</p>
+                    <p style="margin-top: 1rem;"><strong>Cuándo se usa:</strong></p>
+                    <p>Antes de usar una variable, para validar que fue declarada.</p>
+                    <p style="margin-top: 1rem;"><strong>Retorna:</strong></p>
+                    <p><code>true</code> si existe, <code>false</code> si no.</p>
+                </div>
+
+                <div class="operation-card">
+                    <h5>3. get(name)</h5>
+                    <p><strong>Qué hace:</strong></p>
+                    <p>Obtiene la entrada completa de una variable.</p>
+                    <p style="margin-top: 1rem;"><strong>Cuándo se usa:</strong></p>
+                    <p>Para acceder a toda la información de la variable (tipo, línea, valor, etc.).</p>
+                    <p style="margin-top: 1rem;"><strong>Retorna:</strong></p>
+                    <p><code>SymbolTableEntry</code> o <code>null</code> si no existe.</p>
+                </div>
+
+                <div class="operation-card">
+                    <h5>4. initialize(name, value)</h5>
+                    <p><strong>Qué hace:</strong></p>
+                    <p>Marca una variable como inicializada y guarda su valor.</p>
+                    <p style="margin-top: 1rem;"><strong>Cuándo se usa:</strong></p>
+                    <p>Cuando el visitor visita un <code>AssignmentNode</code> (:=).</p>
+                    <p style="margin-top: 1rem;"><strong>Efecto:</strong></p>
+                    <p>Actualiza <code>initialized = true</code> e infiere el tipo.</p>
+                </div>
+
+                <div class="operation-card">
+                    <h5>5. validateUsage(name, line, column)</h5>
+                    <p><strong>Qué hace:</strong></p>
+                    <p>Valida que una variable esté declarada antes de usarla.</p>
+                    <p style="margin-top: 1rem;"><strong>Cuándo se usa:</strong></p>
+                    <p>Cuando el visitor encuentra un <code>IdentifierNode</code> siendo usado.</p>
+                    <p style="margin-top: 1rem;"><strong>Efecto:</strong></p>
+                    <p>Genera error si no está declarada, warning si no está inicializada.</p>
+                </div>
+
+                <div class="operation-card">
+                    <h5>6. clear()</h5>
+                    <p><strong>Qué hace:</strong></p>
+                    <p>Limpia toda la tabla de símbolos.</p>
+                    <p style="margin-top: 1rem;"><strong>Cuándo se usa:</strong></p>
+                    <p>Al iniciar un nuevo análisis semántico.</p>
+                    <p style="margin-top: 1rem;"><strong>Efecto:</strong></p>
+                    <p>Resetea todos los símbolos, errores y warnings.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diseño para RoboLang -->
+        <div class="content-section">
+            <h3 style="color: #1e293b; font-size: 1.75rem; font-weight: 700;">🏗️ Diseño de la Tabla de Símbolos para RoboLang</h3>
+
+            <div class="mermaid">
+graph LR
+    subgraph "Tabla de Símbolos"
+        SymbolTable["<b>SymbolTable</b><br/>━━━━━━━━━━━━━━━━<br/>-symbols: Map<br/>-errors: List<br/>-warnings: List<br/>━━━━━━━━━━━━━━━━<br/>+declare()<br/>+isDeclared()<br/>+get()<br/>+initialize()<br/>+validateUsage()<br/>+getErrors()<br/>+hasErrors()"]
+    end
+
+    subgraph "Entrada de Símbolo"
+        Entry["<b>SymbolTableEntry</b><br/>━━━━━━━━━━━━━━━━<br/>-name: String<br/>-type: SymbolType<br/>-declarationLine: int<br/>-declarationColumn: int<br/>-initialized: boolean<br/>-value: Object<br/>━━━━━━━━━━━━━━━━<br/>+getName()<br/>+getType()<br/>+isInitialized()<br/>+getValue()<br/>+setValue()"]
+    end
+
+    subgraph "Tipo de Símbolo"
+        SymType["<b>SymbolType</b><br/><i>enum</i><br/>━━━━━━━━━━━━━━━━<br/>UNKNOWN<br/>INTEGER<br/>BOOLEAN<br/>SENSOR"]
+    end
+
+    SymbolTable -->|"contiene *"| Entry
+    Entry -->|"tiene"| SymType
+
+    style SymbolTable fill:#fecaca,color:#1e293b,stroke:#dc2626,stroke-width:3px
+    style Entry fill:#bfdbfe,color:#1e293b,stroke:#1d4ed8,stroke-width:3px
+    style SymType fill:#a7f3d0,color:#1e293b,stroke:#047857,stroke-width:3px
+            </div>
+
+            <h4 style="margin-top: 2rem;">Decisiones de Diseño:</h4>
+            <div style="background: #f8fafc; padding: 2rem; border-radius: 0.75rem; margin-top: 1rem;">
+                <ol style="line-height: 2;">
+                    <li><strong>Map vs List:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>Usamos <code>Map&lt;String, SymbolTableEntry&gt;</code> para búsquedas O(1)</li>
+                            <li>La clave es el nombre de la variable</li>
+                            <li>Más eficiente que recorrer una lista</li>
+                        </ul>
+                    </li>
+                    <li style="margin-top: 1rem;"><strong>LinkedHashMap:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>Mantiene el orden de inserción</li>
+                            <li>Útil para mostrar variables en el orden que fueron declaradas</li>
+                        </ul>
+                    </li>
+                    <li style="margin-top: 1rem;"><strong>Listas de Errores y Warnings:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>Acumulamos todos los errores, no solo el primero</li>
+                            <li>Mejor experiencia de usuario: ve todos los problemas de una vez</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Casos de Uso -->
+        <div class="content-section">
+            <h3>🎯 Casos de Uso en Análisis Semántico</h3>
+
+            <h4>Caso 1: Detección de Variables No Declaradas</h4>
+            <div class="code-comparison-grid">
+                <div class="comparison-invalid">
+                    <div class="comparison-header">❌ CÓDIGO INVÁLIDO</div>
+                    <div class="comparison-content">
+                        <pre><code class="language-robolang">// ERROR: 'contador' no declarado
+contador := 5</code></pre>
+                        <div class="error-example" style="margin-top: 1rem;">
+                            <strong>Error Detectado:</strong>
+                            <p style="margin-top: 0.5rem;">
+                                ❌ Variable 'contador' no declarada (usada en línea 2:1)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-valid">
+                    <div class="comparison-header">✅ CÓDIGO VÁLIDO</div>
+                    <div class="comparison-content">
+                        <pre><code class="language-robolang">VAR contador
+contador := 5</code></pre>
+                        <div class="success-example" style="margin-top: 1rem;">
+                            <strong>Análisis Exitoso:</strong>
+                            <p style="margin-top: 0.5rem;">
+                                ✅ Variable 'contador' declarada en 1:4<br>
+                                ✅ Inicializada en 2:1 con valor 5
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2.5rem;">Caso 2: Detección de Redeclaraciones</h4>
+            <div class="code-comparison-grid">
+                <div class="comparison-invalid">
+                    <div class="comparison-header">❌ CÓDIGO INVÁLIDO</div>
+                    <div class="comparison-content">
+                        <pre><code class="language-robolang">VAR pasos
+VAR pasos  // ERROR: Redeclaración</code></pre>
+                        <div class="error-example" style="margin-top: 1rem;">
+                            <strong>Error Detectado:</strong>
+                            <p style="margin-top: 0.5rem;">
+                                ❌ Variable 'pasos' ya fue declarada en línea 1:4
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-valid">
+                    <div class="comparison-header">✅ CÓDIGO VÁLIDO</div>
+                    <div class="comparison-content">
+                        <pre><code class="language-robolang">VAR pasos
+VAR distancia  // OK: Diferente nombre</code></pre>
+                        <div class="success-example" style="margin-top: 1rem;">
+                            <strong>Análisis Exitoso:</strong>
+                            <p style="margin-top: 0.5rem;">
+                                ✅ Variable 'pasos' declarada en 1:4<br>
+                                ✅ Variable 'distancia' declarada en 2:4
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2.5rem;">Caso 3: Verificación de Inicialización</h4>
+            <div class="use-case-example">
+                <pre><code class="language-robolang">VAR nivel
+// Advertencia: 'nivel' usado sin inicializar
+IF (nivel > 50) {
+    UP;
+}</code></pre>
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1rem; border-radius: 0.5rem;">
+                    <strong>⚠️ Warning Generado:</strong>
+                    <p style="margin-top: 0.5rem;">
+                        Variable 'nivel' podría no estar inicializada (usada en línea 3:5)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flujo de Trabajo con la Tabla de Símbolos -->
+        <div class="content-section">
+            <h3>🔄 Flujo de Trabajo: Construyendo la Tabla durante el Análisis</h3>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h5>1. Inicio del Análisis</h5>
+                    <p>El <code>SemanticAnalyzerVisitor</code> crea una tabla de símbolos vacía</p>
+                    <div class="symbol-table-viz" style="margin-top: 1rem;">
+Table de Símbolos: {}
+Errores: []
+Warnings: []
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <h5>2. Encuentra VAR pasos</h5>
+                    <p>Llama a <code>symbolTable.declare("pasos", 1, 4)</code></p>
+                    <div class="symbol-table-viz" style="margin-top: 1rem;">
+Table de Símbolos: {
+  "pasos": { name: "pasos", type: UNKNOWN, line: 1, col: 4, initialized: false }
+}
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <h5>3. Encuentra pasos := 5</h5>
+                    <p>Llama a <code>symbolTable.validateUsage("pasos", 2, 1)</code> ✅</p>
+                    <p>Llama a <code>symbolTable.initialize("pasos", 5)</code></p>
+                    <div class="symbol-table-viz" style="margin-top: 1rem;">
+Table de Símbolos: {
+  "pasos": { name: "pasos", type: INTEGER, line: 1, col: 4, initialized: true, value: 5 }
+}
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <h5>4. Encuentra REPEAT pasos</h5>
+                    <p>Llama a <code>symbolTable.validateUsage("pasos", 4, 8)</code> ✅</p>
+                    <p>Variable válida y inicializada, continúa sin errores</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h5>5. Fin del Análisis</h5>
+                    <p>Verifica si hay errores acumulados</p>
+                    <div class="symbol-table-viz" style="margin-top: 1rem;">
+hasErrors(): false
+hasWarnings(): false
+✅ Análisis semántico exitoso
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementación en Java -->
+        <div class="content-section">
+            <h3>💻 Implementación en Java</h3>
+
+            <!-- Ubicación de archivos -->
+            <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0;">
+                <h4 style="color: #991b1b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    📁 Ubicación en el Proyecto
+                </h4>
+                <p style="margin: 0; color: var(--text-secondary);">
+                    Revisa las implementaciones completas en:
+                </p>
+                <pre style="background: #1e293b; color: #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.9rem;"><code>src/main/java/semantic/identifiers/SymbolTable.java
+src/main/java/semantic/identifiers/SymbolTableEntry.java</code></pre>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    ⚠️ <strong>Ejercicios:</strong> Los métodos <code>declare()</code> y <code>validateUsage()</code> están marcados como ejercicios para que los completes.
+                </p>
+            </div>
+
+            <p>
+                Veamos la estructura básica de la implementación. Primero definimos <code>SymbolTableEntry</code>,
+                que representa cada variable en la tabla:
+            </p>
+
+            <h4 style="margin-top: 2rem;">Clase SymbolTableEntry</h4>
+
+            <!-- Ubicación específica de SymbolTableEntry -->
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; margin: 1.5rem 0;">
+                <p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+                    📍 <strong>Ubicación:</strong> <code style="background: #1e293b; color: #10b981; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">src/main/java/semantic/identifiers/SymbolTableEntry.java</code>
+                </p>
+            </div>
+
+            <pre><code class="language-java">/**
+ * Representa una entrada en la tabla de símbolos.
+ * Almacena toda la información sobre una variable declarada.
+ */
+public class SymbolTableEntry {
+    private String name;                  // Nombre de la variable
+    private SymbolType type;              // Tipo: INTEGER, BOOLEAN, SENSOR, etc.
+    private int declarationLine;          // Línea donde fue declarada
+    private int declarationColumn;        // Columna donde fue declarada
+    private boolean initialized;          // ¿Ya tiene valor asignado?
+    private Object value;                 // Valor actual (si está inicializada)
+
+    /**
+     * Constructor: crea una entrada sin inicializar
+     */
+    public SymbolTableEntry(String name, int line, int column) {
+        this.name = name;
+        this.type = SymbolType.UNKNOWN;   // Tipo desconocido inicialmente
+        this.declarationLine = line;
+        this.declarationColumn = column;
+        this.initialized = false;         // No inicializada por defecto
+        this.value = null;
+    }
+
+    // Getters
+    public String getName() { return name; }
+    public SymbolType getType() { return type; }
+    public int getDeclarationLine() { return declarationLine; }
+    public int getDeclarationColumn() { return declarationColumn; }
+    public boolean isInitialized() { return initialized; }
+    public Object getValue() { return value; }
+
+    // Setters
+    public void setType(SymbolType type) {
+        this.type = type;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+        this.initialized = true;  // Marcar como inicializada al asignar valor
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%s) declarada en %d:%d%s",
+            name, type,
+            declarationLine, declarationColumn,
+            initialized ? " [inicializada]" : " [no inicializada]"
+        );
+    }
+}</code></pre>
+
+            <h4 style="margin-top: 2rem;">Clase SymbolTable</h4>
+            <p>
+                Ahora veamos la tabla de símbolos que gestiona todas las entradas:
+            </p>
+
+            <!-- Ubicación específica de SymbolTable -->
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; margin: 1.5rem 0;">
+                <p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+                    📍 <strong>Ubicación:</strong> <code style="background: #1e293b; color: #10b981; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">src/main/java/semantic/identifiers/SymbolTable.java</code>
+                </p>
+            </div>
+
+            <pre><code class="language-java">public class SymbolTable {
+    // Almacenamiento: nombre → entrada
+    private Map&lt;String, SymbolTableEntry&gt; symbols;
+
+    // Acumuladores de errores y warnings
+    private List&lt;String&gt; errors;
+    private List&lt;String&gt; warnings;
+
+    public SymbolTable() {
+        this.symbols = new LinkedHashMap&lt;&gt;(); // Mantiene orden
+        this.errors = new ArrayList&lt;&gt;();
+        this.warnings = new ArrayList&lt;&gt;();
+    }
+
+    /**
+     * ⚠️ EJERCICIO: Declara una nueva variable
+     *
+     * Este método debe:
+     * 1. Verificar si la variable YA existe en la tabla (usar symbols.containsKey)
+     * 2. Si existe:
+     *    - Agregar un error a la lista de errores indicando que fue redeclarada
+     *    - Incluir en el mensaje la línea donde fue declarada originalmente
+     *    - Retornar false
+     * 3. Si NO existe:
+     *    - Crear una nueva SymbolTableEntry con el nombre, línea y columna
+     *    - Agregarla al mapa symbols
+     *    - Retornar true
+     *
+     * @param name   Nombre de la variable a declarar
+     * @param line   Línea donde se declara
+     * @param column Columna donde se declara
+     * @return true si se declaró correctamente, false si ya existía
+     */
+    public boolean declare(String name, int line, int column) {
+        // TODO: Implementar la lógica de declaración
+        // Hint: Usa symbols.containsKey(name) para verificar si existe
+        // Hint: Usa symbols.put(name, entry) para agregar una nueva entrada
+
+        throw new UnsupportedOperationException("Método declare no implementado - EJERCICIO");
+    }
+
+    /**
+     * ⚠️ EJERCICIO: Valida que una variable esté declarada antes de usarse
+     *
+     * Este método debe:
+     * 1. Verificar si la variable está declarada (usar isDeclared)
+     * 2. Si NO está declarada:
+     *    - Agregar un error indicando que se usó sin declarar
+     *    - Incluir línea y columna donde se usó
+     *    - Retornar false
+     * 3. Si SÍ está declarada:
+     *    - Obtener la entrada de la tabla (usar symbols.get)
+     *    - Verificar si está inicializada (usar entry.isInitialized())
+     *    - Si NO está inicializada: agregar un WARNING (no error)
+     *    - Retornar true
+     *
+     * Diferencia importante:
+     * - Variable no declarada = ERROR (detiene compilación)
+     * - Variable no inicializada = WARNING (solo advertencia)
+     *
+     * @param name   Nombre de la variable que se está usando
+     * @param line   Línea donde se usa
+     * @param column Columna donde se usa
+     * @return true si la validación pasó, false si hay error
+     */
+    public boolean validateUsage(String name, int line, int column) {
+        // TODO: Implementar la lógica de validación de uso
+        // Hint: Primero verifica con isDeclared(name)
+        // Hint: Luego verifica inicialización con entry.isInitialized()
+        // Hint: Usa errors.add() para errores y warnings.add() para advertencias
+
+        throw new UnsupportedOperationException("Método validateUsage no implementado - EJERCICIO");
+    }
+
+    /**
+     * Marca una variable como inicializada
+     */
+    public void initialize(String name, Object value) {
+        SymbolTableEntry entry = symbols.get(name);
+        if (entry != null) {
+            entry.setValue(value);
+
+            // Inferir tipo basado en el valor
+            if (value instanceof Integer) {
+                entry.setType(SymbolType.INTEGER);
+            } else if (value instanceof Boolean) {
+                entry.setType(SymbolType.BOOLEAN);
+            }
+        }
+    }
+
+    // ... otros métodos (get, clear, etc.)
+}</code></pre>
+        </div>
+
+        <!-- Resumen -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Has aprendido:</h4>
+                <ul style="line-height: 1.8;">
+                    <li>✅ La tabla de símbolos <strong>almacena información sobre variables</strong> declaradas</li>
+                    <li>✅ Cada entrada contiene: nombre, tipo, línea, columna, estado de inicialización y valor</li>
+                    <li>✅ <strong>Operaciones básicas:</strong> declare, isDeclared, get, initialize, validateUsage</li>
+                    <li>✅ Usamos <strong>Map&lt;String, SymbolTableEntry&gt;</strong> para búsquedas eficientes</li>
+                    <li>✅ La tabla <strong>acumula errores y warnings</strong> durante el análisis</li>
+                    <li>✅ Casos de uso: detectar variables no declaradas, redeclaraciones, variables no inicializadas</li>
+                    <li>✅ Se construye dinámicamente durante el recorrido del AST con el visitor</li>
+                </ul>
+
+                <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; padding: 1.5rem; border-radius: 0.75rem; margin-top: 1.5rem;">
+                    <h4>🎯 Próximo Paso</h4>
+                    <p>
+                        Ahora que entiendes qué es la tabla de símbolos y cómo funciona,
+                        en el siguiente slide verás cómo <strong>implementar el SemanticAnalyzerVisitor</strong>,
+                        el visitor que construye y usa la tabla de símbolos para validar el programa.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide5-sensorusage-exercise.html" class="btn" style="background: var(--text-secondary);">
+                ← Anterior: Ejercicio SensorUsageVisitor
+            </a>
+            <a href="slide7-semantic-analyzer.html" class="btn btn-primary">
+                Siguiente: SemanticAnalyzerVisitor →
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 6: Tabla de Símbolos para Análisis Semántico
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#ef4444',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#dc2626',
+                lineColor: '#94a3b8',
+                secondaryColor: '#3b82f6',
+                tertiaryColor: '#10b981'
+            }
+        });
+    </script>
+</body>
+</html>

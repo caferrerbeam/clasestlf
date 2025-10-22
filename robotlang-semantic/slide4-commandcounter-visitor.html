@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 4: CommandCounterVisitor - Implementación | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .complete-solution-badge {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .code-with-line-annotations {
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .line-annotation {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .state-tracker {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: var(--font-mono);
+            margin: 1.5rem 0;
+        }
+
+        .state-value {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .execution-trace {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .trace-step {
+            background: white;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .trace-step::before {
+            content: "▶";
+            position: absolute;
+            left: 1rem;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .method-focus {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+        }
+
+        .recursion-diagram {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .purpose-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-left: 4px solid #10b981;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .use-case-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--secondary-green);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .counter-visualization {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .counter-box {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 2px solid #3b82f6;
+        }
+
+        .counter-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .counter-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .pattern-highlight {
+            background: #fef3c7;
+            border: 2px dashed #f59e0b;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .counter-visualization {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>📊 CommandCounterVisitor</h1>
+                <p class="subtitle">Slide 4 - Implementación Completa de un Visitor</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 4 DE 7</div>
+            <h2>CommandCounterVisitor - Solución Completa</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                Aprende a implementar un visitor funcional paso a paso
+            </p>
+        </div>
+
+        <div class="complete-solution-badge">
+            <h3 style="color: #f59e0b; margin-bottom: 0.5rem;">⚠️ SOLUCIÓN COMPLETA INCLUIDA</h3>
+            <p style="color: var(--text-secondary); margin: 0;">
+                Este slide muestra el código completo y detallado del CommandCounterVisitor.
+                Estudia cada sección con atención para entender cómo implementar un visitor.
+            </p>
+        </div>
+
+        <!-- Ubicación del archivo -->
+        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0;">
+            <h4 style="color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                📁 Ubicación en el Proyecto
+            </h4>
+            <p style="margin: 0; color: var(--text-secondary);">
+                Revisa la implementación completa en:
+            </p>
+            <pre style="background: #1e293b; color: #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.95rem;"><code>src/main/java/semantic/statistics/CommandCounterVisitor.java</code></pre>
+            <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                💡 <strong>Tip:</strong> Abre este archivo en tu IDE para seguir las explicaciones mientras lees el slide.
+            </p>
+        </div>
+
+        <!-- Propósito -->
+        <div class="content-section">
+            <h3>🎯 Propósito del CommandCounterVisitor</h3>
+
+            <div class="purpose-card">
+                <h4 style="color: #047857;">¿Qué hace este visitor?</h4>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">
+                    El <code>CommandCounterVisitor</code> <strong>recorre el AST completo</strong> y
+                    <strong>cuenta cuántas veces se usa cada comando del robot</strong> (UP, DOWN, LEFT, RIGHT, PENUP, PENDOWN).
+                </p>
+                <p style="margin-top: 1rem;">
+                    Es útil para:
+                </p>
+                <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                    <li>Análisis de complejidad del programa</li>
+                    <li>Estadísticas de uso de comandos</li>
+                    <li>Optimización de trayectorias del robot</li>
+                    <li>Debugging y visualización</li>
+                </ul>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Casos de Uso Prácticos:</h4>
+            <div class="use-case-grid">
+                <div class="use-case-card">
+                    <h5>📈 Análisis de Programas</h5>
+                    <p>Determinar la complejidad de un programa basándose en el número de comandos ejecutados.</p>
+                </div>
+
+                <div class="use-case-card">
+                    <h5>🏆 Gamificación</h5>
+                    <p>Mostrar estadísticas al usuario: "Tu programa usa 45 movimientos. ¿Puedes optimizarlo?"</p>
+                </div>
+
+                <div class="use-case-card">
+                    <h5>🔍 Debugging</h5>
+                    <p>Verificar que el programa genera el número esperado de comandos.</p>
+                </div>
+
+                <div class="use-case-card">
+                    <h5>📊 Métricas</h5>
+                    <p>Generar reportes de uso para analizar patrones de programación.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estructura de la Clase -->
+        <div class="content-section">
+            <h3>🏗️ Estructura de la Clase</h3>
+            <p>
+                Primero, veamos la estructura completa de la clase y sus componentes:
+            </p>
+
+            <pre><code class="language-java">public class CommandCounterVisitor implements ASTVisitor&lt;Void&gt; {
+
+    // ========== ESTADO INTERNO - Contadores ==========
+    private int upCommands = 0;
+    private int downCommands = 0;
+    private int leftCommands = 0;
+    private int rightCommands = 0;
+    private int penUpCommands = 0;
+    private int penDownCommands = 0;
+
+    // Contadores totales
+    private int totalMovementCommands = 0;
+    private int totalPenCommands = 0;
+
+    // ========== MÉTODO PRINCIPAL ==========
+    public void analyze(ASTNode root) {
+        resetCounters();
+        if (root != null) {
+            root.accept(this);
+        }
+    }
+
+    // ========== MÉTODOS AUXILIARES ==========
+    private void resetCounters() { /* ... */ }
+    public void printReport() { /* ... */ }
+    public String getReport() { /* ... */ }
+
+    // ========== VISITOR METHODS ==========
+    @Override
+    public Void visitMovementCommand(MovementCommandNode node) { /* ... */ }
+    @Override
+    public Void visitPenCommand(PenCommandNode node) { /* ... */ }
+    // ... más métodos visit para navegación ...
+}</code></pre>
+
+            <div class="line-annotation">
+                <h5>💡 Observaciones Clave:</h5>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Implementa <code>ASTVisitor&lt;Void&gt;</code>:</strong> No retorna nada (usa <code>Void</code>), solo acumula en sus contadores internos</li>
+                    <li><strong>Estado interno:</strong> Variables privadas para cada tipo de comando</li>
+                    <li><strong>Método <code>analyze()</code>:</strong> Punto de entrada que inicia el recorrido</li>
+                    <li><strong>Métodos <code>visitXXX()</code>:</strong> Lógica específica para cada tipo de nodo</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Estado Interno -->
+        <div class="content-section">
+            <h3>💾 Manejo del Estado Interno</h3>
+            <p>
+                El visitor mantiene contadores como variables de instancia. Veamos cómo se definen:
+            </p>
+
+            <pre><code class="language-java">// Contadores por tipo de comando específico
+private int upCommands = 0;        // Cuenta comandos UP
+private int downCommands = 0;      // Cuenta comandos DOWN
+private int leftCommands = 0;      // Cuenta comandos LEFT
+private int rightCommands = 0;     // Cuenta comandos RIGHT
+private int penUpCommands = 0;     // Cuenta comandos PENUP
+private int penDownCommands = 0;   // Cuenta comandos PENDOWN
+
+// Contadores totales por categoría
+private int totalMovementCommands = 0;  // Suma de UP+DOWN+LEFT+RIGHT
+private int totalPenCommands = 0;       // Suma de PENUP+PENDOWN</code></pre>
+
+            <div class="pattern-highlight">
+                <h4>🎨 Patrón de Diseño: Acumulador de Estado</h4>
+                <p>
+                    Este visitor usa el patrón <strong>Acumulador</strong>: va acumulando información en
+                    variables de instancia a medida que visita nodos. Cuando termina el recorrido,
+                    el estado interno contiene los resultados completos.
+                </p>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Resetear Contadores:</h4>
+            <pre><code class="language-java">private void resetCounters() {
+    upCommands = 0;
+    downCommands = 0;
+    leftCommands = 0;
+    rightCommands = 0;
+    penUpCommands = 0;
+    penDownCommands = 0;
+    totalMovementCommands = 0;
+    totalPenCommands = 0;
+}</code></pre>
+            <p>
+                <strong>¿Por qué resetear?</strong> Para poder reutilizar la misma instancia del visitor
+                en múltiples análisis sin contaminar resultados anteriores.
+            </p>
+        </div>
+
+        <!-- Método analyze() -->
+        <div class="content-section">
+            <h3>🚀 Método analyze() - Punto de Entrada</h3>
+
+            <div class="method-focus">
+                <pre><code class="language-java">/**
+ * Analiza el AST y cuenta todos los comandos.
+ *
+ * @param root El nodo raíz del AST
+ */
+public void analyze(ASTNode root) {
+    // 1. Resetear contadores para análisis limpio
+    resetCounters();
+
+    // 2. Iniciar el recorrido del árbol
+    if (root != null) {
+        root.accept(this);  // ← Inicia el patrón Visitor
+    }
+}</code></pre>
+            </div>
+
+            <div class="line-annotation">
+                <h5>¿Qué sucede en cada línea?</h5>
+                <ol style="line-height: 2;">
+                    <li><code>resetCounters();</code> - Limpia todos los contadores a cero</li>
+                    <li><code>if (root != null)</code> - Validación defensiva contra null</li>
+                    <li><code>root.accept(this)</code> - <strong>¡Aquí inicia la magia!</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>Pasa el visitor al nodo raíz</li>
+                            <li>El nodo llama a <code>visitXXX()</code> correspondiente</li>
+                            <li>Se inicia el recorrido recursivo del árbol</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Métodos visit Clave -->
+        <div class="content-section">
+            <h3>🔑 Métodos visit Clave - Implementación Detallada</h3>
+
+            <h4>1. visitMovementCommand() - Contar Comandos de Movimiento</h4>
+            <div class="method-focus">
+                <pre><code class="language-java">@Override
+public Void visitMovementCommand(MovementCommandNode node) {
+    // Obtener el tipo de comando del nodo
+    String command = node.getCommand();
+
+    if (command != null) {
+        // Usar switch para determinar qué contador incrementar
+        switch (command) {
+            case "UP":
+                upCommands++;      // Incrementar contador específico
+                break;
+            case "DOWN":
+                downCommands++;
+                break;
+            case "LEFT":
+                leftCommands++;
+                break;
+            case "RIGHT":
+                rightCommands++;
+                break;
+        }
+        // Incrementar el total de movimientos
+        totalMovementCommands++;
+    }
+
+    return null;  // ASTVisitor&lt;Void&gt; requiere retornar null
+}</code></pre>
+            </div>
+
+            <div class="line-annotation">
+                <h5>🔍 Análisis Línea por Línea:</h5>
+                <ul style="line-height: 2;">
+                    <li><code>String command = node.getCommand();</code>
+                        <br>→ Obtiene el tipo de comando ("UP", "DOWN", etc.) del nodo
+                    </li>
+                    <li><code>switch (command)</code>
+                        <br>→ Determina qué contador incrementar basándose en el comando
+                    </li>
+                    <li><code>upCommands++;</code>
+                        <br>→ Incrementa el contador específico del comando
+                    </li>
+                    <li><code>totalMovementCommands++;</code>
+                        <br>→ Incrementa el contador total (independiente del tipo)
+                    </li>
+                    <li><code>return null;</code>
+                        <br>→ Requerido por <code>ASTVisitor&lt;Void&gt;</code>
+                    </li>
+                </ul>
+            </div>
+
+            <h4 style="margin-top: 2.5rem;">2. visitPenCommand() - Contar Comandos de Pluma</h4>
+            <div class="method-focus">
+                <pre><code class="language-java">@Override
+public Void visitPenCommand(PenCommandNode node) {
+    // Obtener el tipo de comando de pluma
+    String command = node.getCommand();
+
+    if (command != null) {
+        switch (command) {
+            case "PENUP":
+                penUpCommands++;
+                break;
+            case "PENDOWN":
+                penDownCommands++;
+                break;
+        }
+        // Incrementar el total de comandos de pluma
+        totalPenCommands++;
+    }
+
+    return null;
+}</code></pre>
+            </div>
+
+            <p style="margin-top: 1rem;">
+                <strong>Nota:</strong> La lógica es idéntica a <code>visitMovementCommand()</code>,
+                pero opera sobre comandos de pluma. Este patrón se repite: cada tipo de nodo relevante
+                tiene su propia lógica de conteo.
+            </p>
+
+            <h4 style="margin-top: 2.5rem;">3. visitRepeatStatement() - Navegación Recursiva</h4>
+            <div class="method-focus">
+                <pre><code class="language-java">@Override
+public Void visitRepeatStatement(RepeatStatementNode node) {
+    // Visitar recursivamente todos los hijos del REPEAT
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);  // ← Recursión
+    }
+    return null;
+}</code></pre>
+            </div>
+
+            <div class="pattern-highlight">
+                <h4>🎨 Patrón de Recursión</h4>
+                <p>
+                    Este método <strong>no cuenta nada</strong>. Solo propaga la visita a los hijos.
+                    ¿Por qué? Porque el <code>RepeatStatementNode</code> en sí no es un comando contable.
+                    Lo que nos interesa son los comandos <strong>dentro</strong> del REPEAT.
+                </p>
+                <p style="margin-top: 1rem;">
+                    Al llamar <code>child.accept(this)</code>, cada hijo llamará a su método <code>visitXXX()</code>
+                    correspondiente. Si el hijo es un <code>MovementCommandNode</code>, se llamará
+                    <code>visitMovementCommand()</code> y se incrementará el contador.
+                </p>
+            </div>
+        </div>
+
+        <!-- Patrón de Recursión -->
+        <div class="content-section">
+            <h3>🔄 El Patrón de Recursión</h3>
+            <p>
+                La mayoría de los métodos <code>visitXXX()</code> simplemente propagan la visita a sus hijos:
+            </p>
+
+            <pre><code class="language-java">// Patrón estándar de navegación
+@Override
+public Void visitStatementList(StatementListNode node) {
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);
+    }
+    return null;
+}
+
+@Override
+public Void visitIfStatement(IfStatementNode node) {
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);
+    }
+    return null;
+}
+
+@Override
+public Void visitWhileStatement(WhileStatementNode node) {
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);
+    }
+    return null;
+}
+
+// ... y así sucesivamente para todos los nodos "contenedores"</code></pre>
+
+            <div class="recursion-diagram">
+                <h4 style="margin-bottom: 1.5rem;">Diagrama de Recursión:</h4>
+                <div class="mermaid">
+graph TD
+    Program[visitProgram] -->|Visita hijos| StmtList[visitStatementList]
+    StmtList -->|Visita hijo 1| Repeat[visitRepeatStatement]
+    StmtList -->|Visita hijo 2| Down[visitMovementCommand<br/>DOWN]
+
+    Repeat -->|Visita hijo| Block[visitStatementBlock]
+    Block -->|Visita hijo 1| Up[visitMovementCommand<br/>UP]
+    Block -->|Visita hijo 2| Right[visitMovementCommand<br/>RIGHT]
+
+    Up -.->|upCommands++| Counter1[Incrementa contador]
+    Right -.->|rightCommands++| Counter2[Incrementa contador]
+    Down -.->|downCommands++| Counter3[Incrementa contador]
+
+    style Program fill:#8b5cf6,color:#fff
+    style Repeat fill:#3b82f6,color:#fff
+    style Up fill:#10b981,color:#fff
+    style Right fill:#10b981,color:#fff
+    style Down fill:#10b981,color:#fff
+    style Counter1 fill:#fde68a
+    style Counter2 fill:#fde68a
+    style Counter3 fill:#fde68a
+                </div>
+            </div>
+        </div>
+
+        <!-- Ejemplo de Ejecución Completo -->
+        <div class="content-section">
+            <h3>🎬 Ejemplo de Ejecución Completa</h3>
+
+            <h4>Programa RoboLang:</h4>
+            <pre><code class="language-robolang">REPEAT 2 {
+    UP;
+    RIGHT;
+}
+DOWN;
+PENUP;</code></pre>
+
+            <h4 style="margin-top: 2rem;">Traza de Ejecución:</h4>
+            <div class="execution-trace">
+                <div class="trace-step">
+                    <strong>1. analyze(programNode)</strong> → Resetea contadores
+                    <div class="state-tracker">
+upCommands: <span class="state-value">0</span>  rightCommands: <span class="state-value">0</span>  downCommands: <span class="state-value">0</span>  penUpCommands: <span class="state-value">0</span>
+                    </div>
+                </div>
+
+                <div class="trace-step">
+                    <strong>2. programNode.accept(visitor)</strong> → Llama visitProgram()
+                    <br><small>visitProgram() visita todos los hijos del programa</small>
+                </div>
+
+                <div class="trace-step">
+                    <strong>3. Encuentra RepeatStatementNode</strong> → Llama visitRepeatStatement()
+                    <br><small>visitRepeatStatement() visita el bloque de statements</small>
+                </div>
+
+                <div class="trace-step">
+                    <strong>4. Primer hijo del REPEAT: MovementCommandNode("UP")</strong> → visitMovementCommand()
+                    <br><small>Incrementa upCommands y totalMovementCommands</small>
+                    <div class="state-tracker">
+upCommands: <span class="state-value">1</span>  totalMovementCommands: <span class="state-value">1</span>
+                    </div>
+                </div>
+
+                <div class="trace-step">
+                    <strong>5. Segundo hijo del REPEAT: MovementCommandNode("RIGHT")</strong> → visitMovementCommand()
+                    <br><small>Incrementa rightCommands y totalMovementCommands</small>
+                    <div class="state-tracker">
+upCommands: <span class="state-value">1</span>  rightCommands: <span class="state-value">1</span>  totalMovementCommands: <span class="state-value">2</span>
+                    </div>
+                </div>
+
+                <div class="trace-step">
+                    <strong>6. ⚠️ REPEAT 2 se ejecuta 2 veces → Los pasos 4-5 se repiten</strong>
+                    <div class="state-tracker">
+upCommands: <span class="state-value">2</span>  rightCommands: <span class="state-value">2</span>  totalMovementCommands: <span class="state-value">4</span>
+                    </div>
+                </div>
+
+                <div class="trace-step">
+                    <strong>7. Fuera del REPEAT: MovementCommandNode("DOWN")</strong> → visitMovementCommand()
+                    <div class="state-tracker">
+upCommands: <span class="state-value">2</span>  rightCommands: <span class="state-value">2</span>  downCommands: <span class="state-value">1</span>  totalMovementCommands: <span class="state-value">5</span>
+                    </div>
+                </div>
+
+                <div class="trace-step">
+                    <strong>8. PenCommandNode("PENUP")</strong> → visitPenCommand()
+                    <div class="state-tracker">
+upCommands: <span class="state-value">2</span>  rightCommands: <span class="state-value">2</span>  downCommands: <span class="state-value">1</span>
+penUpCommands: <span class="state-value">1</span>  totalPenCommands: <span class="state-value">1</span>
+totalMovementCommands: <span class="state-value">5</span>
+                    </div>
+                </div>
+
+                <div class="trace-step">
+                    <strong>9. Recorrido completo ✓</strong>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem;">Resultado Final:</h4>
+            <div class="counter-visualization">
+                <div class="counter-box">
+                    <div class="counter-label">UP</div>
+                    <div class="counter-value">2</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-label">DOWN</div>
+                    <div class="counter-value">1</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-label">RIGHT</div>
+                    <div class="counter-value">2</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-label">PENUP</div>
+                    <div class="counter-value">1</div>
+                </div>
+                <div class="counter-box" style="grid-column: span 2;">
+                    <div class="counter-label">TOTAL</div>
+                    <div class="counter-value">6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métodos de Reporte -->
+        <div class="content-section">
+            <h3>📝 Métodos de Reporte</h3>
+            <p>
+                Una vez completado el recorrido, el visitor puede generar un reporte:
+            </p>
+
+            <pre><code class="language-java">public void printReport() {
+    System.out.println("\n=== REPORTE DE COMANDOS ===\n");
+
+    System.out.println("Comandos de Movimiento:");
+    System.out.println("  UP:    " + upCommands);
+    System.out.println("  DOWN:  " + downCommands);
+    System.out.println("  LEFT:  " + leftCommands);
+    System.out.println("  RIGHT: " + rightCommands);
+    System.out.println("  Total: " + totalMovementCommands);
+
+    System.out.println("\nComandos de Pluma:");
+    System.out.println("  PENUP:   " + penUpCommands);
+    System.out.println("  PENDOWN: " + penDownCommands);
+    System.out.println("  Total:   " + totalPenCommands);
+
+    System.out.println("\nTOTAL GENERAL: " +
+                      (totalMovementCommands + totalPenCommands) + " comandos");
+}</code></pre>
+
+            <h4 style="margin-top: 2rem;">Uso Completo:</h4>
+            <pre><code class="language-java">// 1. Crear el visitor
+CommandCounterVisitor counter = new CommandCounterVisitor();
+
+// 2. Analizar el AST
+ProgramNode ast = parser.parse(tokens);
+counter.analyze(ast);
+
+// 3. Obtener resultados
+counter.printReport();
+
+// O acceder a contadores individuales
+int totalMovimientos = counter.getTotalMovementCommands();
+System.out.println("Total de movimientos: " + totalMovimientos);</code></pre>
+        </div>
+
+        <!-- Resumen -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Has aprendido:</h4>
+                <ul style="line-height: 1.8;">
+                    <li>✅ <strong>Propósito:</strong> CommandCounterVisitor cuenta comandos del robot en el AST</li>
+                    <li>✅ <strong>Estado interno:</strong> Usa variables de instancia como contadores acumuladores</li>
+                    <li>✅ <strong>Método analyze():</strong> Resetea contadores e inicia recorrido con <code>root.accept(this)</code></li>
+                    <li>✅ <strong>visitMovementCommand():</strong> Incrementa contadores según el tipo de comando</li>
+                    <li>✅ <strong>Patrón de recursión:</strong> Métodos visit propagan la visita a hijos con <code>child.accept(this)</code></li>
+                    <li>✅ <strong>Separación de responsabilidades:</strong> Nodos de navegación vs nodos de conteo</li>
+                    <li>✅ <strong>Reporte:</strong> Métodos para obtener y mostrar resultados acumulados</li>
+                </ul>
+
+                <div class="highlight-box" style="margin-top: 1.5rem;">
+                    <h4>🎯 Próximo Paso</h4>
+                    <p>
+                        Ahora que entiendes cómo se implementa un visitor completo,
+                        en el siguiente slide tendrás la oportunidad de <strong>implementar tu propio visitor</strong>:
+                        <code>SensorUsageVisitor</code>. Aplicarás todo lo aprendido en un ejercicio práctico guiado.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide3-visitor-pattern.html" class="btn" style="background: var(--text-secondary);">
+                ← Anterior: Patrón Visitor
+            </a>
+            <a href="slide5-sensorusage-exercise.html" class="btn btn-primary">
+                Siguiente: Ejercicio SensorUsageVisitor →
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 4: CommandCounterVisitor - Implementación Completa
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#10b981',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#047857',
+                lineColor: '#94a3b8',
+                secondaryColor: '#3b82f6',
+                tertiaryColor: '#8b5cf6'
+            }
+        });
+    </script>
+</body>
+</html>

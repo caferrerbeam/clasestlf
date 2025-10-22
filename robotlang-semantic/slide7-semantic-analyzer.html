@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 7: SemanticAnalyzerVisitor | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .complete-example-badge {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 3px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .guided-badge {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .method-responsibility {
+            background: white;
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .why-section {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 2px solid #3b82f6;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .what-section {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 2px solid #10b981;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .when-section {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .pseudocode-box {
+            background: #f8fafc;
+            border: 2px dashed #94a3b8;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .special-cases {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .implementation-hints {
+            background: #ede9fe;
+            border-left: 4px solid var(--accent-purple);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+        }
+
+        .line-by-line {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            border-left: 4px solid #10b981;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .method-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .method-card h5 {
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            font-family: var(--font-mono);
+        }
+
+        .responsibility-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .responsibility-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .responsibility-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🔬 SemanticAnalyzerVisitor</h1>
+                <p class="subtitle">Slide 7 - Implementación Guiada del Análisis Semántico</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 7 DE 7 - IMPLEMENTACIÓN GUIADA</div>
+            <h2>SemanticAnalyzerVisitor</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                El visitor que valida el uso de variables usando la tabla de símbolos
+            </p>
+        </div>
+
+        <div class="guided-badge">
+            <h3 style="color: #f59e0b; margin-bottom: 0.5rem;">📖 IMPLEMENTACIÓN GUIADA</h3>
+            <p style="color: var(--text-secondary); margin: 0;">
+                Este slide proporciona una <strong>guía completa</strong> para implementar el SemanticAnalyzerVisitor.
+                Se muestra <strong>UN ejemplo completo</strong> (visitVariableDeclaration) y guía para el resto.
+            </p>
+        </div>
+
+        <!-- Ubicación del archivo -->
+        <div style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border-left: 4px solid #8b5cf6; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0;">
+            <h4 style="color: #6d28d9; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                📁 Ubicación en el Proyecto
+            </h4>
+            <p style="margin: 0; color: var(--text-secondary);">
+                Revisa e implementa los métodos en:
+            </p>
+            <pre style="background: #1e293b; color: #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.95rem;"><code>src/main/java/semantic/SemanticAnalyzerVisitor.java</code></pre>
+            <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                ⚠️ <strong>Ejercicios pendientes:</strong> Los métodos <code>visitIdentifier()</code>, <code>visitAssignment()</code> y <code>visitRepeatStatement()</code> están marcados para que los implementes.
+            </p>
+        </div>
+
+        <!-- Ubicación de tests -->
+        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0;">
+            <h4 style="color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                🧪 Pruebas
+            </h4>
+            <p style="margin: 0; color: var(--text-secondary);">
+                Verifica tu implementación con:
+            </p>
+            <pre style="background: #1e293b; color: #10b981; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.95rem;"><code>src/test/java/semantic/SemanticAnalyzerVisitorTest.java</code></pre>
+        </div>
+
+        <!-- El Método analyze() -->
+        <div class="content-section">
+            <h3>🚀 El Método analyze() - Punto de Entrada</h3>
+            <p>
+                Este método es el punto de entrada del análisis semántico. Veamos su estructura y propósito:
+            </p>
+
+            <pre><code class="language-java">/**
+ * Analiza el AST completo y retorna la tabla de símbolos
+ *
+ * @param root El nodo raíz del AST
+ * @return La tabla de símbolos construida
+ */
+public SymbolTable analyze(ASTNode root) {
+    // 1. Limpiar tabla de símbolos para análisis limpio
+    symbolTable.clear();
+
+    // 2. Iniciar el recorrido del AST
+    if (root != null) {
+        root.accept(this);  // Inicia el patrón Visitor
+    }
+
+    // 3. Retornar la tabla construida (con errores/warnings acumulados)
+    return symbolTable;
+}</code></pre>
+
+            <div class="why-section">
+                <h4>🤔 ¿Por qué recibe el nodo raíz?</h4>
+                <ul style="line-height: 1.8;">
+                    <li>El análisis semántico opera sobre <strong>todo el programa</strong></li>
+                    <li>El nodo raíz (<code>ProgramNode</code>) es el punto de partida del AST</li>
+                    <li>Al recibirlo como parámetro, el visitor puede analizar <strong>cualquier AST</strong>, no solo uno específico</li>
+                    <li>Permite <strong>reutilizar</strong> el mismo visitor para múltiples programas</li>
+                </ul>
+            </div>
+
+            <div class="what-section">
+                <h4>✅ ¿Qué hace este método?</h4>
+                <ol style="line-height: 1.8;">
+                    <li>Limpia la tabla de símbolos de análisis anteriores</li>
+                    <li>Inicia el recorrido recursivo del AST llamando a <code>root.accept(this)</code></li>
+                    <li>Durante el recorrido, los métodos <code>visitXXX()</code> construyen la tabla y detectan errores</li>
+                    <li>Retorna la tabla de símbolos completa con todos los errores y warnings acumulados</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Ejemplo Completo: visitVariableDeclaration -->
+        <div class="content-section">
+            <h3>💎 Ejemplo Completo: visitVariableDeclaration()</h3>
+
+            <div class="complete-example-badge">
+                <h4 style="color: #047857; margin: 0;">✅ CÓDIGO COMPLETO - ESTUDIA CON ATENCIÓN</h4>
+            </div>
+
+            <pre><code class="language-java">@Override
+public Void visitVariableDeclaration(VariableDeclarationNode node) {
+    // PASO 1: Obtener el nodo identificador de la declaración
+    if (node.getIdentifier() != null) {
+
+        // PASO 2: Extraer el nombre de la variable
+        String varName = node.getIdentifier().getName();
+
+        // PASO 3: Obtener la ubicación (línea y columna) para mensajes de error
+        int line = node.getLine();
+        int column = node.getColumn();
+
+        // PASO 4: Intentar declarar la variable en la tabla de símbolos
+        // La tabla validará automáticamente si ya existe (redeclaración)
+        symbolTable.declare(varName, line, column);
+
+        // NOTA: Si la variable ya existe, symbolTable.declare() retorna false
+        // y agrega un error automáticamente. No necesitamos manejarlo aquí.
+    }
+
+    // PASO 5: Retornar null (requerido por ASTVisitor&lt;Void&gt;)
+    return null;
+}</code></pre>
+
+            <div class="line-by-line">
+                <h4>📝 Explicación Línea por Línea:</h4>
+                <ul style="line-height: 2;">
+                    <li><code>if (node.getIdentifier() != null)</code>
+                        <br>→ Validación defensiva: asegura que el nodo tiene un identificador
+                    </li>
+                    <li><code>String varName = node.getIdentifier().getName();</code>
+                        <br>→ Obtiene el nombre de la variable (ej: "contador", "pasos")
+                    </li>
+                    <li><code>int line = node.getLine();</code>
+                        <br>→ Obtiene la línea donde se declaró (para mensajes de error precisos)
+                    </li>
+                    <li><code>symbolTable.declare(varName, line, column);</code>
+                        <br>→ <strong>Decisión clave:</strong> Agrega la variable a la tabla de símbolos
+                        <br>→ Si ya existe, la tabla internamente registrará un error de redeclaración
+                    </li>
+                    <li><code>return null;</code>
+                        <br>→ Cumple con el contrato de <code>ASTVisitor&lt;Void&gt;</code>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="why-section">
+                <h4>🎯 Decisiones de Diseño</h4>
+                <ul style="line-height: 1.8;">
+                    <li><strong>¿Por qué no validamos si existe antes de declarar?</strong>
+                        <br>Porque <code>symbolTable.declare()</code> ya lo hace internamente.
+                        Seguimos el principio <em>Don't Repeat Yourself (DRY)</em>.
+                    </li>
+                    <li><strong>¿Por qué no visitamos los hijos?</strong>
+                        <br>Un <code>VariableDeclarationNode</code> solo tiene el identificador como hijo,
+                        y ya lo procesamos directamente. No hay necesidad de recursión aquí.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Responsabilidades de Cada Método Visit -->
+        <div class="content-section">
+            <h3>📋 Responsabilidades de Cada Método visit</h3>
+            <p>
+                Para cada método de la interfaz <code>ASTVisitor</code>, aquí está <strong>QUÉ</strong> debe hacer
+                y <strong>POR QUÉ</strong>:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; margin: 2rem 0;">
+                <!-- visitAssignment -->
+                <div class="method-card" style="border: 3px solid #f59e0b; background: linear-gradient(135deg, #fef3c7, #fef9e7);">
+                    <h5>⚠️ EJERCICIO: visitAssignment()</h5>
+
+                    <div class="what-section" style="margin-top: 1rem;">
+                        <strong>¿QUÉ debe hacer?</strong>
+                        <ul class="responsibility-list">
+                            <li>Validar que la variable del lado izquierdo esté declarada</li>
+                            <li>Visitar recursivamente el valor del lado derecho (puede contener otros identificadores)</li>
+                            <li>Marcar la variable como inicializada en la tabla de símbolos</li>
+                            <li>Manejar correctamente el flag <code>inAssignment</code> para evitar validaciones duplicadas</li>
+                        </ul>
+                    </div>
+
+                    <div class="why-section" style="margin-top: 1rem;">
+                        <strong>¿POR QUÉ?</strong>
+                        <p>
+                            No puedes asignar un valor a una variable que no existe.
+                            Después de una asignación, la variable tiene un valor conocido (está inicializada).
+                        </p>
+                    </div>
+
+                    <div style="background: #fffbeb; border: 2px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <strong>📝 Tu tarea:</strong>
+                        <p style="margin-top: 0.5rem;">
+                            Implementa este método usando <code>validateUsage()</code> e <code>initialize()</code> de la tabla de símbolos.
+                            Recuerda manejar el flag <code>inAssignment</code> correctamente.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- visitIdentifier -->
+                <div class="method-card" style="border: 3px solid #f59e0b; background: linear-gradient(135deg, #fef3c7, #fef9e7);">
+                    <h5>⚠️ EJERCICIO: visitIdentifier()</h5>
+
+                    <div class="what-section" style="margin-top: 1rem;">
+                        <strong>¿QUÉ debe hacer?</strong>
+                        <ul class="responsibility-list">
+                            <li>Verificar que la variable esté declarada cuando se usa</li>
+                            <li>Validar que la variable esté inicializada (generar warning si no lo está)</li>
+                            <li><strong>Caso especial:</strong> NO validar si estamos en el lado izquierdo de una asignación</li>
+                        </ul>
+                    </div>
+
+                    <div class="why-section" style="margin-top: 1rem;">
+                        <strong>¿POR QUÉ?</strong>
+                        <p>
+                            Cada uso de un identificador debe referirse a una variable existente.
+                            Usar una variable no inicializada es un bug potencial que debe advertirse.
+                        </p>
+                    </div>
+
+                    <div class="special-cases">
+                        <strong>⚠️ Caso Especial Importante:</strong>
+                        <p style="margin-top: 0.5rem;">
+                            Si <code>inAssignment == true</code>, NO debes validar porque ese identificador
+                            ya fue validado por <code>visitAssignment()</code>. Solo valida cuando
+                            el identificador se usa en expresiones (lado derecho).
+                        </p>
+                    </div>
+
+                    <div style="background: #fffbeb; border: 2px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <strong>📝 Tu tarea:</strong>
+                        <p style="margin-top: 0.5rem;">
+                            Implementa este método usando <code>validateUsage()</code> de la tabla de símbolos.
+                            Respeta el flag <code>inAssignment</code> para evitar validaciones duplicadas.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- visitRepeatStatement -->
+                <div class="method-card" style="border: 3px solid #f59e0b; background: linear-gradient(135deg, #fef3c7, #fef9e7);">
+                    <h5>⚠️ EJERCICIO: visitRepeatStatement()</h5>
+
+                    <div class="what-section" style="margin-top: 1rem;">
+                        <strong>¿QUÉ debe hacer?</strong>
+                        <ul class="responsibility-list">
+                            <li>Validar el contador del REPEAT (si es un identificador en lugar de un número)</li>
+                            <li>Visitar recursivamente todos los statements dentro del bloque</li>
+                        </ul>
+                    </div>
+
+                    <div class="why-section" style="margin-top: 1rem;">
+                        <strong>¿POR QUÉ?</strong>
+                        <p>
+                            <code>REPEAT pasos {...}</code> puede usar "pasos" como contador.
+                            Si "pasos" es una variable, debe estar declarada e inicializada.
+                        </p>
+                    </div>
+
+                    <div class="special-cases">
+                        <strong>💡 Casos a considerar:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li><code>REPEAT 5 {...}</code> - Número literal, no necesita validación</li>
+                            <li><code>REPEAT veces {...}</code> - Identificador, debe validarse</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fffbeb; border: 2px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <strong>📝 Tu tarea:</strong>
+                        <p style="margin-top: 0.5rem;">
+                            Implementa este método verificando si el contador es un identificador.
+                            Si lo es, valídalo con <code>validateUsage()</code>. Luego visita recursivamente el bloque.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- visitIfStatement -->
+                <div class="method-card">
+                    <h5>visitIfStatement()</h5>
+
+                    <div class="what-section" style="margin-top: 1rem;">
+                        <strong>¿QUÉ debe hacer?</strong>
+                        <ul class="responsibility-list">
+                            <li>Visitar la condición (puede contener identificadores)</li>
+                            <li>Visitar el bloque THEN</li>
+                            <li>Visitar el bloque ELSE (si existe)</li>
+                        </ul>
+                    </div>
+
+                    <div class="why-section" style="margin-top: 1rem;">
+                        <strong>¿POR QUÉ?</strong>
+                        <p>
+                            La condición puede usar variables: <code>IF (nivel > 50)</code>.
+                            Debemos validar que "nivel" esté declarado.
+                        </p>
+                    </div>
+
+                    <div class="pseudocode-box">
+                        <strong>Pseudocódigo:</strong>
+                        <pre style="margin-top: 0.5rem;">1. Para cada hijo del nodo:
+   - child.accept(this)
+2. La condición y los bloques se validan recursivamente</pre>
+                    </div>
+                </div>
+
+                <!-- Métodos de Navegación -->
+                <div class="method-card">
+                    <h5>Métodos de Navegación (Nodos Contenedores)</h5>
+                    <p style="margin-bottom: 1rem;">
+                        <code>visitStatementList(), visitCondition(), visitOrExpression(), visitIfStatement(), visitWhileStatement(), etc.</code>
+                    </p>
+
+                    <div class="what-section" style="margin-top: 1rem;">
+                        <strong>¿QUÉ deben hacer?</strong>
+                        <ul class="responsibility-list">
+                            <li>Propagar la visita a todos sus hijos usando <code>child.accept(this)</code></li>
+                            <li>No modifican la tabla de símbolos directamente</li>
+                            <li>Actúan como "puentes" en el recorrido del árbol</li>
+                        </ul>
+                    </div>
+
+                    <div class="why-section" style="margin-top: 1rem;">
+                        <strong>¿POR QUÉ son solo "contenedores"?</strong>
+                        <p style="margin-bottom: 1rem;">
+                            El AST tiene dos tipos de nodos:
+                        </p>
+
+                        <!-- Nodos Contenedores -->
+                        <div style="background: #dbeafe; padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6; margin: 1rem 0;">
+                            <strong style="color: #1e40af; font-size: 1.1rem;">🏗️ Nodos Contenedores</strong>
+                            <p style="margin-top: 0.5rem;">
+                                Organizan la estructura del programa. No tienen información semántica directa.
+                            </p>
+                            <p style="margin-top: 0.5rem;">
+                                <strong>Ejemplos:</strong> <code>IfStatementNode</code>, <code>WhileStatementNode</code>,
+                                <code>StatementListNode</code>, <code>ConditionNode</code>, <code>OrExpressionNode</code>
+                            </p>
+                            <p style="margin-top: 0.5rem; font-style: italic; color: #1e40af;">
+                                Su único trabajo: propagar la visita a sus hijos con <code>child.accept(this)</code>
+                            </p>
+                        </div>
+
+                        <!-- Nodos de Acción -->
+                        <div style="background: #dcfce7; padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid #10b981; margin: 1rem 0;">
+                            <strong style="color: #047857; font-size: 1.1rem;">⚡ Nodos de Acción</strong>
+                            <p style="margin-top: 0.5rem;">
+                                Contienen información semántica que afecta la tabla de símbolos.
+                            </p>
+                            <p style="margin-top: 0.5rem;">
+                                <strong>Ejemplos:</strong> <code>VariableDeclarationNode</code>, <code>AssignmentNode</code>,
+                                <code>IdentifierNode</code>, <code>SensorNode</code>
+                            </p>
+                            <p style="margin-top: 0.5rem; font-style: italic; color: #047857;">
+                                Responsabilidad: modificar o consultar la tabla de símbolos
+                            </p>
+                        </div>
+
+                        <p style="margin-top: 1rem;">
+                            <strong>Ejemplo concreto:</strong> Considera este código:
+                        </p>
+                        <pre style="background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;"><code>IF (nivel > 50) {
+    VAR x;
+    x := 10;
+}</code></pre>
+                        <p style="margin-top: 1rem;">
+                            El árbol sería:
+                        </p>
+                        <pre style="background: #f8fafc; color: #1e293b; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem;"><code>IfStatementNode ────────────── 🏗️ CONTENEDOR: solo propaga
+  ├─ ConditionNode ──────────── 🏗️ CONTENEDOR: solo propaga
+  │   └─ ComparisonNode ──────── 🏗️ CONTENEDOR: solo propaga
+  │       ├─ IdentifierNode ──── ⚡ ACCIÓN: valida "nivel"
+  │       └─ NumberNode ──────── (no afecta tabla)
+  └─ StatementListNode ────────── 🏗️ CONTENEDOR: solo propaga
+      ├─ VariableDeclaration ──── ⚡ ACCIÓN: declara "x"
+      └─ AssignmentNode ────────── ⚡ ACCIÓN: inicializa "x"</code></pre>
+
+                        <p style="margin-top: 1rem;">
+                            <strong>La clave:</strong> Los nodos contenedores <strong>no saben qué hacer</strong> con variables.
+                            Solo aseguran que el visitor <strong>llegue a los nodos que sí saben</strong> (las hojas de acción).
+                        </p>
+                    </div>
+
+                    <div class="pseudocode-box" style="margin-top: 1.5rem;">
+                        <strong>Patrón estándar (mismo para todos los contenedores):</strong>
+                        <pre style="margin-top: 0.5rem;"><code>@Override
+public Void visitXXX(XXXNode node) {
+    // Solo propagar - no hacer nada más
+    for (ASTNode child : node.getChildren()) {
+        child.accept(this);
+    }
+    return null;
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Comandos -->
+                <div class="method-card">
+                    <h5>Comandos del Robot</h5>
+                    <p style="margin-bottom: 1rem;">
+                        <code>visitMovementCommand(), visitPenCommand(), visitSimpleCommand()</code>
+                    </p>
+
+                    <div class="what-section" style="margin-top: 1rem;">
+                        <strong>¿QUÉ deben hacer?</strong>
+                        <ul class="responsibility-list">
+                            <li>Nada - simplemente retornar null</li>
+                        </ul>
+                    </div>
+
+                    <div class="why-section" style="margin-top: 1rem;">
+                        <strong>¿POR QUÉ?</strong>
+                        <p>
+                            Los comandos del robot (UP, DOWN, PENUP, etc.) no afectan
+                            la tabla de símbolos. No declaran ni usan variables.
+                        </p>
+                    </div>
+
+                    <div class="pseudocode-box">
+                        <strong>Implementación:</strong>
+                        <pre style="margin-top: 0.5rem;">return null;</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ejercicios de Implementación -->
+        <div class="content-section">
+            <h3>📝 Ejercicios de Implementación</h3>
+            <p>
+                Los tres métodos marcados como ejercicio (<code>visitAssignment</code>, <code>visitIdentifier</code>, <code>visitRepeatStatement</code>)
+                son fundamentales para el análisis semántico. Debes implementarlos usando la tabla de símbolos.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #fef3c7, #fef9e7); border-left: 4px solid #f59e0b; padding: 1.5rem; border-radius: 0.75rem; margin: 1.5rem 0;">
+                <h4 style="color: #92400e;">💡 Consejos Generales:</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li>Usa los métodos de la tabla de símbolos: <code>validateUsage()</code> e <code>initialize()</code></li>
+                    <li>El flag <code>inAssignment</code> es crucial para evitar validaciones duplicadas</li>
+                    <li>Siempre visita recursivamente los nodos hijos para validar todo el subárbol</li>
+                    <li>Revisa los métodos ya implementados (<code>visitVariableDeclaration</code>) como referencia</li>
+                </ul>
+            </div>
+
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 0.75rem; margin: 1.5rem 0;">
+                <h4 style="color: #1e40af;">🎯 Objetivos de Aprendizaje:</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li>Entender cómo se propaga la validación por el árbol usando el patrón Visitor</li>
+                    <li>Aprender a manejar estado interno en un visitor (el flag <code>inAssignment</code>)</li>
+                    <li>Diferenciar entre errores (variables no declaradas) y warnings (variables no inicializadas)</li>
+                    <li>Practicar el uso de la API de la tabla de símbolos</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Estado Interno del Visitor -->
+        <div class="content-section">
+            <h3>💾 Estado Interno del Visitor</h3>
+            <p>
+                El <code>SemanticAnalyzerVisitor</code> mantiene estado interno para funcionar correctamente:
+            </p>
+
+            <pre><code class="language-java">public class SemanticAnalyzerVisitor implements ASTVisitor&lt;Void&gt; {
+
+    // La tabla de símbolos que se va construyendo
+    private SymbolTable symbolTable;
+
+    // Flag para saber si estamos procesando una asignación
+    // (evita validar el identificador de la izquierda dos veces)
+    private boolean inAssignment;
+
+    public SemanticAnalyzerVisitor() {
+        this.symbolTable = new SymbolTable();
+        this.inAssignment = false;
+    }
+
+    // ... métodos visit ...
+}</code></pre>
+
+            <div class="why-section">
+                <h4>🎯 ¿Por qué necesitamos el flag inAssignment?</h4>
+                <p>
+                    Considera esta asignación:
+                </p>
+                <pre style="margin-top: 0.5rem;"><code>contador := valor</code></pre>
+                <p style="margin-top: 1rem;">
+                    Sin el flag, <code>visitIdentifier()</code> se llamaría DOS veces:
+                </p>
+                <ol style="line-height: 1.8; margin-top: 0.5rem;">
+                    <li>Una vez para "contador" (el identificador de la izquierda)</li>
+                    <li>Otra vez para "valor" (el identificador de la derecha)</li>
+                </ol>
+                <p style="margin-top: 1rem;">
+                    Queremos validar solo "valor", no "contador" (porque ya lo validamos en <code>visitAssignment</code>).
+                    El flag <code>inAssignment</code> nos permite saltar la validación durante el procesamiento del identificador de la izquierda.
+                </p>
+            </div>
+        </div>
+
+        <!-- Validaciones que Debe Realizar -->
+        <div class="content-section">
+            <h3>✅ Validaciones que Debe Realizar el Visitor</h3>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="background: var(--accent-purple); color: white;">
+                        <th style="padding: 1rem; text-align: left;">Validación</th>
+                        <th style="padding: 1rem; text-align: left;">Método Responsable</th>
+                        <th style="padding: 1rem; text-align: left;">Tipo de Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Variable ya declarada</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>visitVariableDeclaration()</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">❌ Error</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Variable no declarada</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>visitIdentifier()</code>, <code>visitAssignment()</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">❌ Error</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Variable no inicializada</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>visitIdentifier()</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">⚠️ Warning</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">Identificador en REPEAT no declarado</td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;"><code>visitRepeatStatement()</code></td>
+                        <td style="padding: 1rem; border: 1px solid #e2e8f0;">❌ Error</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Flujo Completo de Análisis -->
+        <div class="content-section">
+            <h3>🔄 Flujo Completo de un Análisis</h3>
+
+            <div class="mermaid">
+sequenceDiagram
+    participant User as Usuario
+    participant SA as SemanticAnalyzerVisitor
+    participant ST as SymbolTable
+    participant AST as ProgramNode
+
+    User->>SA: analyze(programNode)
+    activate SA
+
+    SA->>ST: clear()
+    Note over ST: Tabla limpia
+
+    SA->>AST: accept(this)
+    activate AST
+
+    AST->>SA: visitProgram(this)
+    Note over SA: Inicia recorrido
+
+    loop Para cada statement
+        AST->>SA: visitVariableDeclaration(node)
+        SA->>ST: declare(name, line, col)
+        Note over ST: Variable añadida
+
+        AST->>SA: visitAssignment(node)
+        SA->>ST: validateUsage(name, line, col)
+        alt Variable declarada
+            ST-->>SA: true
+            SA->>ST: initialize(name, value)
+        else Variable NO declarada
+            ST-->>SA: false (error registrado)
+        end
+
+        AST->>SA: visitIdentifier(node)
+        SA->>ST: validateUsage(name, line, col)
+    end
+
+    AST-->>SA: return
+    deactivate AST
+
+    SA-->>User: return symbolTable
+    Note over User: Tabla con errores/warnings
+    deactivate SA
+            </div>
+        </div>
+
+        <!-- Ejemplo de Uso -->
+        <div class="content-section">
+            <h3>💻 Ejemplo de Uso del SemanticAnalyzerVisitor</h3>
+
+            <pre><code class="language-java">// 1. Parsear el código
+Lexer lexer = new Lexer(sourceCode);
+List&lt;Token&gt; tokens = lexer.tokenize();
+
+Parser parser = new Parser(tokens);
+ProgramNode ast = parser.parse();
+
+// 2. Crear el visitor de análisis semántico
+SemanticAnalyzerVisitor semanticAnalyzer = new SemanticAnalyzerVisitor();
+
+// 3. Ejecutar el análisis
+SymbolTable symbolTable = semanticAnalyzer.analyze(ast);
+
+// 4. Verificar resultados
+if (symbolTable.hasErrors()) {
+    System.out.println("❌ Errores semánticos encontrados:");
+    for (String error : symbolTable.getErrors()) {
+        System.out.println("  " + error);
+    }
+}
+
+if (symbolTable.hasWarnings()) {
+    System.out.println("⚠️  Advertencias:");
+    for (String warning : symbolTable.getWarnings()) {
+        System.out.println("  " + warning);
+    }
+}
+
+if (!symbolTable.hasErrors()) {
+    System.out.println("✅ Análisis semántico exitoso");
+    System.out.println("\nTabla de símbolos:");
+    System.out.println(symbolTable.toString());
+}</code></pre>
+        </div>
+
+        <!-- Resumen Final -->
+        <div class="content-section">
+            <h3>📚 Resumen del Slide y de la Guía Completa</h3>
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem;">
+                <h4>Has aprendido:</h4>
+                <ul style="line-height: 1.8;">
+                    <li>✅ El método <code>analyze()</code> es el punto de entrada que inicia el recorrido del AST</li>
+                    <li>✅ <code>visitVariableDeclaration()</code> agrega variables a la tabla de símbolos</li>
+                    <li>✅ <code>visitAssignment()</code> valida la variable y la marca como inicializada</li>
+                    <li>✅ <code>visitIdentifier()</code> valida que las variables usadas estén declaradas</li>
+                    <li>✅ Los métodos de navegación propagan la visita a los hijos</li>
+                    <li>✅ El flag <code>inAssignment</code> evita validaciones duplicadas</li>
+                    <li>✅ La tabla de símbolos acumula errores y warnings durante el recorrido</li>
+                </ul>
+
+                <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 3px solid #10b981; padding: 2rem; border-radius: 1rem; margin-top: 2rem;">
+                    <h4 style="color: #047857;">🎉 ¡Felicitaciones!</h4>
+                    <p style="margin-top: 1rem;">
+                        Has completado la guía completa de <strong>Análisis Semántico con Patrón Visitor</strong>.
+                        Ahora tienes todos los conocimientos necesarios para:
+                    </p>
+                    <ul style="line-height: 1.8; margin-top: 1rem;">
+                        <li>✨ Comprender la arquitectura del AST</li>
+                        <li>✨ Implementar el patrón Visitor</li>
+                        <li>✨ Crear visitors personalizados (contadores, analizadores, etc.)</li>
+                        <li>✨ Diseñar y usar tablas de símbolos</li>
+                        <li>✨ Realizar análisis semántico completo</li>
+                    </ul>
+
+                    <p style="margin-top: 1.5rem; font-weight: 600; color: #047857;">
+                        ¡Es hora de aplicar estos conocimientos en tus propios proyectos de compiladores!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide6-symbol-table.html" class="btn" style="background: var(--text-secondary);">
+                ← Anterior: Tabla de Símbolos
+            </a>
+            <a href="index.html" class="btn btn-primary">
+                ✅ Volver al Índice
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 7: SemanticAnalyzerVisitor - Implementación Guiada
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#8b5cf6',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#6d28d9',
+                lineColor: '#94a3b8',
+                secondaryColor: '#10b981',
+                tertiaryColor: '#3b82f6'
+            }
+        });
+    </script>
+</body>
+</html>

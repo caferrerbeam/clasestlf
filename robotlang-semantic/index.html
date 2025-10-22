@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Semántico con Patrón Visitor - RoboLang | Universidad EAM</title>
+    <meta name="description" content="Guía completa para estudiantes sobre análisis semántico usando el patrón Visitor en RoboLang">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        .visitor-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .learning-objectives {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin: 2rem 0;
+        }
+
+        .objective-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .objective-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .objective-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .slide-badge {
+            display: inline-block;
+            background: var(--info);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .difficulty-foundation {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .difficulty-intermediate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .difficulty-practice {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-advanced {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+
+        .slide-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .prerequisites {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 2rem 0;
+            border-radius: var(--radius-md);
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🔍 Análisis Semántico - RoboLang</h1>
+                <p class="subtitle">Patrón Visitor y Tabla de Símbolos | Universidad EAM</p>
+            </div>
+            <div class="course-info">
+                <span class="course-badge">Teoría de Lenguajes Formales</span>
+                <span class="visitor-badge">Patrón Visitor</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h2>🎯 Domina el Análisis Semántico Paso a Paso</h2>
+                <p class="hero-description">
+                    Una guía didáctica completa que te llevará desde entender la estructura del AST
+                    hasta implementar análisis semántico completo usando el patrón Visitor.
+                    Aprenderás a validar el significado del código RoboLang y detectar errores semánticos.
+                </p>
+
+                <div class="progress-overview">
+                    <div class="progress-card">
+                        <div class="progress-number">7</div>
+                        <div class="progress-label">Slides Interactivos</div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-number">3</div>
+                        <div class="progress-label">Visitors a Implementar</div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-number">2</div>
+                        <div class="progress-label">Tablas de Símbolos</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="prerequisites">
+            <h3>⚠️ Prerequisitos Importantes</h3>
+            <ul>
+                <li><strong>Conocimiento del AST:</strong> Debes haber completado la guía de implementación del parser</li>
+                <li><strong>Java Básico:</strong> Interfaces, herencia, y colecciones</li>
+                <li><strong>Recursión:</strong> Comprensión de funciones recursivas y recorrido de árboles</li>
+            </ul>
+        </div>
+
+        <div class="learning-objectives">
+            <h3>🎓 Al finalizar esta guía podrás:</h3>
+            <ul class="objective-list">
+                <li>Comprender la estructura completa del AST de RoboLang y sus relaciones</li>
+                <li>Explicar cómo se construye un AST dinámicamente en tiempo de ejecución</li>
+                <li>Dominar el patrón Visitor y aplicarlo a diferentes análisis de código</li>
+                <li>Implementar Visitors personalizados para análisis de métricas de código</li>
+                <li>Diseñar y utilizar tablas de símbolos para validación semántica</li>
+                <li>Realizar análisis semántico completo detectando errores en tiempo de compilación</li>
+            </ul>
+        </div>
+
+        <section class="learning-path">
+            <h2>📚 Ruta de Aprendizaje - Análisis Semántico</h2>
+            <p class="path-description">
+                Sigue estos slides en orden secuencial. Cada uno construye sobre los conceptos del anterior.
+                La progresión va desde fundamentos teóricos hasta implementación práctica completa.
+            </p>
+
+            <div class="sections-grid">
+                <!-- SLIDE 1: Arquitectura del AST -->
+                <article class="section-card foundation">
+                    <div class="card-header">
+                        <span class="section-icon">🏗️</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 1</span>
+                            <h3>Arquitectura del AST de RoboLang</h3>
+                            <span class="difficulty-badge difficulty-foundation">Fundamentos</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> Comprender la estructura completa del árbol de sintaxis abstracta,
+                            su jerarquía de nodos y cómo representa un programa RoboLang.
+                        </p>
+                        <ul class="section-topics">
+                            <li>📊 Clasificación completa de nodos del AST</li>
+                            <li>🔗 Relaciones y atributos de cada tipo de nodo</li>
+                            <li>📝 Ejemplo de derivación de un programa completo</li>
+                            <li>🌳 Visualización del AST resultante</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>📖 Concepto clave:</strong>
+                                <em>El AST es la representación estructurada del código fuente</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide1-ast-architecture.html" class="btn btn-primary">
+                            Comenzar con el AST
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 25-30 min</span>
+                    </div>
+                </article>
+
+                <!-- SLIDE 2: ASTNode - Construcción del Árbol -->
+                <article class="section-card foundation">
+                    <div class="card-header">
+                        <span class="section-icon">🔨</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 2</span>
+                            <h3>ASTNode - Construcción del Árbol</h3>
+                            <span class="difficulty-badge difficulty-foundation">Fundamentos ⭐ Esencial</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> Entender cómo se construye el AST dinámicamente
+                            y la importancia de la clase base ASTNode.
+                        </p>
+                        <ul class="section-topics">
+                            <li>🧱 Análisis profundo de la clase ASTNode.java</li>
+                            <li>➕ El método addChild() y la composición del árbol</li>
+                            <li>🎯 Ejemplos prácticos: ConditionNode y otros nodos</li>
+                            <li>🎬 Visualización paso a paso del proceso de construcción</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>🎨 Concepto clave:</strong>
+                                <em>El patrón Composite en acción - cada nodo puede contener otros nodos</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide2-astnode-construction.html" class="btn btn-primary">
+                            Aprender Construcción del AST
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 30-35 min</span>
+                    </div>
+                </article>
+
+                <!-- SLIDE 3: Patrón Visitor -->
+                <article class="section-card intermediate">
+                    <div class="card-header">
+                        <span class="section-icon">👁️</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 3</span>
+                            <h3>Patrón Visitor - Fundamentos</h3>
+                            <span class="difficulty-badge difficulty-intermediate">Intermedio</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> Dominar el patrón Visitor y comprender cómo
+                            permite operar sobre el AST sin modificar sus clases.
+                        </p>
+                        <ul class="section-topics">
+                            <li>🎯 Teoría del patrón Visitor (Problema y Solución)</li>
+                            <li>📐 Diagrama UML y estructura del patrón</li>
+                            <li>🔍 Análisis de la interface ASTVisitor.java</li>
+                            <li>🔄 Flujo de ejecución: accept() y visit()</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>💡 Concepto clave:</strong>
+                                <em>Separación de estructura (AST) y operaciones (Visitors)</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide3-visitor-pattern.html" class="btn btn-primary">
+                            Entender el Patrón Visitor
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 20-25 min</span>
+                    </div>
+                </article>
+
+                <!-- SLIDE 4: CommandCounterVisitor -->
+                <article class="section-card intermediate">
+                    <div class="card-header">
+                        <span class="section-icon">📊</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 4</span>
+                            <h3>CommandCounterVisitor - Implementación Completa</h3>
+                            <span class="difficulty-badge difficulty-intermediate">Intermedio - Guiado</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> Aprender a implementar un Visitor completo
+                            mediante un ejemplo guiado paso a paso.
+                        </p>
+                        <ul class="section-topics">
+                            <li>🎯 Propósito: Contar comandos de movimiento y pluma</li>
+                            <li>💻 Código completo con explicación línea por línea</li>
+                            <li>🔄 Manejo de estado interno y recursión</li>
+                            <li>🧪 Ejemplo de ejecución con traza completa</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>✨ Lo aprenderás:</strong>
+                                <em>Cómo implementar un Visitor desde cero siguiendo el patrón</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide4-commandcounter-visitor.html" class="btn btn-primary">
+                            Ver Implementación Completa
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 30-40 min</span>
+                    </div>
+                </article>
+
+                <!-- SLIDE 5: SensorUsageVisitor (Ejercicio) -->
+                <article class="section-card practice">
+                    <div class="card-header">
+                        <span class="section-icon">🧪</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 5</span>
+                            <h3>SensorUsageVisitor - Ejercicio Práctico</h3>
+                            <span class="difficulty-badge difficulty-practice">Práctica - Implementa Tú</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> ¡Tu turno! Implementa tu primer Visitor desde cero
+                            siguiendo la guía y aplicando lo aprendido.
+                        </p>
+                        <ul class="section-topics">
+                            <li>📋 Descripción detallada del problema</li>
+                            <li>📝 Requisitos y casos de prueba</li>
+                            <li>💡 Guía de implementación (sin código solución)</li>
+                            <li>✅ Checklist de validación</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>🚀 Desafío:</strong>
+                                <em>Implementa un Visitor que analice el uso de sensores en el código</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide5-sensorusage-exercise.html" class="btn btn-primary">
+                            Comenzar Ejercicio
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 45-60 min</span>
+                    </div>
+                </article>
+
+                <!-- SLIDE 6: Tabla de Símbolos -->
+                <article class="section-card advanced">
+                    <div class="card-header">
+                        <span class="section-icon">📚</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 6</span>
+                            <h3>Análisis Semántico - Tabla de Símbolos</h3>
+                            <span class="difficulty-badge difficulty-advanced">Avanzado</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> Comprender qué es una tabla de símbolos y cómo
+                            se usa para validar el significado del código.
+                        </p>
+                        <ul class="section-topics">
+                            <li>📖 Concepto y propósito de la tabla de símbolos</li>
+                            <li>🗂️ Diseño de la estructura de datos</li>
+                            <li>⚙️ Operaciones: insert, lookup, validación</li>
+                            <li>🔍 Casos de uso: variables no declaradas, redeclaraciones</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>🎯 Concepto clave:</strong>
+                                <em>La tabla de símbolos mantiene el "contexto" del programa</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide6-symbol-table.html" class="btn btn-primary">
+                            Aprender Tabla de Símbolos
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 25-30 min</span>
+                    </div>
+                </article>
+
+                <!-- SLIDE 7: SemanticAnalyzerVisitor -->
+                <article class="section-card advanced">
+                    <div class="card-header">
+                        <span class="section-icon">🔬</span>
+                        <div class="section-info">
+                            <span class="slide-badge">Slide 7</span>
+                            <h3>SemanticAnalyzerVisitor - Implementación Guiada</h3>
+                            <span class="difficulty-badge difficulty-advanced">Avanzado - Proyecto Final</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>
+                            <strong>Objetivo:</strong> Implementar el análisis semántico completo
+                            usando Visitor y tabla de símbolos.
+                        </p>
+                        <ul class="section-topics">
+                            <li>🔍 Análisis del método analyze() en detalle</li>
+                            <li>📋 Responsabilidades de cada método visit</li>
+                            <li>💻 Ejemplo completo: visitVariableDeclaration</li>
+                            <li>📝 Guía para implementar los demás métodos</li>
+                        </ul>
+                        <div class="bnf-reference">
+                            <div class="bnf-inline">
+                                <strong>🏆 Proyecto final:</strong>
+                                <em>Combina todo lo aprendido: AST, Visitor y Tabla de Símbolos</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="slide7-semantic-analyzer.html" class="btn btn-primary">
+                            Implementar Análisis Semántico
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <span class="time-estimate">⏱️ 60-90 min</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section style="margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 1rem; color: white;">
+            <h2 style="color: white;">💪 ¿Listo para dominar el análisis semántico?</h2>
+            <p style="font-size: 1.1rem; margin: 1rem 0;">
+                Esta guía te llevará paso a paso desde los fundamentos del AST hasta implementar
+                análisis semántico completo. Cada slide construye sobre el anterior, así que asegúrate
+                de seguirlos en orden.
+            </p>
+            <a href="slide1-ast-architecture.html" class="btn" style="background: white; color: #667eea; padding: 1rem 2rem; text-decoration: none; border-radius: 0.5rem; display: inline-block; font-weight: 600; margin-top: 1rem;">
+                Comenzar con Slide 1 →
+            </a>
+        </section>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Guía de Análisis Semántico - RoboLang v3.0
+        </p>
+    </footer>
+
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

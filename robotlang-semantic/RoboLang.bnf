@@ -1,0 +1,214 @@
+/* RoboLang Grammar
+ * Robot Control Language - Context-Free Grammar
+ * version 3.0
+ * Updated on Mon Oct 21, 2025
+ * Based on specification document: 🤖 RoboLang.pdf
+ *
+ * Cambios en versión 2.0:
+ * - Soporte para declaración de variables (VAR)
+ * - Soporte para asignación de valores a variables (:=)
+ * - Identificadores pueden usarse en RepeatStatement
+ * - Valores pueden ser sensores, números, booleanos o identificadores
+ * - Expresiones lógicas completas (AND, OR, NOT) ya implementadas
+ *
+ * Cambios en versión 3.0:
+ * - Soporte para funciones definidas por el usuario
+ * - Función MAIN como punto de entrada del programa
+ * - Llamadas a funciones con argumentos
+ * - Statement RETURN para retornar valores desde funciones
+ * - Parámetros en definición de funciones
+ */
+
+/* Main program structure */
+Program  ::= FunctionList MainFunction
+           | MainFunction
+
+/* Function definitions */
+FunctionList
+         ::= FunctionDeclaration
+           | FunctionDeclaration FunctionList
+
+FunctionDeclaration
+         ::= 'FUNCTION' Identifier '(' ParameterList ')' StatementBlock
+           | 'FUNCTION' Identifier '(' ')' StatementBlock
+
+MainFunction
+         ::= 'MAIN' StatementBlock
+
+ParameterList
+         ::= Identifier
+           | Identifier ',' ParameterList
+
+/* Function calls */
+FunctionCall
+         ::= Identifier '(' ArgumentList ')'
+           | Identifier '(' ')'
+
+ArgumentList
+         ::= Value
+           | Value ',' ArgumentList
+
+/* Statement definitions */
+StatementList
+         ::= Statement
+           | Statement StatementList
+
+Statement
+         ::= SimpleCommand
+           | RepeatStatement
+           | IfStatement
+           | WhileStatement
+           | VariableDeclaration
+           | Assignment
+           | ReturnStatement
+           | FunctionCallStatement
+
+FunctionCallStatement
+         ::= FunctionCall ';'
+
+ReturnStatement
+         ::= 'RETURN' Value ';'
+           | 'RETURN' ';'
+StatementBlock
+         ::= '{' StatementList '}'
+           | '{' '}'
+
+/* Simple commands */
+SimpleCommand
+         ::= MovementCommand ';'
+           | PenCommand ';'
+
+MovementCommand
+         ::= 'UP'
+           | 'DOWN'
+           | 'LEFT'
+           | 'RIGHT'
+
+PenCommand
+         ::= 'PENUP'
+           | 'PENDOWN'
+
+/* Variable declarations and assignments */
+VariableDeclaration
+         ::= 'VAR' Identifier ';'
+
+Assignment
+         ::= Identifier ':=' Value ';'
+
+/* Control structures */
+RepeatStatement
+         ::= 'REPEAT' (Number | Identifier) StatementBlock
+
+IfStatement
+         ::= 'IF' '(' Condition ')' StatementBlock
+           | 'IF' '(' Condition ')' StatementBlock 'ELSE' StatementBlock
+
+WhileStatement
+         ::= 'WHILE' '(' Condition ')' StatementBlock
+
+/* Condition expressions with operator precedence */
+Condition
+         ::= OrExpression
+
+OrExpression
+         ::= AndExpression
+           | OrExpression 'OR' AndExpression
+
+AndExpression
+         ::= NotExpression
+           | AndExpression 'AND' NotExpression
+
+NotExpression
+         ::= 'NOT' NotExpression
+           | PrimaryExpression
+
+PrimaryExpression
+         ::= ComparisonExpression
+           | '(' Condition ')'
+
+/* Comparison operations */
+ComparisonExpression
+         ::= Value ComparisonOperator Value
+
+ComparisonOperator
+         ::= '='
+           | '!='
+           | '<'
+           | '<='
+           | '>'
+           | '>='
+
+/* Values and sensors */
+Value    ::= Sensor
+           | Number
+           | Boolean
+           | Identifier
+           | FunctionCall
+
+Sensor   ::= NumericSensor
+           | BooleanSensor
+
+NumericSensor
+         ::= 'DIST'
+           | 'TEMP'
+           | 'LIGHT'
+           | 'BATTERY'
+
+BooleanSensor
+         ::= 'OBSTACLE'
+
+Boolean  ::= 'true'
+           | 'false'
+
+/* Numbers */
+Number   ::= Digit
+           | Digit Number
+
+Digit    ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+/* Identifiers */
+Identifier ::= Letter (Letter | Digit | '_')*
+Letter     ::= 'a'..'z' | 'A'..'Z'
+
+/* Lexical tokens (terminal symbols) */
+COMMAND_UP       ::= 'UP'
+COMMAND_DOWN     ::= 'DOWN'
+COMMAND_LEFT     ::= 'LEFT'
+COMMAND_RIGHT    ::= 'RIGHT'
+COMMAND_PENUP    ::= 'PENUP'
+COMMAND_PENDOWN  ::= 'PENDOWN'
+KEYWORD_REPEAT   ::= 'REPEAT'
+KEYWORD_IF       ::= 'IF'
+KEYWORD_ELSE     ::= 'ELSE'
+KEYWORD_WHILE    ::= 'WHILE'
+KEYWORD_VAR      ::= 'VAR'
+KEYWORD_FUNCTION ::= 'FUNCTION'
+KEYWORD_MAIN     ::= 'MAIN'
+KEYWORD_RETURN   ::= 'RETURN'
+SENSOR_DIST      ::= 'DIST'
+SENSOR_TEMP      ::= 'TEMP'
+SENSOR_LIGHT     ::= 'LIGHT'
+SENSOR_BATTERY   ::= 'BATTERY'
+SENSOR_OBSTACLE  ::= 'OBSTACLE'
+OPERATOR_AND     ::= 'AND'
+OPERATOR_OR      ::= 'OR'
+OPERATOR_NOT     ::= 'NOT'
+OPERATOR_EQ      ::= '='
+OPERATOR_NEQ     ::= '!='
+OPERATOR_LT      ::= '<'
+OPERATOR_GT      ::= '>'
+OPERATOR_LTE     ::= '<='
+OPERATOR_GTE     ::= '>='
+OPERATOR_ASSIGN  ::= ':='
+BOOLEAN_TRUE     ::= 'true'
+BOOLEAN_FALSE    ::= 'false'
+IDENTIFIER       ::= [a-zA-Z_][a-zA-Z0-9_]*
+LPAREN           ::= '('
+RPAREN           ::= ')'
+LBRACE           ::= '{'
+RBRACE           ::= '}'
+SEMICOLON        ::= ';'
+COMMA            ::= ','
+NUMBER           ::= [0-9]+
+WHITESPACE       ::= [ \t\r\n]+ 
+COMMENT          ::= '//' [^\r\n]* | '/*' ( [^*] | '*'+ [^*/] )* '*'+ '/'
