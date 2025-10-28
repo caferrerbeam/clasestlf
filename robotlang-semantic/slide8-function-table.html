@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 8: Tabla de Funciones | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .exercise-badge {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+            color: #1e293b;
+        }
+
+        .concept-box {
+            background: white;
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            color: #1e293b;
+        }
+
+        .challenge-box {
+            background: linear-gradient(135deg, #ffe4e6, #fecdd3);
+            border: 3px solid #e11d48;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            color: #1e293b;
+        }
+
+        .step-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+            color: #1e293b;
+        }
+
+        .step-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--accent-purple);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 2.5rem;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .comparison-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            color: #1e293b;
+        }
+
+        .method-responsibility {
+            background: #f8fafc;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            color: #1e293b;
+        }
+
+        .validation-example {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            font-family: var(--font-mono);
+        }
+
+        .error-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .error-type.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .error-type.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .hint-box {
+            background: #ede9fe;
+            border-left: 4px solid #8b5cf6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            color: #1e293b;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 0.75rem;
+            color: #1e293b;
+        }
+
+        .navigation-buttons .btn {
+            color: white;
+        }
+
+        /* Asegurar que todo el texto sea legible */
+        .content-section {
+            color: #1e293b;
+        }
+
+        .content-section h3,
+        .content-section h4,
+        .content-section p,
+        .content-section li {
+            color: inherit;
+        }
+
+        .step-card h4 {
+            color: #1e293b;
+        }
+
+        .concept-box,
+        .comparison-card,
+        .method-responsibility {
+            color: #1e293b;
+        }
+
+        .concept-box h4,
+        .comparison-card h4 {
+            color: inherit;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-table {
+                grid-template-columns: 1fr;
+            }
+
+            .navigation-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🎯 Tabla de Símbolos de Funciones</h1>
+                <p class="subtitle">Slide 8 - Ejercicio Práctico de Implementación</p>
+            </div>
+            <div class="course-info">
+                <a href="index.html" class="btn" style="background: white; color: var(--primary-blue);">← Volver al Índice</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="max-width: 1200px; margin: 0 auto;">
+        <div class="slide-header">
+            <div class="slide-number">SLIDE 8 DE 8 - EJERCICIO PRÁCTICO</div>
+            <h2>Tabla de Símbolos de Funciones</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+                Extendiendo el análisis semántico para validar declaración y llamadas de funciones
+            </p>
+        </div>
+
+        <div class="exercise-badge">
+            <h3 style="color: #f59e0b; margin-bottom: 0.5rem;">👨‍💻 EJERCICIO DE IMPLEMENTACIÓN</h3>
+            <p style="color: var(--text-secondary); margin: 0;">
+                Este slide te guía paso a paso para implementar la <strong>tabla de símbolos de funciones</strong>.
+                Se explica <strong>QUÉ hacer</strong> y <strong>POR QUÉ</strong>, pero <strong>TÚ escribirás el código</strong>.
+            </p>
+        </div>
+
+        <!-- Contexto: Por qué necesitamos una tabla de funciones -->
+        <div class="content-section">
+            <h3>🤔 ¿Por qué Necesitamos una Tabla de Funciones?</h3>
+
+            <div class="concept-box">
+                <h4 style="color: var(--primary-blue);">El Problema</h4>
+                <p>
+                    Ya tenemos una <strong>tabla de símbolos para variables</strong> que valida:
+                </p>
+                <ul style="line-height: 1.8;">
+                    <li>✅ Que las variables estén declaradas antes de usarse</li>
+                    <li>✅ Que no haya variables duplicadas</li>
+                    <li>✅ Que las variables estén inicializadas</li>
+                </ul>
+                <p style="margin-top: 1rem;">
+                    Pero en RoboLang v3.0 agregamos <strong>funciones</strong>. ¿Qué pasa con este código?
+                </p>
+                <pre><code class="language-java">FUNCTION moverCuadrado(pasos) {
+    REPEAT pasos {
+        UP;
+        RIGHT;
+    }
+}
+
+MAIN {
+    moverCuadrado(5);      // ¿Está declarada?
+    funcionInexistente();  // ¿Esto es válido?
+    moverCuadrado(1, 2);   // ¿Número de argumentos correcto?
+}</code></pre>
+                <p style="margin-top: 1rem;">
+                    <strong>Necesitamos validar:</strong>
+                </p>
+                <ol style="line-height: 1.8;">
+                    <li>Que las funciones estén declaradas antes de llamarlas</li>
+                    <li>Que no haya funciones duplicadas</li>
+                    <li>Que el número de argumentos coincida con el número de parámetros</li>
+                </ol>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0; color: #1e293b;">
+                <h4 style="color: #1e40af;">💡 La Solución</h4>
+                <p>
+                    Crear una <strong>tabla de símbolos separada</strong> específica para funciones,
+                    similar a cómo tenemos SymbolTable para variables.
+                </p>
+            </div>
+        </div>
+
+        <!-- Comparación: Variables vs Funciones -->
+        <div class="content-section">
+            <h3>📊 Variables vs Funciones: ¿Qué es Diferente?</h3>
+
+            <div class="comparison-table">
+                <div class="comparison-card" style="border-left: 4px solid #10b981;">
+                    <h4 style="color: #047857;">Tabla de Variables</h4>
+                    <p style="margin-top: 1rem;"><strong>Almacena:</strong></p>
+                    <ul style="line-height: 1.8;">
+                        <li>Nombre de la variable</li>
+                        <li>Tipo (INTEGER, BOOLEAN, UNKNOWN)</li>
+                        <li>Línea y columna de declaración</li>
+                        <li>Si está inicializada</li>
+                        <li>Valor (opcional)</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Valida:</strong></p>
+                    <ul style="line-height: 1.8;">
+                        <li>Variable declarada</li>
+                        <li>Variable no duplicada</li>
+                        <li>Variable inicializada (warning)</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-card" style="border-left: 4px solid #ec4899;">
+                    <h4 style="color: #be185d;">Tabla de Funciones</h4>
+                    <p style="margin-top: 1rem;"><strong>Almacena:</strong></p>
+                    <ul style="line-height: 1.8;">
+                        <li>Nombre de la función</li>
+                        <li><strong>Lista de parámetros</strong> ⭐</li>
+                        <li>Línea y columna de declaración</li>
+                        <li><em>(No necesita "inicializada")</em></li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Valida:</strong></p>
+                    <ul style="line-height: 1.8;">
+                        <li>Función declarada</li>
+                        <li>Función no duplicada</li>
+                        <li><strong>Número de argumentos correcto</strong> ⭐</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 1.5rem; border-radius: 0.75rem; margin-top: 2rem; color: #1e293b;">
+                <h4 style="color: #92400e;">🎯 Diferencia Clave</h4>
+                <p>
+                    La tabla de funciones necesita almacenar la <strong>lista de parámetros</strong>
+                    para poder validar que las llamadas pasen el número correcto de argumentos.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    Ejemplo: <code>FUNCTION suma(a, b, c)</code> tiene <strong>3 parámetros</strong>.
+                    Una llamada <code>suma(5, 10)</code> es inválida (solo 2 argumentos).
+                </p>
+            </div>
+        </div>
+
+        <!-- Arquitectura de la Solución -->
+        <div class="content-section">
+            <h3>🏗️ Arquitectura de la Solución</h3>
+
+            <p>Necesitamos crear <strong>dos clases</strong> y modificar <strong>una existente</strong>:</p>
+
+            <div class="mermaid">
+classDiagram
+    class FunctionTableEntry {
+        -String name
+        -List~String~ parameters
+        -int declarationLine
+        -int declarationColumn
+        +getName() String
+        +getParameters() List~String~
+        +getParameterCount() int
+        +getDeclarationLine() int
+        +getDeclarationColumn() int
+    }
+
+    class FunctionTable {
+        -Map~String, FunctionTableEntry~ functions
+        -List~String~ errors
+        -List~String~ warnings
+        +declare(name, parameters, line, col) boolean
+        +isDeclared(name) boolean
+        +validateCall(name, argCount, line, col) boolean
+        +get(name) FunctionTableEntry
+        +getErrors() List~String~
+        +hasErrors() boolean
+        +clear() void
+    }
+
+    class SemanticAnalyzerVisitor {
+        -SymbolTable symbolTable
+        -FunctionTable functionTable ⭐
+        +visitFunctionDeclaration(node)
+        +visitFunctionCall(node)
+    }
+
+    FunctionTable --> FunctionTableEntry : contiene
+    SemanticAnalyzerVisitor --> FunctionTable : usa
+    SemanticAnalyzerVisitor --> SymbolTable : usa
+
+    note for FunctionTableEntry "Representa UNA función\nen el programa"
+    note for FunctionTable "Gestiona TODAS las funciones\ny sus validaciones"
+    note for SemanticAnalyzerVisitor "Usa AMBAS tablas:\nvariables Y funciones"
+            </div>
+        </div>
+
+        <!-- PARTE 1: FunctionTableEntry -->
+        <div class="content-section">
+            <h3>📦 Parte 1: Implementar FunctionTableEntry</h3>
+
+            <div class="challenge-box">
+                <h4 style="color: #be185d; margin-bottom: 1rem;">🎯 TU MISIÓN</h4>
+                <p>
+                    Crear la clase <code>FunctionTableEntry</code> que representa <strong>una entrada</strong>
+                    en la tabla de funciones.
+                </p>
+                <p style="margin-top: 1rem;">
+                    <strong>Ubicación:</strong>
+                    <code>src/main/java/semantic/functions/FunctionTableEntry.java</code>
+                </p>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">1</span>Campos de Instancia</h4>
+                <p style="margin-top: 1rem;">¿Qué información necesitas almacenar sobre una función?</p>
+                <div class="method-responsibility">
+                    <strong>Información necesaria:</strong>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><strong>name</strong> (String): Nombre de la función</li>
+                        <li><strong>parameters</strong> (List&lt;String&gt;): Lista con los nombres de los parámetros</li>
+                        <li><strong>declarationLine</strong> (int): Línea donde se declaró</li>
+                        <li><strong>declarationColumn</strong> (int): Columna donde se declaró</li>
+                    </ul>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Pista:</strong> Usa <code>ArrayList</code> para almacenar la lista de parámetros.
+                    Haz una copia defensiva en el constructor para evitar modificaciones externas.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">2</span>Constructor</h4>
+                <p style="margin-top: 1rem;">¿Cómo inicializas una nueva entrada?</p>
+                <div class="method-responsibility">
+                    <strong>Responsabilidad del constructor:</strong>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li>Recibir: nombre, lista de parámetros, línea, columna</li>
+                        <li>Asignar todos los campos</li>
+                        <li><strong>Importante:</strong> Hacer una copia de la lista de parámetros</li>
+                    </ul>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Pista:</strong> Para copiar la lista: <code>new ArrayList&lt;&gt;(parameters)</code>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">3</span>Getters</h4>
+                <p style="margin-top: 1rem;">¿Qué métodos necesitas para acceder a la información?</p>
+                <div class="method-responsibility">
+                    <strong>Getters necesarios:</strong>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><code>getName()</code>: Retorna el nombre de la función</li>
+                        <li><code>getParameters()</code>: Retorna una COPIA de la lista de parámetros</li>
+                        <li><code>getParameterCount()</code>: Retorna el tamaño de la lista (útil para validación)</li>
+                        <li><code>getDeclarationLine()</code>: Retorna la línea</li>
+                        <li><code>getDeclarationColumn()</code>: Retorna la columna</li>
+                    </ul>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Pista:</strong> En <code>getParameters()</code>, retorna una copia nueva para mantener encapsulación.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">4</span>Método toString()</h4>
+                <p style="margin-top: 1rem;">Para debugging y visualización</p>
+                <div class="method-responsibility">
+                    <strong>Formato sugerido:</strong>
+                    <pre style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">moverCuadrado(pasos, direccion) @ 5:1</pre>
+                    <p style="margin-top: 0.5rem;">
+                        Es decir: <code>nombreFuncion(param1, param2, ...) @ linea:columna</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARTE 2: FunctionTable -->
+        <div class="content-section">
+            <h3>🗄️ Parte 2: Implementar FunctionTable</h3>
+
+            <div class="challenge-box">
+                <h4 style="color: #be185d; margin-bottom: 1rem;">🎯 TU MISIÓN</h4>
+                <p>
+                    Crear la clase <code>FunctionTable</code> que gestiona <strong>todas las funciones</strong>
+                    y realiza las validaciones semánticas.
+                </p>
+                <p style="margin-top: 1rem;">
+                    <strong>Ubicación:</strong>
+                    <code>src/main/java/semantic/functions/FunctionTable.java</code>
+                </p>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">1</span>Campos de Instancia</h4>
+                <div class="method-responsibility">
+                    <strong>¿Qué necesita almacenar la tabla?</strong>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><strong>functions</strong> (Map&lt;String, FunctionTableEntry&gt;): Mapeo nombre → entrada</li>
+                        <li><strong>errors</strong> (List&lt;String&gt;): Lista de errores encontrados</li>
+                        <li><strong>warnings</strong> (List&lt;String&gt;): Lista de advertencias (opcional para funciones)</li>
+                    </ul>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Pista:</strong> Usa <code>LinkedHashMap</code> para mantener el orden de inserción.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">2</span>Método declare()</h4>
+                <p style="margin-top: 1rem;">Declara una nueva función en la tabla</p>
+                <div class="method-responsibility">
+                    <strong>Firma del método:</strong>
+                    <pre><code class="language-java">public boolean declare(String name, List&lt;String&gt; parameters, int line, int column)</code></pre>
+
+                    <strong style="display: block; margin-top: 1rem;">Lógica a implementar:</strong>
+                    <ol style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li>Verificar si la función ya existe en el mapa</li>
+                        <li>Si existe:
+                            <ul>
+                                <li>Agregar error: "Función 'nombre' ya fue declarada en línea X:Y"</li>
+                                <li>Retornar <code>false</code></li>
+                            </ul>
+                        </li>
+                        <li>Si NO existe:
+                            <ul>
+                                <li>Crear nueva <code>FunctionTableEntry</code></li>
+                                <li>Agregarla al mapa</li>
+                                <li>Retornar <code>true</code></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Ejemplos de uso:</strong>
+                    <pre><code class="language-java">// Ejemplo de uso
+declare("moverCuadrado", ["pasos"], 5, 1)  → true (primera vez)
+declare("moverCuadrado", ["x"], 10, 1)     → false (duplicada) + error</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">3</span>Método validateCall()</h4>
+                <p style="margin-top: 1rem;">Valida una llamada a función</p>
+                <div class="method-responsibility">
+                    <strong>Firma del método:</strong>
+                    <pre><code class="language-java">public boolean validateCall(String name, int argumentCount, int line, int column)</code></pre>
+
+                    <strong style="display: block; margin-top: 1rem;">Lógica a implementar:</strong>
+                    <ol style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li>Verificar si la función está declarada
+                            <ul>
+                                <li>Si NO: agregar error "Función 'nombre' no declarada (llamada en línea X:Y)"</li>
+                                <li>Retornar <code>false</code></li>
+                            </ul>
+                        </li>
+                        <li>Si SÍ está declarada:
+                            <ul>
+                                <li>Obtener el número esperado de parámetros</li>
+                                <li>Comparar con <code>argumentCount</code></li>
+                                <li>Si no coincide: agregar error descriptivo</li>
+                            </ul>
+                        </li>
+                        <li>Retornar <code>true</code> solo si todo es válido</li>
+                    </ol>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Ejemplos de uso:</strong>
+                    <pre><code class="language-java">// Función declarada: suma(a, b, c) → 3 parámetros
+
+validateCall("suma", 3, 15, 5)  → true  ✅
+validateCall("suma", 2, 16, 5)  → false ❌ + error "espera 3, pasaron 2"
+validateCall("resta", 2, 17, 5) → false ❌ + error "no declarada"</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">4</span>Métodos de Consulta y Utilidad</h4>
+                <div class="method-responsibility">
+                    <strong>Métodos necesarios:</strong>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><code>isDeclared(String name)</code>: Verifica si una función existe</li>
+                        <li><code>get(String name)</code>: Obtiene la entrada de una función</li>
+                        <li><code>getAll()</code>: Retorna todas las entradas (Collection)</li>
+                        <li><code>getErrors()</code>: Retorna copia de la lista de errores</li>
+                        <li><code>getWarnings()</code>: Retorna copia de la lista de warnings</li>
+                        <li><code>hasErrors()</code>: Verifica si hay errores</li>
+                        <li><code>hasWarnings()</code>: Verifica si hay warnings</li>
+                        <li><code>clear()</code>: Limpia tabla, errores y warnings</li>
+                        <li><code>size()</code>: Número de funciones en la tabla</li>
+                    </ul>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Pista:</strong> Estos métodos son muy similares a los de <code>SymbolTable</code>.
+                    Puedes usar esa clase como referencia.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">5</span>Método toString()</h4>
+                <div class="method-responsibility">
+                    <strong>Para visualización:</strong>
+                    <pre style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">=== Tabla de Funciones ===
+moverCuadrado(pasos) @ 5:1
+dibujarLinea(x, y, longitud) @ 12:1
+
+=== Errores ===
+❌ Función 'suma' ya fue declarada en línea 10:1</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARTE 3: Integración con SemanticAnalyzerVisitor -->
+        <div class="content-section">
+            <h3>🔗 Parte 3: Integrar FunctionTable con SemanticAnalyzerVisitor</h3>
+
+            <div class="challenge-box">
+                <h4 style="color: #be185d; margin-bottom: 1rem;">🎯 TU MISIÓN</h4>
+                <p>
+                    Modificar <code>SemanticAnalyzerVisitor</code> para usar la nueva tabla de funciones
+                    y validar declaraciones y llamadas.
+                </p>
+                <p style="margin-top: 1rem;">
+                    <strong>Archivo a modificar:</strong>
+                    <code>src/main/java/semantic/SemanticAnalyzerVisitor.java</code>
+                </p>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">1</span>Agregar el Campo FunctionTable</h4>
+                <div class="method-responsibility">
+                    <strong>¿Qué hacer?</strong>
+                    <ul style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li>Agregar un campo privado <code>functionTable</code> del tipo <code>FunctionTable</code></li>
+                        <li>Inicializarlo en el constructor</li>
+                        <li>Crear un getter <code>getFunctionTable()</code></li>
+                    </ul>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Recuerda:</strong> El visitor ahora tendrá DOS tablas:
+                    <code>symbolTable</code> (variables) y <code>functionTable</code> (funciones).
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">2</span>Modificar el Método analyze()</h4>
+                <div class="method-responsibility">
+                    <strong>¿Qué cambiar?</strong>
+                    <p style="margin-top: 0.5rem;">
+                        Además de limpiar <code>symbolTable</code>, también debes limpiar <code>functionTable</code>
+                        al inicio del análisis.
+                    </p>
+                </div>
+                <div class="hint-box">
+                    <strong>💡 Pista:</strong> Llama a <code>functionTable.clear()</code> antes de <code>root.accept(this)</code>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">3</span>Modificar visitFunctionDeclaration()</h4>
+                <div class="method-responsibility">
+                    <strong>Responsabilidades del método:</strong>
+                    <ol style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><strong>Registrar la función en functionTable:</strong>
+                            <ul>
+                                <li>Obtener el nombre de la función del nodo</li>
+                                <li>Extraer los nombres de los parámetros (lista de strings)</li>
+                                <li>Llamar a <code>functionTable.declare(...)</code></li>
+                            </ul>
+                        </li>
+                        <li><strong>Registrar los parámetros como variables locales:</strong>
+                            <ul>
+                                <li>Para cada parámetro, declararlo en <code>symbolTable</code></li>
+                                <li>Marcarlos como inicializados (vienen con valores de la llamada)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Visitar el cuerpo de la función:</strong>
+                            <ul>
+                                <li>Llamar a <code>node.getBody().accept(this)</code></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Ejemplo paso a paso:</strong>
+                    <pre><code class="language-java">// Ejemplo: FUNCTION suma(a, b) { RETURN a; }
+
+// Paso 1: Registrar función
+functionTable.declare("suma", ["a", "b"], 1, 1)
+
+// Paso 2: Registrar parámetros como variables
+symbolTable.declare("a", 1, 15)
+symbolTable.initialize("a", "parameter")
+symbolTable.declare("b", 1, 18)
+symbolTable.initialize("b", "parameter")
+
+// Paso 3: Visitar cuerpo
+body.accept(this)</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4><span class="step-number">4</span>Modificar visitFunctionCall()</h4>
+                <div class="method-responsibility">
+                    <strong>Responsabilidades del método:</strong>
+                    <ol style="line-height: 1.8; margin-top: 0.5rem;">
+                        <li><strong>Validar la llamada:</strong>
+                            <ul>
+                                <li>Obtener el nombre de la función del nodo</li>
+                                <li>Contar el número de argumentos</li>
+                                <li>Llamar a <code>functionTable.validateCall(...)</code></li>
+                            </ul>
+                        </li>
+                        <li><strong>Visitar los argumentos:</strong>
+                            <ul>
+                                <li>Para cada argumento, llamar a <code>arg.accept(this)</code></li>
+                                <li>Esto valida que las variables usadas en argumentos estén declaradas</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Ejemplo paso a paso:</strong>
+                    <pre><code class="language-java">// Ejemplo: moverCuadrado(pasos)
+
+// Paso 1: Validar llamada
+String funcName = "moverCuadrado"
+int argCount = 1  // un argumento: "pasos"
+functionTable.validateCall(funcName, argCount, line, col)
+
+// Paso 2: Visitar argumentos
+for (arg : node.getArguments()) {
+    arg.accept(this)  // Valida "pasos" esté declarado
+}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Casos de Prueba -->
+        <div class="content-section">
+            <h3>🧪 Casos de Prueba para Validar tu Implementación</h3>
+
+            <p>Una vez implementes las tres partes, prueba tu código con estos casos:</p>
+
+            <div class="step-card">
+                <h4>✅ Caso 1: Programa Válido</h4>
+                <pre><code class="language-java">FUNCTION moverArriba(pasos) {
+    REPEAT pasos { UP; }
+}
+
+FUNCTION dibujar(lado) {
+    moverArriba(lado);
+    RIGHT;
+}
+
+MAIN {
+    dibujar(10);
+}</code></pre>
+                <div class="method-responsibility" style="margin-top: 1rem;">
+                    <strong>Resultado esperado:</strong> Sin errores. Dos funciones en la tabla.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4>❌ Caso 2: Función No Declarada</h4>
+                <pre><code class="language-java">MAIN {
+    funcionInexistente(5);
+}</code></pre>
+                <div class="method-responsibility" style="margin-top: 1rem;">
+                    <strong>Resultado esperado:</strong>
+                    <span class="error-type error">ERROR</span>
+                    Función 'funcionInexistente' no declarada
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4>❌ Caso 3: Número Incorrecto de Argumentos</h4>
+                <pre><code class="language-java">FUNCTION suma(a, b, c) {
+    RETURN a;
+}
+
+MAIN {
+    suma(5, 10);  // Solo 2 argumentos, espera 3
+}</code></pre>
+                <div class="method-responsibility" style="margin-top: 1rem;">
+                    <strong>Resultado esperado:</strong>
+                    <span class="error-type error">ERROR</span>
+                    Función 'suma' espera 3 parámetros pero se pasaron 2 argumentos
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h4>❌ Caso 4: Función Duplicada</h4>
+                <pre><code class="language-java">FUNCTION mover(x) {
+    UP;
+}
+
+FUNCTION mover(y) {  // Nombre duplicado
+    DOWN;
+}
+
+MAIN {
+    mover(5);
+}</code></pre>
+                <div class="method-responsibility" style="margin-top: 1rem;">
+                    <strong>Resultado esperado:</strong>
+                    <span class="error-type error">ERROR</span>
+                    Función 'mover' ya fue declarada
+                </div>
+            </div>
+        </div>
+
+        <!-- Flujo Completo -->
+        <div class="content-section">
+            <h3>🔄 Flujo Completo del Análisis</h3>
+
+            <p>Visualiza cómo interactúan las dos tablas durante el análisis:</p>
+
+            <div class="mermaid">
+sequenceDiagram
+    participant User as Usuario
+    participant SA as SemanticAnalyzerVisitor
+    participant FT as FunctionTable
+    participant ST as SymbolTable
+
+    User->>SA: analyze(ast)
+
+    Note over SA: Analiza declaración de función
+    SA->>FT: declare("mover", ["pasos"], 5, 1)
+    FT-->>SA: true ✓
+
+    SA->>ST: declare("pasos", 5, 15)
+    Note over ST: Parámetro como variable local
+    SA->>ST: initialize("pasos", "parameter")
+
+    Note over SA: Analiza MAIN
+    SA->>FT: validateCall("mover", 1, 10, 5)
+    FT-->>SA: true ✓
+
+    Note over SA: Valida argumento
+    SA->>ST: validateUsage("valor", 10, 11)
+    ST-->>SA: true ✓ (si "valor" está declarado)
+
+    SA-->>User: SymbolTable + FunctionTable
+            </div>
+        </div>
+
+        <!-- Checklist Final -->
+        <div class="content-section">
+            <h3>✅ Checklist de Implementación</h3>
+
+            <div style="background: white; border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 2rem; color: #1e293b;">
+                <h4 style="color: #1e293b;">Antes de considerar el ejercicio completo, verifica:</h4>
+
+                <div style="display: grid; gap: 1rem; margin-top: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>FunctionTableEntry almacena: nombre, parámetros, línea, columna</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>FunctionTableEntry tiene getters para todos los campos</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>FunctionTable.declare() detecta funciones duplicadas</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>FunctionTable.validateCall() valida que la función exista</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>FunctionTable.validateCall() valida el número de argumentos</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>SemanticAnalyzerVisitor tiene campo functionTable</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>analyze() limpia ambas tablas (funciones y variables)</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>visitFunctionDeclaration() registra la función en functionTable</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>visitFunctionDeclaration() declara parámetros en symbolTable</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>visitFunctionCall() valida la llamada con validateCall()</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>visitFunctionCall() visita recursivamente los argumentos</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #1e293b;">
+                        <input type="checkbox" style="width: 1.5rem; height: 1.5rem;">
+                        <span>Todos los casos de prueba pasan correctamente</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen y Objetivos -->
+        <div class="content-section">
+            <h3>🎯 Objetivos de Aprendizaje</h3>
+
+            <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 2rem; border-radius: 0.75rem; color: #1e293b;">
+                <h4 style="color: #1e40af;">Al completar este ejercicio habrás aprendido:</h4>
+                <ul style="line-height: 2; margin-top: 1rem;">
+                    <li>✨ Cómo diseñar estructuras de datos para análisis semántico</li>
+                    <li>✨ Diferencias entre validación de variables y funciones</li>
+                    <li>✨ Cómo mantener múltiples tablas de símbolos simultáneamente</li>
+                    <li>✨ Validación de número de argumentos en llamadas a funciones</li>
+                    <li>✨ Integración de nuevas validaciones en un visitor existente</li>
+                    <li>✨ Separación de responsabilidades (Entry vs Table vs Visitor)</li>
+                </ul>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 3px solid #10b981; padding: 2rem; border-radius: 1rem; margin-top: 2rem; text-align: center; color: #1e293b;">
+                <h3 style="color: #047857;">🎉 ¡Manos a la Obra!</h3>
+                <p style="margin-top: 1rem; font-size: 1.1rem; color: #1e293b;">
+                    Tienes toda la información necesaria para implementar la tabla de funciones.
+                    Sigue los pasos, consulta las pistas, y prueba con los casos de validación.
+                </p>
+                <p style="margin-top: 1rem; font-weight: 600; color: #047857;">
+                    ¡Éxito en tu implementación! 💪
+                </p>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide7-semantic-analyzer.html" class="btn" style="background: var(--text-secondary); color: white;">
+                ← Anterior: SemanticAnalyzer
+            </a>
+            <a href="index.html" class="btn btn-primary">
+                🏠 Volver al Índice
+            </a>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; background: var(--bg-dark); color: var(--text-white); margin-top: 3rem;">
+        <p>Universidad EAM - Teoría de Lenguajes Formales</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Slide 8: Tabla de Funciones - Ejercicio de Implementación
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#fce7f3',
+                primaryTextColor: '#1e293b',
+                primaryBorderColor: '#be185d',
+                lineColor: '#94a3b8',
+                secondaryColor: '#d1fae5',
+                secondaryTextColor: '#1e293b',
+                tertiaryColor: '#dbeafe',
+                tertiaryTextColor: '#1e293b',
+                noteBkgColor: '#fef3c7',
+                noteTextColor: '#1e293b'
+            }
+        });
+    </script>
+</body>
+</html>

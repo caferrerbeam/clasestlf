@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 10: Generación de Código desde el AST | Universidad EAM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .slide-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .phase-badge {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 3px solid #3b82f6;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+            color: #1e293b;
+        }
+
+        .concept-section {
+            background: white;
+            border-left: 4px solid #f59e0b;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            color: #1e293b;
+        }
+
+        .challenge-box {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 2px solid #ef4444;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            color: #1e293b;
+        }
+
+        .solution-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 2px solid #10b981;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            color: #1e293b;
+        }
+
+        .architecture-box {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 2px solid #8b5cf6;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            color: #1e293b;
+        }
+
+        .example-box {
+            background: #f8fafc;
+            border: 2px dashed #64748b;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+            color: #1e293b;
+        }
+
+        .translation-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            align-items: start;
+        }
+
+        .translation-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #f59e0b;
+            padding-top: 2rem;
+        }
+
+        .code-column {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .code-column h4 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .phase-timeline {
+            position: relative;
+            padding-left: 3rem;
+            margin: 2rem 0;
+        }
+
+        .phase-item {
+            position: relative;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 0.75rem;
+            border-left: 4px solid #f59e0b;
+            box-shadow: var(--shadow-sm);
+            color: #1e293b;
+        }
+
+        .phase-item::before {
+            content: attr(data-number);
+            position: absolute;
+            left: -3rem;
+            top: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #f59e0b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .visitor-pattern-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            color: #1e293b;
+        }
+
+        .key-insight {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            color: #1e293b;
+        }
+
+        .challenge-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .challenge-list li {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: white;
+            border-radius: 0.5rem;
+            border-left: 4px solid #ef4444;
+            color: #1e293b;
+        }
+
+        .challenge-list li strong {
+            color: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .translation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .translation-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <!-- Header -->
+        <div class="slide-header">
+            <h1>🎯 Slide 10: Generación de Código desde el AST</h1>
+            <p style="font-size: 1.2rem; margin-top: 1rem;">
+                Del Árbol de Sintaxis Abstracta al Código Ejecutable
+            </p>
+            <p style="margin-top: 0.5rem; opacity: 0.9;">
+                Cómo convertir la representación abstracta del programa en código JavaScript ejecutable
+            </p>
+        </div>
+
+        <!-- Objetivo -->
+        <div class="phase-badge">
+            <h3 style="margin: 0; color: #1e293b;">📚 Objetivo de Aprendizaje</h3>
+            <p style="margin-top: 1rem; font-size: 1.1rem; color: #1e293b;">
+                Comprender el proceso de generación de código, sus desafíos técnicos,
+                y cómo implementar un generador usando el patrón Visitor.
+            </p>
+        </div>
+
+        <!-- ¿Qué es la Generación de Código? -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">🔧 ¿Qué es la Generación de Código?</h2>
+
+            <div class="concept-section">
+                <h3 style="color: #1e293b;">Definición</h3>
+                <p>
+                    La <strong>generación de código</strong> es la fase final del compilador donde el AST
+                    (Árbol de Sintaxis Abstracta) se transforma en código ejecutable en el lenguaje destino.
+                </p>
+                <p style="margin-top: 1rem;">
+                    En nuestro caso: <code>RoboLang AST → JavaScript ejecutable</code>
+                </p>
+            </div>
+
+            <div class="key-insight">
+                <h4 style="color: #1e293b;">💡 Idea Clave</h4>
+                <p>
+                    El generador de código <strong>recorre el AST</strong> y para cada nodo genera
+                    el código equivalente en el lenguaje destino. Es como "traducir" de un idioma a otro,
+                    pero manteniendo exactamente la misma lógica.
+                </p>
+            </div>
+        </div>
+
+        <!-- Pipeline del Compilador -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">🔄 Pipeline Completo del Compilador</h2>
+
+            <div class="mermaid">
+graph LR
+    A[Código RoboLang] -->|Lexer| B[Tokens]
+    B -->|Parser| C[AST]
+    C -->|Semantic| D[AST Validado]
+    D -->|Code Gen| E[JavaScript]
+    E -->|Runtime| F[Ejecución]
+
+    style A fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:#1e293b
+    style E fill:#dcfce7,stroke:#10b981,stroke-width:3px,color:#1e293b
+    style D fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e293b
+    style F fill:#fce7f3,stroke:#ec4899,stroke-width:2px,color:#1e293b
+            </div>
+
+            <div class="example-box">
+                <h4 style="color: #1e293b;">📍 Estamos aquí: Code Generation</h4>
+                <p>
+                    Ya tenemos un AST validado semánticamente. Ahora necesitamos convertirlo
+                    en código JavaScript que pueda ejecutarse en un navegador o Node.js.
+                </p>
+            </div>
+        </div>
+
+        <!-- Ejemplo Completo de Traducción -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">📖 Ejemplo: De RoboLang a JavaScript</h2>
+
+            <div class="translation-grid">
+                <div class="code-column">
+                    <h4>RoboLang (Código Fuente)</h4>
+                    <pre><code class="language-robolang">VAR pasos;
+pasos := 3;
+
+FUNCTION moverCuadrado(lado) {
+    REPEAT lado {
+        UP;
+        RIGHT;
+    }
+}
+
+MAIN {
+    IF (BATTERY > 50) {
+        moverCuadrado(pasos);
+    }
+}</code></pre>
+                </div>
+
+                <div class="translation-arrow">
+                    ➜
+                </div>
+
+                <div class="code-column">
+                    <h4>JavaScript (Código Generado)</h4>
+                    <pre><code class="language-javascript">const robot = RoboLangRuntime.getRobot();
+
+let pasos;
+
+async function moverCuadrado(lado) {
+    for (let _i0 = 0; _i0 < lado; _i0++) {
+        await robot.moveUp();
+        await robot.moveRight();
+    }
+}
+
+async function main() {
+    pasos = 3;
+    if (robot.getSensor('BATTERY') > 50) {
+        await moverCuadrado(pasos);
+    }
+}
+
+main().catch(err => console.error(err));</code></pre>
+                </div>
+            </div>
+
+            <div class="key-insight">
+                <h4 style="color: #1e293b;">🔍 Observa las Transformaciones</h4>
+                <ul style="margin-top: 1rem;">
+                    <li><code>VAR pasos</code> → <code>let pasos</code></li>
+                    <li><code>FUNCTION</code> → <code>async function</code></li>
+                    <li><code>REPEAT lado</code> → <code>for (let _i0 = 0; _i0 < lado; _i0++)</code></li>
+                    <li><code>UP;</code> → <code>await robot.moveUp();</code></li>
+                    <li><code>BATTERY</code> → <code>robot.getSensor('BATTERY')</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Los 7 Retos de la Generación de Código -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #ef4444;">⚠️ Los 7 Retos de la Generación de Código</h2>
+
+            <div class="challenge-box">
+                <h3 style="color: #1e293b;">¿Por qué es difícil generar código?</h3>
+                <p>
+                    Generar código correcto y eficiente requiere resolver varios desafíos técnicos:
+                </p>
+            </div>
+
+            <ul class="challenge-list">
+                <li>
+                    <strong>1. Preservar Semántica:</strong>
+                    El código generado debe hacer <em>exactamente</em> lo mismo que el código fuente.
+                    Un error aquí cambia el comportamiento del programa.
+                </li>
+
+                <li>
+                    <strong>2. Mapeo de Construcciones:</strong>
+                    Cada construcción de RoboLang debe mapearse a JavaScript.
+                    Ejemplo: ¿Cómo traducir <code>REPEAT n</code>? → <code>for</code> loop
+                </li>
+
+                <li>
+                    <strong>3. Nombres Únicos:</strong>
+                    Generar variables temporales sin conflictos.
+                    Ejemplo: loops anidados necesitan <code>_i0</code>, <code>_i1</code>, <code>_i2</code>...
+                </li>
+
+                <li>
+                    <strong>4. Gestión de Contexto:</strong>
+                    Saber en qué función estamos, nivel de indentación, scope actual, etc.
+                </li>
+
+                <li>
+                    <strong>5. Código Legible:</strong>
+                    Generar código formateado, con indentación correcta y comentarios útiles.
+                </li>
+
+                <li>
+                    <strong>6. Async/Await:</strong>
+                    JavaScript requiere <code>async/await</code> para animaciones.
+                    Saber cuándo agregar <code>await</code> es crucial.
+                </li>
+
+                <li>
+                    <strong>7. Manejo de Errores:</strong>
+                    ¿Qué pasa si encontramos un nodo del AST que no sabemos traducir?
+                </li>
+            </ul>
+        </div>
+
+        <!-- Explicación Detallada: Variables con Contador -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #ef4444;">🔍 Profundizando: ¿Por qué Variables con Contador?</h2>
+
+            <div class="challenge-box">
+                <h3 style="color: #1e293b;">❓ El Problema de los Loops Anidados</h3>
+                <p style="font-size: 1.1rem;">
+                    Cuando traduces <code>REPEAT</code> a <code>for</code>, necesitas una variable
+                    para el contador del loop. Pero, ¿qué pasa si hay loops <strong>dentro de otros loops</strong>?
+                </p>
+            </div>
+
+            <div class="example-box" style="margin-top: 2rem;">
+                <h4 style="color: #1e293b;">Programa RoboLang con Loops Anidados</h4>
+                <pre><code class="language-robolang">MAIN {
+    REPEAT 3 {           // Loop externo
+        REPEAT 4 {       // Loop interno
+            UP;
+        }
+        RIGHT;
+    }
+}</code></pre>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="color: #ef4444;">❌ Intento Incorrecto: Usar siempre la misma variable "i"</h3>
+                <div style="background: #fee2e2; padding: 1.5rem; border-radius: 0.75rem; border: 3px solid #ef4444; margin-top: 1rem;">
+                    <pre><code class="language-javascript">// ¡CÓDIGO INCORRECTO!
+for (let i = 0; i < 3; i++) {        // Loop externo usa 'i'
+    for (let i = 0; i < 4; i++) {    // ❌ Loop interno también usa 'i'
+        await robot.moveUp();
+    }
+    await robot.moveRight();
+}</code></pre>
+                </div>
+
+                <div class="challenge-box" style="margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">⚠️ ¿Qué está mal aquí?</h4>
+                    <ul style="line-height: 2;">
+                        <li><strong>Conflicto de nombres:</strong> Ambos loops usan la variable <code>i</code></li>
+                        <li><strong>Shadowing:</strong> El <code>i</code> interno "oculta" el externo</li>
+                        <li><strong>Comportamiento inesperado:</strong> Pierde el control del loop externo</li>
+                        <li><strong>Error semántico:</strong> No hace lo que debería hacer</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="color: #10b981;">✅ Solución Correcta: Variables Únicas con Contador</h3>
+                <div style="background: #dcfce7; padding: 1.5rem; border-radius: 0.75rem; border: 3px solid #10b981; margin-top: 1rem;">
+                    <pre><code class="language-javascript">// ✓ CÓDIGO CORRECTO
+for (let _i0 = 0; _i0 < 3; _i0++) {    // Loop externo usa '_i0'
+    for (let _i1 = 0; _i1 < 4; _i1++) {  // ✓ Loop interno usa '_i1'
+        await robot.moveUp();
+    }
+    await robot.moveRight();
+}</code></pre>
+                </div>
+
+                <div class="solution-box" style="margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">✨ ¿Por qué funciona?</h4>
+                    <ul style="line-height: 2;">
+                        <li><strong>Nombres únicos:</strong> <code>_i0</code> y <code>_i1</code> son variables diferentes</li>
+                        <li><strong>Sin conflictos:</strong> Cada loop tiene su propio contador independiente</li>
+                        <li><strong>Comportamiento correcto:</strong> El loop externo itera 3 veces, el interno 4 veces</li>
+                        <li><strong>Escalable:</strong> Podemos tener <code>_i2</code>, <code>_i3</code>, etc. para más anidamiento</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="color: #3b82f6;">🔧 Cómo Funciona el Contador</h3>
+
+                <div class="key-insight">
+                    <h4 style="color: #1e293b;">💡 Mecanismo del Generador</h4>
+                    <p>El generador mantiene un <strong>contador global</strong> que se incrementa cada vez que genera un loop:</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #64748b;">
+                        <h4 style="color: #1e293b;">Código Java del Generador</h4>
+                        <pre><code class="language-java">class JavaScriptCodeGenerator {
+    private int loopCounter = 0;  // Inicia en 0
+
+    String visitRepeatStatement(node) {
+        // Generar nombre único
+        String varName = "_i" + loopCounter++;
+
+        // varName será: "_i0", "_i1", "_i2", ...
+
+        writeLine("for (let " + varName + " = 0; ...");
+        // ...
+    }
+}</code></pre>
+                    </div>
+
+                    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #64748b;">
+                        <h4 style="color: #1e293b;">Secuencia de Generación</h4>
+                        <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #e2e8f0;">
+                                        <th style="padding: 0.5rem; text-align: left; border: 1px solid #cbd5e1;">Paso</th>
+                                        <th style="padding: 0.5rem; text-align: left; border: 1px solid #cbd5e1;">loopCounter</th>
+                                        <th style="padding: 0.5rem; text-align: left; border: 1px solid #cbd5e1;">Variable</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">1º REPEAT</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">0 → 1</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>_i0</code></td>
+                                    </tr>
+                                    <tr style="background: #f8fafc;">
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">2º REPEAT</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">1 → 2</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>_i1</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">3º REPEAT</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">2 → 3</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>_i2</code></td>
+                                    </tr>
+                                    <tr style="background: #f8fafc;">
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">...</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">...</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="color: #8b5cf6;">📊 Ejemplo Completo: 3 Niveles de Anidamiento</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5rem; margin-top: 1rem; align-items: start;">
+                    <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #f59e0b;">
+                        <h4 style="color: #1e293b;">RoboLang</h4>
+                        <pre style="margin-top: 0.5rem;"><code class="language-robolang">MAIN {
+    REPEAT 2 {
+        REPEAT 3 {
+            REPEAT 4 {
+                UP;
+            }
+        }
+    }
+}</code></pre>
+                    </div>
+
+                    <div style="font-size: 2rem; color: #f59e0b; padding-top: 3rem;">
+                        →
+                    </div>
+
+                    <div style="background: #dcfce7; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #10b981;">
+                        <h4 style="color: #1e293b;">JavaScript</h4>
+                        <pre style="margin-top: 0.5rem;"><code class="language-javascript">async function main() {
+    for (let _i0 = 0; _i0 < 2; _i0++) {
+        for (let _i1 = 0; _i1 < 3; _i1++) {
+            for (let _i2 = 0; _i2 < 4; _i2++) {
+                await robot.moveUp();
+            }
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1.5rem;">
+                    <h4 style="color: #1e293b;">🎯 Resultado</h4>
+                    <ul style="line-height: 2;">
+                        <li><code>_i0</code> controla el loop más externo (2 iteraciones)</li>
+                        <li><code>_i1</code> controla el loop medio (3 iteraciones)</li>
+                        <li><code>_i2</code> controla el loop más interno (4 iteraciones)</li>
+                        <li><strong>Total de movimientos UP:</strong> 2 × 3 × 4 = 24 veces ✓</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="color: #f59e0b;">🤔 Preguntas Frecuentes</h3>
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #3b82f6; margin-top: 1rem;">
+                    <h4 style="color: #3b82f6;">P: ¿Por qué usar <code>_i</code> y no solo <code>i</code>?</h4>
+                    <p><strong>R:</strong> El guión bajo <code>_</code> indica que es una variable generada automáticamente,
+                       no una del programa original. Es una convención que ayuda a distinguirlas.</p>
+                </div>
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #3b82f6; margin-top: 1rem;">
+                    <h4 style="color: #3b82f6;">P: ¿Qué pasa si el usuario define una variable llamada <code>_i0</code>?</h4>
+                    <p><strong>R:</strong> En una implementación completa, el generador debería verificar
+                       que no existan conflictos con variables del usuario. Se puede usar un prefijo más único como
+                       <code>__loop_0</code> o verificar en la tabla de símbolos.</p>
+                </div>
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #3b82f6; margin-top: 1rem;">
+                    <h4 style="color: #3b82f6;">P: ¿El contador se reinicia para cada función?</h4>
+                    <p><strong>R:</strong> Depende de la implementación. Generalmente es global para todo el archivo,
+                       pero podría reiniciarse por función si quieres. Lo importante es que dentro de un mismo
+                       scope no haya conflictos.</p>
+                </div>
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #3b82f6; margin-top: 1rem;">
+                    <h4 style="color: #3b82f6;">P: ¿Hay límite de cuántos loops anidados puedo tener?</h4>
+                    <p><strong>R:</strong> No hay límite técnico. El contador puede ir de 0 a infinito
+                       (<code>_i0</code>, <code>_i1</code>, ..., <code>_i999</code>, etc.). En la práctica,
+                       programas con más de 3-4 niveles de anidamiento son difíciles de leer.</p>
+                </div>
+            </div>
+
+            <div class="visitor-pattern-box" style="margin-top: 2rem;">
+                <h3 style="color: #1e293b;">💡 Resumen: Variables con Contador</h3>
+                <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; margin-top: 1rem;">
+                    <ul style="line-height: 2.5;">
+                        <li>✓ <strong>Problema:</strong> Loops anidados necesitan variables diferentes</li>
+                        <li>✓ <strong>Solución:</strong> Contador global que genera <code>_i0</code>, <code>_i1</code>, <code>_i2</code>...</li>
+                        <li>✓ <strong>Implementación:</strong> <code>loopCounter++</code> en cada <code>visitRepeatStatement()</code></li>
+                        <li>✓ <strong>Resultado:</strong> Código JavaScript correcto sin conflictos de nombres</li>
+                        <li>✓ <strong>Convención:</strong> Prefijo <code>_</code> indica variable generada automáticamente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado del Generador: Explicación Completa -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #8b5cf6;">🧠 El Estado del Generador: Toda la Información que Necesita Recordar</h2>
+
+            <div class="visitor-pattern-box">
+                <h3 style="color: #1e293b;">🤔 ¿Por qué el generador necesita "estado"?</h3>
+                <p style="font-size: 1.1rem;">
+                    El generador NO puede simplemente "mirar un nodo y traducirlo". Necesita <strong>recordar contexto</strong>
+                    mientras recorre el AST. Piensa en ello como un escritor que necesita recordar en qué capítulo está,
+                    qué personajes ha mencionado, y cuántas veces ha usado una palabra.
+                </p>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="color: #3b82f6;">📦 Los 4 Componentes del Estado del Generador</h3>
+
+                <div class="architecture-box" style="margin-top: 1.5rem;">
+                    <pre><code class="language-java">public class JavaScriptCodeGenerator {
+    // 1. Donde construimos el código final
+    private StringBuilder code;
+
+    // 2. Nivel de indentación actual (cuántos tabs)
+    private int indentLevel;
+
+    // 3. Contador para nombres únicos de loops
+    private int loopCounter;
+
+    // 4. ¿En qué función estamos actualmente?
+    private String currentFunction;
+}</code></pre>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">💡 Cada uno tiene una razón de existir</h4>
+                    <p>Vamos a explicar CADA UNO en detalle con ejemplos concretos.</p>
+                </div>
+            </div>
+
+            <!-- StringBuilder code -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #10b981;">1️⃣ StringBuilder code - El Código que Vamos Construyendo</h3>
+
+                <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #10b981; margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">¿Qué es?</h4>
+                    <p>Un <code>StringBuilder</code> es como un documento de texto que puedes ir completando línea por línea.</p>
+                </div>
+
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; margin-top: 1rem; border: 2px solid #64748b;">
+                    <h4 style="color: #1e293b;">¿Por qué StringBuilder y no String?</h4>
+                    <p><strong>Rendimiento.</strong> En Java, los String son inmutables. Si haces:</p>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">String result = "";
+result = result + "linea 1\n";  // Crea nuevo String
+result = result + "linea 2\n";  // Crea otro nuevo String
+result = result + "linea 3\n";  // Crea otro nuevo String
+// ¡3 objetos String creados y descartados!</code></pre>
+
+                    <p style="margin-top: 1rem;">Con StringBuilder:</p>
+                    <pre style="margin-top: 0.5rem;"><code class="language-java">StringBuilder code = new StringBuilder();
+code.append("linea 1\n");  // Modifica el buffer interno
+code.append("linea 2\n");  // Modifica el mismo buffer
+code.append("linea 3\n");  // Modifica el mismo buffer
+// ¡Solo 1 objeto! Más eficiente</code></pre>
+                </div>
+
+                <div style="background: #dbeafe; padding: 1.5rem; border-radius: 0.75rem; margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">🎬 Ejemplo en Acción</h4>
+                    <pre><code class="language-java">// Al inicio
+code = new StringBuilder();
+
+// Visitamos ProgramNode
+code.append("const robot = RoboLangRuntime.getRobot();\n");
+
+// Visitamos VariableDeclaration
+code.append("let pasos;\n");
+
+// Visitamos FunctionDeclaration
+code.append("async function mover() {\n");
+code.append("    await robot.moveUp();\n");
+code.append("}\n");
+
+// Al final
+String resultado = code.toString();  // Convertir a String final</code></pre>
+                </div>
+            </div>
+
+            <!-- indentLevel -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #f59e0b;">2️⃣ int indentLevel - Nivel de Indentación</h3>
+
+                <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #f59e0b; margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">¿Para qué sirve?</h4>
+                    <p>Para que el código generado esté <strong>correctamente formateado</strong> con indentación.
+                       Sin esto, todo el código estaría pegado a la izquierda y sería ilegible.</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div style="background: #fee2e2; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #ef4444;">
+                        <h4 style="color: #ef4444;">❌ Sin indentLevel</h4>
+                        <pre><code class="language-javascript">async function main() {
+for (let _i0 = 0; _i0 < 3; _i0++) {
+await robot.moveUp();
+}
+}</code></pre>
+                        <p style="margin-top: 0.5rem; color: #991b1b;"><strong>¡Horrible! No se ve la estructura</strong></p>
+                    </div>
+
+                    <div style="background: #dcfce7; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #10b981;">
+                        <h4 style="color: #10b981;">✓ Con indentLevel</h4>
+                        <pre><code class="language-javascript">async function main() {
+    for (let _i0 = 0; _i0 < 3; _i0++) {
+        await robot.moveUp();
+    }
+}</code></pre>
+                        <p style="margin-top: 0.5rem; color: #065f46;"><strong>¡Perfecto! Se ve la jerarquía</strong></p>
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; margin-top: 1.5rem; border: 2px solid #64748b;">
+                    <h4 style="color: #1e293b;">🔧 Cómo Funciona</h4>
+
+                    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <pre><code class="language-java">private int indentLevel = 0;  // Empieza en 0
+
+// Helper para generar espacios de indentación
+private String indent() {
+    return "    ".repeat(indentLevel);  // 4 espacios × nivel
+}
+
+// Ejemplo de uso
+writeLine("async function main() {");
+indentLevel++;  // Entramos a la función, aumentar
+writeLine("for (...) {");
+indentLevel++;  // Entramos al loop, aumentar
+writeLine("await robot.moveUp();");
+indentLevel--;  // Salimos del loop, disminuir
+writeLine("}");
+indentLevel--;  // Salimos de la función, disminuir
+writeLine("}");</code></pre>
+                    </div>
+
+                    <div style="background: #dbeafe; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h4 style="color: #1e293b;">📊 Seguimiento del indentLevel</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
+                            <thead>
+                                <tr style="background: #e2e8f0;">
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: left;">Acción</th>
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;">indentLevel</th>
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: left;">Línea Generada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">Inicio de función</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>async function main() {</code></td>
+                                </tr>
+                                <tr style="background: #f8fafc;">
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">++</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;">1</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>····for (...) {</code></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">++</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;">2</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>········await robot.moveUp();</code></td>
+                                </tr>
+                                <tr style="background: #f8fafc;">
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">--</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;">1</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>····}</code></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">--</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>}</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">🎯 Regla Simple</h4>
+                    <ul style="line-height: 2;">
+                        <li>Cuando ENTRAS a un bloque <code>{</code> → <code>indentLevel++</code></li>
+                        <li>Cuando SALES de un bloque <code>}</code> → <code>indentLevel--</code></li>
+                        <li>Cada línea se escribe con <code>indent()</code> al inicio</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- loopCounter -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #ec4899;">3️⃣ int loopCounter - Contador de Loops</h3>
+
+                <div style="background: #fce7f3; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #ec4899; margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">¿Para qué sirve?</h4>
+                    <p>Para generar <strong>nombres únicos</strong> de variables de loop (<code>_i0</code>, <code>_i1</code>, <code>_i2</code>...)
+                       que NO choquen entre sí en loops anidados.</p>
+                </div>
+
+                <div style="background: #fee2e2; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #ef4444; margin-top: 1.5rem;">
+                    <h4 style="color: #ef4444;">❌ Problema sin loopCounter</h4>
+                    <p>Si siempre usamos <code>i</code> como variable de loop:</p>
+                    <pre style="margin-top: 0.5rem;"><code class="language-javascript">for (let i = 0; i < 3; i++) {        // Loop 1 usa 'i'
+    for (let i = 0; i < 4; i++) {    // Loop 2 también usa 'i'
+        // ❌ ¡CONFLICTO! El 'i' interno oculta al externo
+    }
+}</code></pre>
+                </div>
+
+                <div style="background: #dcfce7; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #10b981; margin-top: 1rem;">
+                    <h4 style="color: #10b981;">✓ Solución con loopCounter</h4>
+                    <pre><code class="language-javascript">for (let _i0 = 0; _i0 < 3; _i0++) {    // Loop 1 usa '_i0'
+    for (let _i1 = 0; _i1 < 4; _i1++) {  // Loop 2 usa '_i1'
+        // ✓ ¡Sin conflictos! Variables diferentes
+    }
+}</code></pre>
+                </div>
+
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; margin-top: 1.5rem; border: 2px solid #64748b;">
+                    <h4 style="color: #1e293b;">🎬 Simulación Paso a Paso</h4>
+
+                    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h5 style="color: #3b82f6;">Programa RoboLang:</h5>
+                        <pre><code class="language-robolang">MAIN {
+    REPEAT 2 {        // ← Loop externo
+        UP;
+        REPEAT 3 {    // ← Loop interno
+            RIGHT;
+        }
+    }
+}</code></pre>
+                    </div>
+
+                    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h5 style="color: #3b82f6;">Generación paso a paso:</h5>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
+                            <thead>
+                                <tr style="background: #e2e8f0;">
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1;">Paso</th>
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1;">Nodo visitado</th>
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1;">loopCounter</th>
+                                    <th style="padding: 0.5rem; border: 1px solid #cbd5e1;">Variable generada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">0</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">Inicio</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;"><code>0</code></td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">-</td>
+                                </tr>
+                                <tr style="background: #fef3c7;">
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">1</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">REPEAT 2</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;"><code>0 → 1</code></td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>_i0</code></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">2</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">UP (comando)</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;"><code>1</code></td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">-</td>
+                                </tr>
+                                <tr style="background: #dcfce7;">
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">3</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">REPEAT 3</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;"><code>1 → 2</code></td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;"><code>_i1</code></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">4</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">RIGHT (comando)</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1; text-align: center;"><code>2</code></td>
+                                    <td style="padding: 0.5rem; border: 1px solid #cbd5e1;">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="background: #dcfce7; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h5 style="color: #10b981;">✓ Código JavaScript generado:</h5>
+                        <pre><code class="language-javascript">async function main() {
+    for (let _i0 = 0; _i0 < 2; _i0++) {    // loopCounter dio 0
+        await robot.moveUp();
+        for (let _i1 = 0; _i1 < 3; _i1++) {  // loopCounter dio 1
+            await robot.moveRight();
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">💡 Punto Clave</h4>
+                    <p>El <code>loopCounter</code> es un <strong>contador global del generador</strong> que NUNCA se reinicia.
+                       Cada vez que visitamos un REPEAT, hacemos <code>loopCounter++</code> y obtenemos un número único.</p>
+                </div>
+            </div>
+
+            <!-- currentFunction -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #06b6d4;">4️⃣ String currentFunction - Función Actual</h3>
+
+                <div style="background: #cffafe; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #06b6d4; margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">¿Para qué sirve?</h4>
+                    <p>Para <strong>recordar en qué función estamos</strong> mientras generamos código.
+                       Esto es útil para validaciones y para generar mensajes de error informativos.</p>
+                </div>
+
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; margin-top: 1rem; border: 2px solid #64748b;">
+                    <h4 style="color: #1e293b;">📋 Usos de currentFunction</h4>
+
+                    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h5 style="color: #3b82f6;">1. Validar RETURN</h5>
+                        <pre><code class="language-java">void visitReturnStatement(ReturnNode node) {
+    if (currentFunction == null) {
+        throw new Error("RETURN fuera de función en línea " + node.getLine());
+    }
+
+    if (currentFunction.equals("main") && node.hasValue()) {
+        throw new Error("main() no puede retornar valor en línea " + node.getLine());
+    }
+
+    // Generar código...
+}</code></pre>
+                    </div>
+
+                    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h5 style="color: #3b82f6;">2. Rastreo de Contexto</h5>
+                        <pre><code class="language-java">void visitFunctionDeclaration(FunctionNode node) {
+    String previousFunction = currentFunction;
+    currentFunction = node.getName();
+
+    // Generar la función...
+
+    currentFunction = previousFunction;  // Restaurar
+}</code></pre>
+                    </div>
+
+                    <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <h5 style="color: #3b82f6;">3. Mensajes de Error Descriptivos</h5>
+                        <pre><code class="language-java">void reportError(String message, int line) {
+    String context = currentFunction != null
+        ? "en función '" + currentFunction + "'"
+        : "en scope global";
+
+    System.err.println("Error " + context + " línea " + line + ": " + message);
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen Final -->
+            <div class="visitor-pattern-box" style="margin-top: 3rem;">
+                <h3 style="color: #1e293b;">📊 Resumen: Los 4 Componentes del Estado del Generador</h3>
+
+                <table style="width: 100%; border-collapse: collapse; background: white; margin-top: 1rem;">
+                    <thead>
+                        <tr style="background: #f59e0b; color: white;">
+                            <th style="padding: 1rem; border: 1px solid #ddd; text-align: left;">Componente</th>
+                            <th style="padding: 1rem; border: 1px solid #ddd; text-align: left;">¿Para qué sirve?</th>
+                            <th style="padding: 1rem; border: 1px solid #ddd; text-align: left;">¿Cuándo cambia?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>StringBuilder code</code></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Construir el código JS línea por línea</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Cada vez que visitamos un nodo</td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>int indentLevel</code></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Formatear con indentación correcta</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Al entrar/salir de bloques <code>{ }</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>int loopCounter</code></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Generar nombres únicos (_i0, _i1...)</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Cada REPEAT (nunca decrece)</td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>String currentFunction</code></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Saber en qué función estamos</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Al entrar/salir de funciones</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="key-insight" style="margin-top: 2rem; background: white; padding: 1.5rem; border-radius: 0.5rem;">
+                    <h4 style="color: #1e293b;">💡 Lo Más Importante</h4>
+                    <p style="font-size: 1.1rem;">
+                        El generador NO es "stateless". Necesita <strong>recordar contexto</strong> mientras
+                        recorre el AST. Estos 4 componentes forman la "memoria de trabajo" del generador,
+                        permitiéndole generar código correcto, bien formateado, y sin conflictos.
+                    </p>
+                    <p style="font-size: 1rem; margin-top: 1rem; color: #1e293b; background: #dcfce7; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #10b981;">
+                        <strong>✅ Nota:</strong> Como RoboLang tiene un <strong>Analizador Semántico</strong> completo
+                        en la Fase 3, el generador NO necesita validar scopes. Solo hace <strong>traducción mecánica</strong>
+                        AST → JavaScript.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arquitectura del Generador -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">🏗️ Arquitectura del Generador de Código</h2>
+
+            <div class="architecture-box">
+                <h3 style="color: #1e293b;">Componentes Principales</h3>
+            </div>
+
+            <div class="mermaid">
+classDiagram
+    class CodeGenerator {
+        <<abstract>>
+        +generate(ProgramNode) String
+        #writeHeader() void
+        #writeFooter() void
+    }
+
+    class JavaScriptCodeGenerator {
+        -code StringBuilder
+        -indentLevel int
+        -loopCounter int
+        -currentFunction String
+        +generate(ProgramNode) String
+        +visitProgram(ProgramNode) void
+        +visitFunction(FunctionNode) void
+        +visitRepeat(RepeatNode) void
+        +visitIf(IfNode) void
+        +visitAssignment(AssignmentNode) void
+        -indent() String
+        -writeLine(String) void
+    }
+
+    class ASTVisitor {
+        <<interface>>
+        +visitProgram(ProgramNode)
+        +visitFunction(FunctionNode)
+        +visitRepeat(RepeatNode)
+        +visitIf(IfNode)
+    }
+
+    class ProgramNode {
+        +accept(Visitor)
+    }
+
+    CodeGenerator <|-- JavaScriptCodeGenerator
+    ASTVisitor <|.. JavaScriptCodeGenerator
+    JavaScriptCodeGenerator ..> ProgramNode
+            </div>
+
+            <div class="key-insight" style="margin-top: 2rem;">
+                <h4 style="color: #1e293b;">🎯 Patrón de Diseño: Visitor</h4>
+                <p>
+                    Usamos el patrón <strong>Visitor</strong> para recorrer el AST.
+                    Cada tipo de nodo tiene un método <code>visit()</code> que genera el código correspondiente.
+                </p>
+            </div>
+        </div>
+
+        <!-- Fases del Proceso -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">📋 Fases del Proceso de Generación</h2>
+
+            <div class="key-insight" style="margin-bottom: 2rem;">
+                <h4 style="color: #1e293b;">💡 Construcción Paso a Paso</h4>
+                <p>
+                    El generador construye el archivo JavaScript <strong>secuencialmente</strong>,
+                    agregando cada sección en orden. Imagina que estás escribiendo un documento
+                    desde arriba hacia abajo, donde cada fase agrega una nueva parte.
+                </p>
+            </div>
+
+            <div class="mermaid">
+flowchart TD
+    Start([Inicio]) --> Init[1. Inicializar]
+    Init --> Header[2. Escribir Header]
+    Header --> Vars[3. Variables Globales]
+    Vars --> Funcs[4. Funciones Usuario]
+    Funcs --> Main[5. Función main]
+    Main --> Footer[6. Footer y Ejecución]
+    Footer --> End([Archivo .js Completo])
+
+    style Start fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:#1e293b
+    style End fill:#dcfce7,stroke:#10b981,stroke-width:3px,color:#1e293b
+    style Init fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style Header fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style Vars fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style Funcs fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style Main fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style Footer fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+            </div>
+
+            <div class="phase-timeline">
+                <div class="phase-item" data-number="1">
+                    <h3 style="color: #1e293b;">Inicialización del Generador</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <strong style="color: #3b82f6;">¿Qué hace?</strong>
+                        <p>Prepara las herramientas que necesitarás durante la generación.</p>
+                    </div>
+                    <pre><code class="language-java">// Java - Constructor del generador
+code = new StringBuilder();    // Donde irá el código JS
+indentLevel = 0;               // Nivel de indentación actual
+loopCounter = 0;               // Para generar _i0, _i1, etc.</code></pre>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">
+                        <strong>🔑 Análogo:</strong> Como un carpintero que saca sus herramientas antes de empezar.
+                    </div>
+                </div>
+
+                <div class="phase-item" data-number="2">
+                    <h3 style="color: #1e293b;">Header del Archivo JavaScript</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <strong style="color: #3b82f6;">¿Qué hace?</strong>
+                        <p>Escribe comentarios informativos y obtiene la instancia del robot.</p>
+                    </div>
+                    <pre><code class="language-javascript">// JavaScript generado
+// ============================================
+// RoboLang Compiled Program
+// Generated: 2025-10-27 18:00:00
+// ============================================
+
+const robot = RoboLangRuntime.getRobot();</code></pre>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">
+                        <strong>🔑 Análogo:</strong> Como poner el título y fecha en un documento.
+                    </div>
+                </div>
+
+                <div class="phase-item" data-number="3">
+                    <h3 style="color: #1e293b;">Declarar Variables Globales</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <strong style="color: #3b82f6;">¿Qué hace?</strong>
+                        <p>Busca todos los <code>VAR</code> en el AST y los declara con <code>let</code>.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; margin: 1rem 0; align-items: center;">
+                        <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem;">
+                            <strong>RoboLang</strong>
+                            <pre style="margin-top: 0.5rem;"><code class="language-robolang">VAR pasos;
+VAR temperatura;</code></pre>
+                        </div>
+                        <div style="font-size: 2rem; color: #f59e0b;">→</div>
+                        <div style="background: #dcfce7; padding: 1rem; border-radius: 0.5rem;">
+                            <strong>JavaScript</strong>
+                            <pre style="margin-top: 0.5rem;"><code class="language-javascript">let pasos;
+let temperatura;</code></pre>
+                        </div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">
+                        <strong>🔑 Clave:</strong> Usamos <code>let</code> (ES6) en vez de <code>var</code> por mejor alcance.
+                    </div>
+                </div>
+
+                <div class="phase-item" data-number="4">
+                    <h3 style="color: #1e293b;">Generar Funciones de Usuario</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <strong style="color: #3b82f6;">¿Qué hace?</strong>
+                        <p>Por cada <code>FUNCTION</code> en el AST, genera una <code>async function</code>.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; margin: 1rem 0; align-items: start;">
+                        <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem;">
+                            <strong>RoboLang</strong>
+                            <pre style="margin-top: 0.5rem;"><code class="language-robolang">FUNCTION mover(n) {
+    REPEAT n {
+        UP;
+    }
+}</code></pre>
+                        </div>
+                        <div style="font-size: 2rem; color: #f59e0b; padding-top: 2rem;">→</div>
+                        <div style="background: #dcfce7; padding: 1rem; border-radius: 0.5rem;">
+                            <strong>JavaScript</strong>
+                            <pre style="margin-top: 0.5rem;"><code class="language-javascript">async function mover(n) {
+    for (let _i0 = 0; _i0 < n; _i0++) {
+        await robot.moveUp();
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">
+                        <strong>🔑 Importante:</strong> TODAS las funciones son <code>async</code> porque pueden contener comandos de movimiento.
+                    </div>
+                </div>
+
+                <div class="phase-item" data-number="5">
+                    <h3 style="color: #1e293b;">Generar Función main()</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <strong style="color: #3b82f6;">¿Qué hace?</strong>
+                        <p>Traduce el bloque <code>MAIN { ... }</code> a una función <code>async function main()</code>.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; margin: 1rem 0; align-items: start;">
+                        <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem;">
+                            <strong>RoboLang</strong>
+                            <pre style="margin-top: 0.5rem;"><code class="language-robolang">MAIN {
+    pasos := 3;
+    mover(pasos);
+}</code></pre>
+                        </div>
+                        <div style="font-size: 2rem; color: #f59e0b; padding-top: 2rem;">→</div>
+                        <div style="background: #dcfce7; padding: 1rem; border-radius: 0.5rem;">
+                            <strong>JavaScript</strong>
+                            <pre style="margin-top: 0.5rem;"><code class="language-javascript">async function main() {
+    pasos = 3;
+    await mover(pasos);
+}</code></pre>
+                        </div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">
+                        <strong>🔑 Punto de Entrada:</strong> <code>main()</code> es donde comienza la ejecución.
+                    </div>
+                </div>
+
+                <div class="phase-item" data-number="6">
+                    <h3 style="color: #1e293b;">Footer: Ejecutar el Programa</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <strong style="color: #3b82f6;">¿Qué hace?</strong>
+                        <p>Llama a <code>main()</code> y captura cualquier error que ocurra.</p>
+                    </div>
+                    <pre><code class="language-javascript">// Ejecutar el programa
+main().catch(err => console.error('RoboLang Error:', err));</code></pre>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.5rem; color: #1e293b;">
+                        <strong>🔑 Seguridad:</strong> El <code>.catch()</code> asegura que los errores se muestren en consola.
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-insight" style="margin-top: 2rem;">
+                <h4 style="color: #1e293b;">📝 Archivo Completo Generado</h4>
+                <p>Al final de las 6 fases, tenemos un archivo .js completo y ejecutable:</p>
+                <pre style="background: white; padding: 1.5rem; border-radius: 0.5rem; margin-top: 1rem;"><code class="language-javascript">// ============================================
+// RoboLang Compiled Program
+// ============================================
+const robot = RoboLangRuntime.getRobot();
+
+let pasos;
+
+async function mover(n) {
+    for (let _i0 = 0; _i0 < n; _i0++) {
+        await robot.moveUp();
+    }
+}
+
+async function main() {
+    pasos = 3;
+    await mover(pasos);
+}
+
+main().catch(err => console.error('RoboLang Error:', err));</code></pre>
+            </div>
+        </div>
+
+        <!-- Patrón Visitor en Acción -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #8b5cf6;">🎨 Patrón Visitor en Acción</h2>
+
+            <div class="visitor-pattern-box">
+                <h3 style="color: #1e293b;">¿Cómo funciona?</h3>
+                <p>
+                    Cada nodo del AST es "visitado" y genera su código correspondiente.
+                </p>
+            </div>
+
+            <div class="mermaid">
+sequenceDiagram
+    participant Gen as CodeGenerator
+    participant AST as ProgramNode
+    participant Func as FunctionNode
+    participant Repeat as RepeatNode
+    participant Cmd as CommandNode
+
+    Gen->>AST: visit()
+    AST->>Gen: visitProgram()
+    Gen->>Func: visit()
+    Func->>Gen: visitFunction()
+    Gen->>Repeat: visit()
+    Repeat->>Gen: visitRepeat()
+    Gen->>Cmd: visit()
+    Cmd->>Gen: visitCommand()
+    Cmd-->>Gen: await robot.moveUp();
+    Repeat-->>Gen: for loop completo
+    Func-->>Gen: async function completa
+    AST-->>Gen: Código completo
+            </div>
+
+            <div class="example-box" style="margin-top: 2rem;">
+                <h4 style="color: #1e293b;">Ejemplo: Visitando un REPEAT</h4>
+                <pre><code class="language-java">@Override
+public String visitRepeatStatement(RepeatStatementNode node) {
+    String loopVar = "_i" + loopCounter++;
+
+    // for (let _i0 = 0; _i0 < count; _i0++) {
+    writeLine("for (let " + loopVar + " = 0; " +
+              loopVar + " < " + node.getCount() + "; " +
+              loopVar + "++) {");
+
+    indentLevel++;
+    node.getBody().accept(this);  // Visitar el cuerpo
+    indentLevel--;
+
+    writeLine("}");
+    return null;
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Tabla de Mapeo Completa -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">📊 Tabla de Mapeo: RoboLang → JavaScript</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; background: white;">
+                <thead>
+                    <tr style="background: #f59e0b; color: white;">
+                        <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">RoboLang</th>
+                        <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">JavaScript</th>
+                        <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">Notas</th>
+                    </tr>
+                </thead>
+                <tbody style="color: #1e293b;">
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>UP;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>await robot.moveUp();</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Necesita <code>await</code></td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>PENDOWN;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>robot.penDown();</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Síncrono, sin <code>await</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>VAR x;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>let x;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Variables ES6</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>x := 5;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>x = 5;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Asignación simple</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>REPEAT 3 { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>for (let _i0 = 0; _i0 < 3; _i0++) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Variable única por loop</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>IF (cond) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>if (cond) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Directamente traducible</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>WHILE (cond) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>while (cond) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Igual sintaxis</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>BATTERY</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>robot.getSensor('BATTERY')</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">API del robot</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>a = b</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>a === b</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Igualdad estricta</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>AND</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>&&</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Operador lógico</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>NOT</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>!</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Negación</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>FUNCTION f(p) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>async function f(p) { }</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Siempre <code>async</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>f(5);</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>await f(5);</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Llamadas con <code>await</code></td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>RETURN x;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>return x;</code></td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">Igual sintaxis</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Soluciones a los Retos -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #10b981;">✅ Soluciones a los Retos</h2>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 1: Preservar Semántica</h3>
+                <p><strong>Solución:</strong> Usar el AST como fuente de verdad. Cada nodo tiene
+                   toda la información semántica necesaria.</p>
+            </div>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 2: Mapeo de Construcciones</h3>
+                <p><strong>Solución:</strong> Crear tabla de mapeo (vista arriba) y seguirla consistentemente.</p>
+            </div>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 3: Nombres Únicos</h3>
+                <p><strong>Solución:</strong> Usar contador global para variables temporales.</p>
+                <pre><code class="language-java">private int loopCounter = 0;
+
+String getLoopVar() {
+    return "_i" + loopCounter++;
+}</code></pre>
+            </div>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 4: Gestión de Contexto</h3>
+                <p><strong>Solución:</strong> Mantener estado del generador:</p>
+                <pre><code class="language-java">private int indentLevel = 0;
+private int loopCounter = 0;
+private String currentFunction = null;</code></pre>
+            </div>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 5: Código Legible</h3>
+                <p><strong>Solución:</strong> Helper para indentación y formato:</p>
+                <pre><code class="language-java">private String indent() {
+    return "    ".repeat(indentLevel);
+}
+
+private void writeLine(String line) {
+    code.append(indent()).append(line).append("\n");
+}</code></pre>
+            </div>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 6: Async/Await</h3>
+                <p><strong>Solución:</strong> Regla simple: comandos de movimiento necesitan <code>await</code>,
+                   funciones de usuario son <code>async</code>.</p>
+            </div>
+
+            <div class="solution-box">
+                <h3 style="color: #1e293b;">💡 Reto 7: Manejo de Errores</h3>
+                <p><strong>Solución:</strong> Lanzar excepción descriptiva con información de línea/columna:</p>
+                <pre><code class="language-java">throw new CodeGeneratorException(
+    "Unknown node type: " + node.getClass(),
+    node.getLine(), node.getColumn()
+);</code></pre>
+            </div>
+        </div>
+
+        <!-- Ejemplo Paso a Paso -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">🔍 Ejemplo Paso a Paso</h2>
+
+            <div class="example-box">
+                <h3 style="color: #1e293b;">Generando código para: <code>REPEAT 3 { UP; }</code></h3>
+            </div>
+
+            <div class="mermaid">
+flowchart TD
+    A[RepeatStatementNode] -->|1. getCount| B[NumberNode: 3]
+    A -->|2. getBody| C[StatementBlockNode]
+    C -->|3. getStatements| D[MovementCommandNode: UP]
+
+    A -->|visit| E[Generar for loop]
+    E -->|counter| F[Variable: _i0]
+    E -->|limit| G[Límite: 3]
+    E -->|body| H[Código: await robot.moveUp]
+
+    E --> I[Código Final Generado]
+
+    style A fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:#1e293b
+    style I fill:#dcfce7,stroke:#10b981,stroke-width:3px,color:#1e293b
+    style B fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style C fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style D fill:#dbeafe,stroke:#3b82f6,color:#1e293b
+    style E fill:#fce7f3,stroke:#ec4899,color:#1e293b
+    style F fill:#e0e7ff,stroke:#6366f1,color:#1e293b
+    style G fill:#e0e7ff,stroke:#6366f1,color:#1e293b
+    style H fill:#e0e7ff,stroke:#6366f1,color:#1e293b
+            </div>
+
+            <div class="phase-timeline" style="margin-top: 2rem;">
+                <div class="phase-item" data-number="1">
+                    <h4 style="color: #1e293b;">Visitar RepeatStatementNode</h4>
+                    <pre><code class="language-java">visitRepeatStatement(node)</code></pre>
+                </div>
+
+                <div class="phase-item" data-number="2">
+                    <h4 style="color: #1e293b;">Generar variable de loop</h4>
+                    <pre><code class="language-java">String loopVar = "_i" + loopCounter++;  // "_i0"</code></pre>
+                </div>
+
+                <div class="phase-item" data-number="3">
+                    <h4 style="color: #1e293b;">Escribir header del for</h4>
+                    <pre><code class="language-javascript">for (let _i0 = 0; _i0 < 3; _i0++) {</code></pre>
+                </div>
+
+                <div class="phase-item" data-number="4">
+                    <h4 style="color: #1e293b;">Aumentar indentación y visitar body</h4>
+                    <pre><code class="language-java">indentLevel++;
+node.getBody().accept(this);</code></pre>
+                </div>
+
+                <div class="phase-item" data-number="5">
+                    <h4 style="color: #1e293b;">Body genera su código</h4>
+                    <pre><code class="language-javascript">    await robot.moveUp();</code></pre>
+                </div>
+
+                <div class="phase-item" data-number="6">
+                    <h4 style="color: #1e293b;">Cerrar loop</h4>
+                    <pre><code class="language-java">indentLevel--;
+writeLine("}");</code></pre>
+                </div>
+            </div>
+
+            <div class="key-insight" style="margin-top: 2rem;">
+                <h4 style="color: #1e293b;">📝 Resultado Final</h4>
+                <pre><code class="language-javascript">for (let _i0 = 0; _i0 < 3; _i0++) {
+    await robot.moveUp();
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Ejercicio Práctico -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #8b5cf6;">🎯 Ejercicio Práctico</h2>
+
+            <div class="visitor-pattern-box">
+                <h3 style="color: #1e293b;">🏋️ Reto: Implementa el generador</h3>
+                <p>
+                    Ahora que entiendes el proceso, tu tarea es implementar el
+                    <code>JavaScriptCodeGenerator</code> siguiendo la especificación.
+                </p>
+            </div>
+
+            <div class="example-box">
+                <h4 style="color: #1e293b;">Pasos a Seguir:</h4>
+                <ol style="line-height: 2;">
+                    <li>Leer la documentación en <code>docs/CODIGO_INTERMEDIO_JS.md</code></li>
+                    <li>Estudiar <code>docs/IMPLEMENTACION_CODEGEN.md</code></li>
+                    <li>Crear clase <code>JavaScriptCodeGenerator</code></li>
+                    <li>Implementar métodos <code>visit()</code> uno por uno</li>
+                    <li>Escribir tests para cada método</li>
+                    <li>Compilar programas de <code>examples/</code></li>
+                    <li>Verificar que el JavaScript generado funciona</li>
+                </ol>
+            </div>
+
+            <div class="challenge-box" style="margin-top: 2rem;">
+                <h4 style="color: #1e293b;">⚡ Mini-Desafío</h4>
+                <p>
+                    ¿Puedes implementar el método <code>visitIfStatement()</code>?
+                </p>
+                <p style="margin-top: 1rem;">
+                    <strong>Input:</strong> Nodo IfStatementNode con condición y bloques then/else<br>
+                    <strong>Output:</strong> Código JavaScript con <code>if (...) { } else { }</code>
+                </p>
+            </div>
+        </div>
+
+        <!-- Recursos Adicionales -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #f59e0b;">📚 Recursos y Documentación</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #3b82f6;">
+                    <h4 style="color: #3b82f6;">📖 Especificación</h4>
+                    <p><code>docs/CODIGO_INTERMEDIO_JS.md</code></p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                        Especificación completa del mapeo RoboLang → JavaScript
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #10b981;">
+                    <h4 style="color: #10b981;">🔧 Guía de Implementación</h4>
+                    <p><code>docs/IMPLEMENTACION_CODEGEN.md</code></p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                        Código Java paso a paso para implementar el generador
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; border: 2px solid #f59e0b;">
+                    <h4 style="color: #f59e0b;">📋 Índice</h4>
+                    <p><code>docs/README.md</code></p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                        Guía de lectura y checklist de implementación
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen Final -->
+        <div class="phase-badge" style="margin-top: 3rem;">
+            <h3 style="margin: 0; color: #1e293b;">🎓 Resumen</h3>
+            <ul style="text-align: left; margin-top: 1rem; line-height: 2; color: #1e293b;">
+                <li>✓ La generación de código transforma el AST en código ejecutable</li>
+                <li>✓ Usamos el patrón Visitor para recorrer el AST sistemáticamente</li>
+                <li>✓ Cada nodo del AST se mapea a código JavaScript equivalente</li>
+                <li>✓ Los principales retos son: preservar semántica, generar nombres únicos, manejar async/await</li>
+                <li>✓ El código generado debe ser legible, correcto y eficiente</li>
+                <li>✓ La arquitectura se compone de: CodeGenerator, Visitors, y helpers (CodeBuilder, NameGenerator)</li>
+            </ul>
+        </div>
+
+        <!-- Navegación -->
+        <div class="navigation-buttons">
+            <a href="slide9-gui-demo.html" class="btn" style="background: var(--text-secondary); color: white;">
+                ← Anterior: GUI Demo
+            </a>
+            <a href="index.html" class="btn btn-primary">
+                🏠 Volver al Índice
+            </a>
+        </div>
+    </main>
+
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Mermaid.js -->
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#fef3c7',
+                primaryTextColor: '#1e293b',
+                primaryBorderColor: '#f59e0b',
+                lineColor: '#94a3b8',
+                secondaryColor: '#dbeafe',
+                secondaryTextColor: '#1e293b',
+                tertiaryColor: '#dcfce7',
+                tertiaryTextColor: '#1e293b',
+                noteBkgColor: '#fef3c7',
+                noteTextColor: '#1e293b'
+            }
+        });
+    </script>
+</body>
+</html>
