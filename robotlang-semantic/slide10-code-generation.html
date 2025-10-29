@@ -321,6 +321,691 @@ main().catch(err => console.error(err));</code></pre>
             </div>
         </div>
 
+        <!-- Mapeo Completo: RoboLang ↔ JavaScript -->
+        <div class="content-section" style="color: #1e293b;">
+            <h2 style="color: #10b981;">📋 Mapeo Completo: RoboLang ↔ JavaScript</h2>
+
+            <div class="key-insight">
+                <h4 style="color: #1e293b;">🎯 Guía de Referencia Completa</h4>
+                <p>
+                    A continuación se presenta el mapeo completo de todas las construcciones de RoboLang
+                    a su equivalente en JavaScript. Esta es tu guía de referencia para implementar el generador.
+                </p>
+            </div>
+
+            <!-- 1. COMANDOS BÁSICOS -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #3b82f6; border-bottom: 3px solid #3b82f6; padding-bottom: 0.5rem;">
+                    🤖 1. Comandos Básicos de Movimiento
+                </h3>
+
+                <div class="translation-grid" style="margin-top: 1.5rem;">
+                    <div class="code-column">
+                        <h4>RoboLang</h4>
+                        <pre><code class="language-robolang">UP;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript</h4>
+                        <pre><code class="language-javascript">await robot.moveUp();</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">DOWN;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">await robot.moveDown();</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">LEFT;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">await robot.moveLeft();</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">RIGHT;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">await robot.moveRight();</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">PENUP;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">robot.penUp();</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">PENDOWN;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">robot.penDown();</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <p><strong>Nota:</strong> Los comandos de movimiento (UP, DOWN, LEFT, RIGHT) requieren <code>await</code>
+                    porque son operaciones asíncronas con animación. Los comandos de pen (PENUP, PENDOWN) son síncronos.</p>
+                </div>
+            </div>
+
+            <!-- 2. ESTRUCTURAS DE CONTROL -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #f59e0b; border-bottom: 3px solid #f59e0b; padding-bottom: 0.5rem;">
+                    🔄 2. Estructuras de Control
+                </h3>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">REPEAT (con número literal)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <h4>RoboLang</h4>
+                        <pre><code class="language-robolang">REPEAT 5 {
+    UP;
+    RIGHT;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript</h4>
+                        <pre><code class="language-javascript">for (let i = 0; i < 5; i++) {
+    await robot.moveUp();
+    await robot.moveRight();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">REPEAT (con variable)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">VAR pasos;
+pasos := 3;
+
+REPEAT pasos {
+    UP;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">let pasos;
+pasos = 3;
+
+for (let i = 0; i < pasos; i++) {
+    await robot.moveUp();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">IF (sin ELSE)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (BATTERY > 50) {
+    UP;
+    RIGHT;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (robot.getSensor('BATTERY') > 50) {
+    await robot.moveUp();
+    await robot.moveRight();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">IF-ELSE</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (DIST > 10) {
+    UP;
+} ELSE {
+    DOWN;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (robot.getSensor('DIST') > 10) {
+    await robot.moveUp();
+} else {
+    await robot.moveDown();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">WHILE</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">WHILE (BATTERY > 20) {
+    UP;
+    RIGHT;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">while (robot.getSensor('BATTERY') > 20) {
+    await robot.moveUp();
+    await robot.moveRight();
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <p><strong>Nota:</strong> REPEAT se traduce a <code>for</code> loop con contador único (_i0, _i1, _i2...)
+                    para evitar conflictos en loops anidados.</p>
+                </div>
+            </div>
+
+            <!-- 3. VARIABLES -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #8b5cf6; border-bottom: 3px solid #8b5cf6; padding-bottom: 0.5rem;">
+                    📦 3. Variables
+                </h3>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Declaración</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <h4>RoboLang</h4>
+                        <pre><code class="language-robolang">VAR contador;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript</h4>
+                        <pre><code class="language-javascript">let contador;</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Asignación (número)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">contador := 10;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">contador = 10;</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Asignación (sensor)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">VAR temperatura;
+temperatura := TEMP;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">let temperatura;
+temperatura = robot.getSensor('TEMP');</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Asignación (booleano)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">VAR activo;
+activo := true;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">let activo;
+activo = true;</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Asignación (identificador)</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">VAR x;
+VAR y;
+x := 5;
+y := x;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">let x;
+let y;
+x = 5;
+y = x;</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. FUNCIONES -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #ec4899; border-bottom: 3px solid #ec4899; padding-bottom: 0.5rem;">
+                    ⚙️ 4. Funciones (v3.0)
+                </h3>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Función sin parámetros</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <h4>RoboLang</h4>
+                        <pre><code class="language-robolang">FUNCTION avanzar() {
+    UP;
+    RIGHT;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript</h4>
+                        <pre><code class="language-javascript">async function avanzar() {
+    await robot.moveUp();
+    await robot.moveRight();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Función con parámetros</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">FUNCTION moverCuadrado(lado) {
+    REPEAT lado {
+        UP;
+        RIGHT;
+    }
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">async function moverCuadrado(lado) {
+    for (let i = 0; i < lado; i++) {
+        await robot.moveUp();
+        await robot.moveRight();
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Función MAIN</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">MAIN {
+    UP;
+    RIGHT;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">async function main() {
+    await robot.moveUp();
+    await robot.moveRight();
+}
+
+main().catch(err => console.error('Error:', err));</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">RETURN sin valor</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">FUNCTION verificar() {
+    IF (BATTERY < 10) {
+        RETURN;
+    }
+    UP;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">async function verificar() {
+    if (robot.getSensor('BATTERY') < 10) {
+        return;
+    }
+    await robot.moveUp();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">RETURN con valor</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">FUNCTION calcular() {
+    VAR resultado;
+    resultado := 42;
+    RETURN resultado;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">async function calcular() {
+    let resultado;
+    resultado = 42;
+    return resultado;
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Llamada a función</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">MAIN {
+    moverCuadrado(5);
+    avanzar();
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">async function main() {
+    await moverCuadrado(5);
+    await avanzar();
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <p><strong>Nota:</strong> Todas las funciones son <code>async</code> porque pueden contener comandos de movimiento.
+                    Las llamadas a funciones requieren <code>await</code>.</p>
+                </div>
+            </div>
+
+            <!-- 5. EXPRESIONES LÓGICAS -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #06b6d4; border-bottom: 3px solid #06b6d4; padding-bottom: 0.5rem;">
+                    🧮 5. Expresiones Lógicas y Comparaciones
+                </h3>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Operadores de Comparación</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <h4>RoboLang</h4>
+                        <pre><code class="language-robolang">IF (DIST = 5) { }</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript</h4>
+                        <pre><code class="language-javascript">if (robot.getSensor('DIST') === 5) { }</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (BATTERY != 0) { }</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (robot.getSensor('BATTERY') !== 0) { }</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (TEMP < 30) { }
+IF (TEMP <= 30) { }
+IF (TEMP > 30) { }
+IF (TEMP >= 30) { }</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (robot.getSensor('TEMP') < 30) { }
+if (robot.getSensor('TEMP') <= 30) { }
+if (robot.getSensor('TEMP') > 30) { }
+if (robot.getSensor('TEMP') >= 30) { }</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Operador AND</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (BATTERY > 50 AND DIST < 10) {
+    UP;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (robot.getSensor('BATTERY') > 50 &&
+    robot.getSensor('DIST') < 10) {
+    await robot.moveUp();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Operador OR</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (BATTERY < 20 OR OBSTACLE) {
+    RETURN;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (robot.getSensor('BATTERY') < 20 ||
+    robot.getSensor('OBSTACLE')) {
+    return;
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Operador NOT</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF (NOT OBSTACLE) {
+    UP;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if (!(robot.getSensor('OBSTACLE'))) {
+    await robot.moveUp();
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Expresiones complejas</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">IF ((BATTERY > 50 AND NOT OBSTACLE)
+    OR TEMP < 20) {
+    UP;
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">if ((robot.getSensor('BATTERY') > 50 &&
+     !(robot.getSensor('OBSTACLE'))) ||
+    robot.getSensor('TEMP') < 20) {
+    await robot.moveUp();
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <p><strong>Nota:</strong> RoboLang usa <code>=</code> para igualdad, JavaScript usa <code>===</code>.
+                    Los operadores <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code> se mantienen iguales.</p>
+                </div>
+            </div>
+
+            <!-- 6. SENSORES -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #14b8a6; border-bottom: 3px solid #14b8a6; padding-bottom: 0.5rem;">
+                    📡 6. Sensores
+                </h3>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Sensores Numéricos</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <h4>RoboLang</h4>
+                        <pre><code class="language-robolang">DIST</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript</h4>
+                        <pre><code class="language-javascript">robot.getSensor('DIST')</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">TEMP</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">robot.getSensor('TEMP')</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">LIGHT</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">robot.getSensor('LIGHT')</code></pre>
+                    </div>
+                </div>
+
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">BATTERY</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">robot.getSensor('BATTERY')</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Sensor Booleano</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">OBSTACLE</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">robot.getSensor('OBSTACLE')</code></pre>
+                    </div>
+                </div>
+
+                <h4 style="color: #1e293b; margin-top: 2rem;">Uso en asignaciones</h4>
+                <div class="translation-grid">
+                    <div class="code-column">
+                        <pre><code class="language-robolang">VAR distancia;
+distancia := DIST;</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <pre><code class="language-javascript">let distancia;
+distancia = robot.getSensor('DIST');</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <p><strong>Nota:</strong> Todos los sensores se acceden mediante <code>robot.getSensor('NOMBRE')</code>.
+                    Los sensores numéricos retornan números, OBSTACLE retorna un booleano.</p>
+                </div>
+            </div>
+
+            <!-- 7. ESTRUCTURA COMPLETA DEL PROGRAMA -->
+            <div style="margin: 3rem 0;">
+                <h3 style="color: #ef4444; border-bottom: 3px solid #ef4444; padding-bottom: 0.5rem;">
+                    📄 7. Estructura Completa del Programa
+                </h3>
+
+                <div class="translation-grid" style="margin-top: 1.5rem;">
+                    <div class="code-column">
+                        <h4>RoboLang (Programa Completo)</h4>
+                        <pre><code class="language-robolang">VAR pasos;
+VAR limite;
+
+FUNCTION mover(n) {
+    REPEAT n {
+        UP;
+        RIGHT;
+    }
+}
+
+MAIN {
+    pasos := 3;
+    limite := 10;
+
+    IF (BATTERY > 50) {
+        mover(pasos);
+    } ELSE {
+        mover(limite);
+    }
+}</code></pre>
+                    </div>
+                    <div class="translation-arrow">→</div>
+                    <div class="code-column">
+                        <h4>JavaScript (Código Generado)</h4>
+                        <pre><code class="language-javascript">// ============================================
+// RoboLang Compiled Program
+// Generated by JavaScriptCodeGenerator
+// ============================================
+
+const robot = RoboLangRuntime.getRobot();
+
+let pasos;
+let limite;
+
+async function mover(n) {
+    for (let i = 0; i < n; i++) {
+        await robot.moveUp();
+        await robot.moveRight();
+    }
+}
+
+async function main() {
+    pasos = 3;
+    limite = 10;
+
+    if (robot.getSensor('BATTERY') > 50) {
+        await mover(pasos);
+    } else {
+        await mover(limite);
+    }
+}
+
+// Execute
+main().catch(err => console.error('Error:', err));</code></pre>
+                    </div>
+                </div>
+
+                <div class="key-insight" style="margin-top: 1rem;">
+                    <h4 style="color: #1e293b;">🎯 Elementos Clave del Código Generado</h4>
+                    <ul style="margin-top: 1rem; line-height: 2;">
+                        <li><strong>Header con comentarios:</strong> Identifica el código como generado por RoboLang</li>
+                        <li><strong>Robot instance:</strong> <code>const robot = RoboLangRuntime.getRobot();</code></li>
+                        <li><strong>Variables globales:</strong> Declaradas antes de las funciones</li>
+                        <li><strong>Funciones async:</strong> Todas las funciones son <code>async</code></li>
+                        <li><strong>Función main():</strong> Punto de entrada del programa</li>
+                        <li><strong>Ejecución:</strong> <code>main().catch(err => console.error('Error:', err));</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="visitor-pattern-box" style="margin-top: 2rem;">
+                <h3 style="color: #1e293b;">✅ Checklist de Implementación</h3>
+                <p style="margin-top: 1rem;">Al implementar tu generador, asegúrate de cubrir:</p>
+                <ul style="margin-top: 1rem; line-height: 2;">
+                    <li>✓ Los 6 comandos básicos (UP, DOWN, LEFT, RIGHT, PENUP, PENDOWN)</li>
+                    <li>✓ Las 3 estructuras de control (REPEAT, IF/ELSE, WHILE)</li>
+                    <li>✓ Variables (declaración con VAR, asignación con :=)</li>
+                    <li>✓ Funciones (FUNCTION, MAIN, RETURN, llamadas)</li>
+                    <li>✓ Los 3 operadores lógicos (AND, OR, NOT)</li>
+                    <li>✓ Los 6 operadores de comparación (=, !=, &lt;, &lt;=, &gt;, &gt;=)</li>
+                    <li>✓ Los 5 sensores (DIST, TEMP, LIGHT, BATTERY, OBSTACLE)</li>
+                    <li>✓ Generación de nombres únicos para loops anidados</li>
+                    <li>✓ Indentación correcta del código generado</li>
+                    <li>✓ Conversión de = a === en JavaScript</li>
+                </ul>
+            </div>
+        </div>
+
         <!-- Los 7 Retos de la Generación de Código -->
         <div class="content-section" style="color: #1e293b;">
             <h2 style="color: #ef4444;">⚠️ Los 7 Retos de la Generación de Código</h2>
@@ -1017,42 +1702,42 @@ writeLine("}");</code></pre>
             <div class="mermaid">
 classDiagram
     class CodeGenerator {
-        <<abstract>>
-        +generate(ProgramNode) String
-        #writeHeader() void
-        #writeFooter() void
+        &lt;&lt;abstract&gt;&gt;
+        +generate(ProgramNode): String
+        #writeHeader(): void
+        #writeFooter(): void
     }
 
     class JavaScriptCodeGenerator {
-        -code StringBuilder
-        -indentLevel int
-        -loopCounter int
-        -currentFunction String
-        +generate(ProgramNode) String
-        +visitProgram(ProgramNode) void
-        +visitFunction(FunctionNode) void
-        +visitRepeat(RepeatNode) void
-        +visitIf(IfNode) void
-        +visitAssignment(AssignmentNode) void
-        -indent() String
-        -writeLine(String) void
+        -code: StringBuilder
+        -indentLevel: int
+        -loopCounter: int
+        -currentFunction: String
+        +generate(ProgramNode): String
+        +visitProgram(ProgramNode): String
+        +visitFunction(FunctionNode): String
+        +visitRepeat(RepeatNode): String
+        +visitIf(IfNode): String
+        +visitAssignment(AssignmentNode): String
+        -indent(): String
+        -writeLine(String): void
     }
 
     class ASTVisitor {
-        <<interface>>
-        +visitProgram(ProgramNode)
-        +visitFunction(FunctionNode)
-        +visitRepeat(RepeatNode)
-        +visitIf(IfNode)
+        &lt;&lt;interface&gt;&gt;
+        +visitProgram(ProgramNode): String
+        +visitFunction(FunctionNode): String
+        +visitRepeat(RepeatNode): String
+        +visitIf(IfNode): String
     }
 
     class ProgramNode {
-        +accept(Visitor)
+        +accept(Visitor): String
     }
 
-    CodeGenerator <|-- JavaScriptCodeGenerator
-    ASTVisitor <|.. JavaScriptCodeGenerator
-    JavaScriptCodeGenerator ..> ProgramNode
+    CodeGenerator &lt;|-- JavaScriptCodeGenerator
+    ASTVisitor &lt;|.. JavaScriptCodeGenerator
+    JavaScriptCodeGenerator ..&gt; ProgramNode
             </div>
 
             <div class="key-insight" style="margin-top: 2rem;">
