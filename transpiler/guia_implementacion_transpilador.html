@@ -1773,6 +1773,613 @@ mvn test -Dtest="JavaScriptCodeGeneratorTest#testReturnStatementWithBoolean"</pr
                 </div>
             </div>
 
+            <!-- 12. RoboLang IDE -->
+            <div class="section" id="ide">
+                <h2>12. RoboLang IDE - Entorno Integrado de Desarrollo</h2>
+
+                <p>
+                    El proyecto incluye un IDE completo con interfaz gráfica (GUI) construido con Java Swing
+                    que te permite escribir, compilar, analizar y ejecutar programas RoboLang visualmente.
+                </p>
+
+                <div class="example-box">
+                    <div class="example-title">📍 Ubicación</div>
+                    <p><strong>Archivo:</strong> <code>src/main/java/gui/RoboLangIDE.java</code></p>
+                    <p><strong>Ejecutar:</strong></p>
+                    <pre>mvn clean compile exec:java -Dexec.mainClass="gui.RoboLangIDE"</pre>
+                </div>
+
+                <h3>12.1 Características Principales</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">🎨 Interfaz Moderna con Tema Oscuro</div>
+                    <p>
+                        El IDE usa un esquema de colores tipo Monokai con:
+                    </p>
+                    <ul>
+                        <li><strong>Editor de código</strong> con resaltado de sintaxis en tiempo real</li>
+                        <li><strong>Números de línea</strong> actualizados automáticamente</li>
+                        <li><strong>Colores personalizados</strong> para keywords, comandos y números</li>
+                        <li><strong>Fuente monoespaciada</strong> (Consolas) para mejor legibilidad</li>
+                    </ul>
+                </div>
+
+                <h3>12.2 Paneles del IDE</h3>
+
+                <div class="steps">
+                    <div class="step">
+                        <strong>📝 Code Editor</strong> (panel izquierdo)<br>
+                        Editor principal con syntax highlighting y números de línea
+                    </div>
+                    <div class="step">
+                        <strong>🎯 Tokens</strong> (pestaña 1)<br>
+                        Tabla que muestra todos los tokens generados por el Lexer con tipo, lexema, línea y columna
+                    </div>
+                    <div class="step">
+                        <strong>🌳 AST</strong> (pestaña 2)<br>
+                        Visualización gráfica del Abstract Syntax Tree con navegación interactiva
+                    </div>
+                    <div class="step">
+                        <strong>📋 Symbols</strong> (pestaña 3)<br>
+                        Tabla de símbolos con variables declaradas, tipos, y estado de inicialización
+                    </div>
+                    <div class="step">
+                        <strong>⚡ JavaScript</strong> (pestaña 4)<br>
+                        Código JavaScript generado con syntax highlighting y botones para copiar/guardar
+                    </div>
+                    <div class="step">
+                        <strong>💻 Console</strong> (pestaña 5)<br>
+                        Salida de la consola con mensajes de éxito, errores, advertencias y análisis
+                    </div>
+                </div>
+
+                <h3>12.3 Barra de Herramientas - Explicación Detallada</h3>
+
+                <p>
+                    La barra de herramientas del IDE contiene 9 botones principales que cubren todas las
+                    operaciones del compilador. Cada botón tiene un ícono emoji descriptivo y tooltip.
+                </p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #1e3c72; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd; width: 15%;">Ícono</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd; width: 20%;">Función</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd; width: 65%;">¿Qué hace?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">📁</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>New File</strong><br><code>newFile()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Crea un archivo nuevo</strong><br>
+                                • Limpia el editor de código<br>
+                                • Borra todos los paneles de salida<br>
+                                • Resetea el estado de compilación<br>
+                                • Te pregunta confirmación si hay cambios sin guardar
+                            </td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">📂</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Open File</strong><br><code>openFile()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Abre un archivo .robo existente</strong><br>
+                                • Muestra diálogo de selección de archivo<br>
+                                • Carga el contenido en el editor<br>
+                                • Actualiza el título de la ventana con el nombre del archivo<br>
+                                • Acepta archivos .robo y .txt
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">💾</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Save File</strong><br><code>saveFile()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Guarda el código actual</strong><br>
+                                • Si es un archivo nuevo, pide dónde guardarlo<br>
+                                • Si ya existe, sobrescribe el archivo<br>
+                                • Guarda con extensión .robo automáticamente<br>
+                                • Actualiza la barra de estado
+                            </td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">▶️</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Parse Code</strong><br><code>parseCode()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Ejecuta el pipeline de compilación (sin code gen)</strong><br>
+                                • <strong>Fase 1:</strong> Lexer - tokeniza el código y llena la tabla de tokens<br>
+                                • <strong>Fase 2:</strong> Parser - construye el AST y lo visualiza gráficamente<br>
+                                • <strong>Fase 3:</strong> Análisis Semántico - verifica variables y llena la tabla de símbolos<br>
+                                • Muestra errores semánticos y advertencias en la consola<br>
+                                • <strong>Resultado:</strong> Código listo para generar JavaScript
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">📊</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Analyze Code</strong><br><code>analyzeCode()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Ejecuta análisis estadístico con visitors especializados</strong><br>
+                                • Requiere que hayas hecho "Parse Code" primero<br>
+                                • <strong>Visitor 1:</strong> CommandCounterVisitor - cuenta UP, DOWN, LEFT, RIGHT, PENUP, PENDOWN<br>
+                                • <strong>Visitor 2:</strong> SensorUsageVisitor - detecta uso de sensores (DIST, TEMP, LIGHT, BATTERY, OBSTACLE)<br>
+                                • Muestra reporte detallado en la consola con totales y ubicaciones<br>
+                                • <strong>Útil para:</strong> Entender la complejidad del programa
+                            </td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">⚡</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Generate JavaScript</strong><br><code>generateCode()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Genera código JavaScript ejecutable (TU CÓDIGO)</strong><br>
+                                • Requiere que hayas hecho "Parse Code" primero<br>
+                                • <strong>Usa tu implementación:</strong> JavaScriptCodeGenerator.generate(AST)<br>
+                                • Muestra el código JavaScript en la pestaña "⚡ JavaScript"<br>
+                                • Aplica syntax highlighting específico para JavaScript<br>
+                                • Muestra estadísticas: número de líneas generadas<br>
+                                • <strong>Ideal para:</strong> Verificar visualmente que tu código funcione
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">🚀</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Transpile & Execute</strong><br><code>transpileAndExecute()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Pipeline completo + ejecución en simulador web</strong><br>
+                                • <strong>TODO EN UNO:</strong> Lexer → Parser → Semántico → Code Gen<br>
+                                • Usa la clase Transpiler para orquestar todas las fases<br>
+                                • Muestra logs detallados de cada fase en la consola<br>
+                                • Guarda el JavaScript en archivo temporal<br>
+                                • <strong>¡Abre automáticamente tu navegador!</strong> con el simulador web<br>
+                                • El código ya está cargado y listo para ejecutar<br>
+                                • <strong>Botón más usado:</strong> Una sola operación hace todo
+                            </td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">🧹</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Clear All</strong><br><code>clearAll()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Limpia todo el IDE</strong><br>
+                                • Borra el contenido del editor<br>
+                                • Limpia la tabla de tokens<br>
+                                • Borra el gráfico del AST<br>
+                                • Limpia la tabla de símbolos<br>
+                                • Borra el código JavaScript generado<br>
+                                • Limpia la consola<br>
+                                • <strong>Útil para:</strong> Empezar de cero sin cerrar el IDE
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-size: 1.5em; text-align: center;">📚</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Load Example</strong><br><code>loadExample()</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong>Carga ejemplos predefinidos de código</strong><br>
+                                • Muestra diálogo con 6 ejemplos disponibles<br>
+                                • <strong>Ejemplos:</strong> Functions v3.0, Simple Movement, Repeat, Conditional, While, Complex<br>
+                                • Carga el código directamente en el editor<br>
+                                • <strong>Ideal para:</strong> Probar tu generador con código de ejemplo<br>
+                                • Los ejemplos van desde simples hasta complejos
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="hint-box">
+                    <div class="hint-title">💡 Orden de Uso Típico</div>
+                    <p>
+                        Para probar tu JavaScriptCodeGenerator:
+                    </p>
+                    <ol>
+                        <li><strong>📚 Load Example</strong> - Carga un ejemplo simple</li>
+                        <li><strong>⚡ Generate JavaScript</strong> - Genera código y verifica que sea correcto</li>
+                        <li><strong>🚀 Transpile & Execute</strong> - Ejecuta en el simulador para ver el resultado</li>
+                    </ol>
+                    <p style="margin-top: 15px;">
+                        <strong>O si prefieres hacer todo de una vez:</strong>
+                    </p>
+                    <ol>
+                        <li><strong>📚 Load Example</strong> - Carga un ejemplo</li>
+                        <li><strong>🚀 Transpile & Execute</strong> - Todo el pipeline + simulador</li>
+                    </ol>
+                </div>
+
+                <h3>12.4 Flujo de Trabajo Recomendado</h3>
+
+                <div class="steps">
+                    <div class="step">
+                        <strong>1. Escribir Código</strong><br>
+                        Escribe tu programa RoboLang en el editor o carga un ejemplo
+                    </div>
+                    <div class="step">
+                        <strong>2. Parsear (▶️)</strong><br>
+                        Click en "Parse Code" para ejecutar Lexer + Parser + Análisis Semántico.<br>
+                        Verás los tokens, el AST y la tabla de símbolos
+                    </div>
+                    <div class="step">
+                        <strong>3. Analizar (📊)</strong><br>
+                        Opcional: Click en "Analyze Code" para ver estadísticas de comandos y sensores
+                    </div>
+                    <div class="step">
+                        <strong>4. Generar (⚡)</strong><br>
+                        Click en "Generate JavaScript" para compilar tu código a JavaScript.<br>
+                        El código aparecerá en la pestaña JavaScript
+                    </div>
+                    <div class="step">
+                        <strong>5. Ejecutar (🚀)</strong><br>
+                        Click en "Transpile & Execute" para hacer TODO en un solo paso y abrir el simulador web
+                    </div>
+                </div>
+
+                <h3>12.5 Integración con el Transpilador</h3>
+
+                <p>
+                    El IDE usa tu implementación de <code>JavaScriptCodeGenerator</code> para generar el código JavaScript:
+                </p>
+
+                <div class="example-box">
+                    <div class="example-title">Código del IDE (líneas 688-692)</div>
+                    <pre>// Generate JavaScript code
+String jsCode = codeGenerator.generate(lastParsedAST);
+
+// Display in JavaScript panel
+jsCodeEditor.setText(jsCode);</pre>
+                </div>
+
+                <p>
+                    Esto significa que el IDE es una <strong>herramienta perfecta para probar tu implementación</strong>
+                    mientras la desarrollas:
+                </p>
+
+                <ul>
+                    <li>Escribe código RoboLang de prueba</li>
+                    <li>Haz click en "⚡ Generate JavaScript"</li>
+                    <li>Verifica visualmente que el código generado sea correcto</li>
+                    <li>Si hay errores, corrige tu JavaScriptCodeGenerator y vuelve a probar</li>
+                </ul>
+
+                <h3>12.6 Características Avanzadas</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">🎯 Visualización del AST</div>
+                    <p>
+                        El panel AST muestra una representación gráfica del árbol sintáctico con:
+                    </p>
+                    <ul>
+                        <li><strong>Nodos visuales</strong>: Cada nodo del AST se dibuja con su tipo y valor</li>
+                        <li><strong>Conexiones</strong>: Líneas que muestran la jerarquía del árbol</li>
+                        <li><strong>Navegación</strong>: Botón "🎯 Center View" para centrar la vista</li>
+                        <li><strong>Scroll</strong>: Desplazamiento horizontal y vertical para árboles grandes</li>
+                    </ul>
+                </div>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">📋 Tabla de Símbolos</div>
+                    <p>
+                        Muestra todas las variables detectadas con:
+                    </p>
+                    <ul>
+                        <li><strong>Nombre</strong> de la variable</li>
+                        <li><strong>Tipo</strong>: INTEGER, BOOLEAN, SENSOR, UNKNOWN</li>
+                        <li><strong>Línea de declaración</strong></li>
+                        <li><strong>Estado</strong>: Si fue inicializada o no</li>
+                        <li><strong>Errores y advertencias</strong> semánticos resaltados</li>
+                    </ul>
+                </div>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">⚡ Panel de JavaScript</div>
+                    <p>
+                        El código generado incluye:
+                    </p>
+                    <ul>
+                        <li><strong>Syntax highlighting</strong> específico para JavaScript</li>
+                        <li><strong>Botón "📋 Copy"</strong>: Copia el código al portapapeles</li>
+                        <li><strong>Botón "💾 Save .js"</strong>: Guarda el código en un archivo .js</li>
+                        <li><strong>Formato legible</strong>: El código está bien indentado y comentado</li>
+                    </ul>
+                </div>
+
+                <h3>12.7 Ejemplos Incluidos</h3>
+
+                <p>El IDE viene con 6 ejemplos predefinidos accesibles desde "📚 Load Example":</p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #1e3c72; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Ejemplo</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Características</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Functions (v3.0) - Complete</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Ejemplo completo con FUNCTION, MAIN, parámetros, RETURN, variables y sensores</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Simple Movement</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Comandos básicos de movimiento (UP, DOWN, LEFT, RIGHT, PENUP, PENDOWN)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Repeat Pattern</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Uso de REPEAT para patrones repetitivos</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Conditional Navigation</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">IF/ELSE con sensores para navegación condicional</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>While Loop</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">WHILE con sensores y IF anidado</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Complex Navigation</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Programa complejo con WHILE, IF anidados, REPEAT y múltiples sensores</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>12.8 Mensajes de la Consola</h3>
+
+                <p>
+                    La consola proporciona feedback detallado sobre cada operación:
+                </p>
+
+                <div class="example-box">
+                    <div class="example-title">Ejemplo de Salida Exitosa</div>
+                    <pre>✅ Parsing completed successfully!
+📊 Found 45 tokens
+✅ No semantic errors!
+📋 Found 3 symbols
+
+═══════════════════════════════════════════════════════════
+⚡ GENERACIÓN DE CÓDIGO JAVASCRIPT
+═══════════════════════════════════════════════════════════
+
+✅ JavaScript code generated successfully!
+📄 Generated 35 lines of code
+💡 Code ready for web simulator execution</pre>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">Mensajes de Error</div>
+                    <p>Si hay errores, la consola mostrará:</p>
+                    <pre>❌ Semantic Errors:
+   Variable 'x' used at line 5 but not declared
+   Variable 'y' declared at line 3 but never initialized</pre>
+                </div>
+
+                <h3>12.9 Integración con el Simulador Web</h3>
+
+                <div class="example-box">
+                    <div class="example-title">🌐 Simulador Web Interactivo</div>
+                    <p><strong>Ubicación:</strong> <code>web/robot_simulator/index.html</code></p>
+                    <p><strong>Tecnología:</strong> HTML5 + Canvas + JavaScript ES6+</p>
+                    <p><strong>Ejecución:</strong> Se abre automáticamente en tu navegador predeterminado</p>
+                </div>
+
+                <p>
+                    El proyecto incluye un <strong>simulador web completo</strong> que ejecuta visualmente el código
+                    JavaScript generado por tu transpilador. Este simulador está ubicado en la carpeta
+                    <code>web/robot_simulator/</code> y se ejecuta directamente en el navegador.
+                </p>
+
+                <h4>¿Cómo se Abre el Simulador?</h4>
+
+                <p>
+                    Cuando haces click en el botón <strong>"🚀 Transpile & Execute"</strong> del IDE,
+                    el sistema ejecuta automáticamente los siguientes pasos:
+                </p>
+
+                <div class="steps">
+                    <div class="step">
+                        <strong>1. Compilación Completa</strong><br>
+                        Ejecuta Lexer → Parser → Análisis Semántico → Generación de Código JavaScript
+                    </div>
+                    <div class="step">
+                        <strong>2. Guardado del Código</strong><br>
+                        Escribe el código JavaScript generado en un archivo temporal
+                    </div>
+                    <div class="step">
+                        <strong>3. Apertura del Navegador</strong><br>
+                        <strong>El IDE abre automáticamente tu navegador predeterminado</strong> (Chrome, Firefox, Safari, Edge)
+                        con la URL del simulador: <code>file:///.../web/robot_simulator/index.html</code>
+                    </div>
+                    <div class="step">
+                        <strong>4. Carga del Código</strong><br>
+                        El simulador carga automáticamente el código JavaScript generado y lo muestra en el editor
+                    </div>
+                    <div class="step">
+                        <strong>5. Listo para Ejecutar</strong><br>
+                        Puedes hacer click en "▶ Play" en el simulador para ver tu programa ejecutándose visualmente
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">⚠️ Apertura Automática del Navegador</div>
+                    <p>
+                        El IDE utiliza <code>Desktop.getDesktop().browse()</code> de Java para abrir el navegador.
+                        Esto funciona en Windows, macOS y Linux con navegadores instalados estándar.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        Si el navegador no se abre automáticamente, puedes abrir manualmente el archivo:
+                    </p>
+                    <pre>web/robot_simulator/index.html</pre>
+                    <p style="margin-top: 10px;">
+                        Simplemente haz doble-click en el archivo o ábrelo desde tu navegador con File → Open.
+                    </p>
+                </div>
+
+                <h4>Características del Simulador Web</h4>
+
+                <p>
+                    El simulador ubicado en <code>web/robot_simulator/</code> proporciona:
+                </p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #1e3c72; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Característica</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>🎨 Canvas Interactivo</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Grid de 30x30 celdas que muestra el robot, su trail (rastro) y posición actual</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>⏯️ Ejecución Paso a Paso</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Botones Play, Pause, Step (un paso), Stop, Reset para control total</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>🎚️ Control de Velocidad</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Slider para ajustar velocidad de ejecución (100ms a 2000ms por comando)</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>📡 Sensores Simulados</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">DIST, TEMP, LIGHT, BATTERY (valores aleatorios), OBSTACLE (detección de bordes)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>💻 Consola de Log</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Muestra cada comando ejecutado con timestamps para debugging</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>📝 Editor de Código</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Puedes editar el código JavaScript directamente en el simulador</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>🎯 Visualización en Tiempo Real</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Ves el robot moverse, el pen activarse, y el trail dibujándose en vivo</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Uso Manual del Simulador</h4>
+
+                <p>
+                    También puedes usar el simulador sin el IDE, directamente desde el navegador:
+                </p>
+
+                <div class="steps">
+                    <div class="step">
+                        <strong>1. Abre el Simulador</strong><br>
+                        Navega a <code>web/robot_simulator/index.html</code> y ábrelo en tu navegador
+                    </div>
+                    <div class="step">
+                        <strong>2. Pega tu Código</strong><br>
+                        Copia el código JavaScript generado y pégalo en el editor del simulador
+                    </div>
+                    <div class="step">
+                        <strong>3. Click en Load Code</strong><br>
+                        Esto carga tu código en el runtime del simulador
+                    </div>
+                    <div class="step">
+                        <strong>4. Click en Play</strong><br>
+                        El robot comenzará a ejecutar tu código visualmente
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">🎮 Ejemplo de Uso Completo</div>
+                    <p><strong>Desde el IDE:</strong></p>
+                    <ol>
+                        <li>Escribe código RoboLang en el IDE</li>
+                        <li>Click "🚀 Transpile & Execute"</li>
+                        <li><strong>Tu navegador se abre automáticamente</strong> con el simulador</li>
+                        <li>El código ya está cargado en el simulador</li>
+                        <li>Click "▶ Play" en el simulador</li>
+                        <li>¡Observa tu robot en acción! 🤖</li>
+                    </ol>
+                </div>
+
+                <div class="hint-box">
+                    <div class="hint-title">💡 Tip: Debugging Visual</div>
+                    <p>
+                        El simulador es perfecto para verificar que tu JavaScriptCodeGenerator funciona correctamente:
+                    </p>
+                    <ul>
+                        <li><strong>Ejecución paso a paso</strong>: Usa el botón "Step" para ejecutar un comando a la vez</li>
+                        <li><strong>Verifica la consola</strong>: Cada comando aparece en el log con su timestamp</li>
+                        <li><strong>Observa el canvas</strong>: El robot debe moverse según tus comandos</li>
+                        <li><strong>Revisa errores</strong>: Si el código no ejecuta, verás errores en la consola del navegador (F12)</li>
+                    </ul>
+                </div>
+
+                <h3>12.10 Arquitectura del IDE</h3>
+
+                <p>
+                    El IDE está construido con componentes modulares:
+                </p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #1e3c72; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Componente</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Clase</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Responsabilidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Editor</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><code>JTextPane</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Edición de código con syntax highlighting</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;">Tokens</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><code>JTable</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Visualización de tokens del Lexer</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">AST</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><code>ASTGraphPanel</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Renderizado gráfico del AST</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;">Símbolos</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><code>SymbolTablePanel</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Tabla de símbolos del análisis semántico</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">JavaScript</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><code>JTextPane</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Visualización del código generado</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #ddd;">Console</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><code>JTextArea</code></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Mensajes de log y feedback al usuario</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>12.11 Uso en el Desarrollo</h3>
+
+                <div class="example-box">
+                    <div class="example-title">💡 Tip: Desarrollo Iterativo</div>
+                    <p>
+                        El IDE es ideal para desarrollo iterativo de tu JavaScriptCodeGenerator:
+                    </p>
+                    <ol>
+                        <li>Abre el IDE: <code>mvn exec:java -Dexec.mainClass="gui.RoboLangIDE"</code></li>
+                        <li>Escribe código de prueba simple (ej: <code>UP; DOWN;</code>)</li>
+                        <li>Click "⚡ Generate JavaScript"</li>
+                        <li>Verifica que el código generado sea correcto</li>
+                        <li>Si no lo es, cierra el IDE, corrige tu código Java, recompila</li>
+                        <li>Vuelve a abrir el IDE y prueba de nuevo</li>
+                        <li>Incrementa gradualmente la complejidad del código de prueba</li>
+                    </ol>
+                </div>
+
+                <div class="hint-box">
+                    <div class="hint-title">🎯 Ventajas del IDE</div>
+                    <ul>
+                        <li><strong>Feedback inmediato</strong>: Ves el resultado al instante sin ejecutar tests</li>
+                        <li><strong>Debugging visual</strong>: Puedes ver tokens, AST y símbolos para entender qué está pasando</li>
+                        <li><strong>Experimentación rápida</strong>: Modifica el código RoboLang y regenera JavaScript en segundos</li>
+                        <li><strong>Integración completa</strong>: Prueba todo el pipeline desde Lexer hasta Simulator</li>
+                    </ul>
+                </div>
+            </div>
+
             <!-- Footer -->
             <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
                 <p style="color: #1e3c72; font-weight: bold; font-size: 1.2em;">
