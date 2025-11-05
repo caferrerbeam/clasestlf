@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Implementación del Transpilador RoboLang</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #1e3c72;
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .section h3 {
+            color: #2a5298;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .section h4 {
+            color: #3b6ec9;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .thinking-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .thinking-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .example-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #155724;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-title {
+            font-weight: bold;
+            color: #721c24;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .hint-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .hint-title {
+            font-weight: bold;
+            color: #0c5460;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .steps {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .step {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #1e3c72;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        pre {
+            background: #2d2d2d !important;
+            color: #f8f8f2 !important;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #1e3c72;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .toc {
+            background: #e7f3ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #2a5298;
+        }
+
+        .toc h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin: 10px 0;
+        }
+
+        .toc a {
+            color: #2a5298;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 1.05em;
+        }
+
+        .toc a:hover {
+            color: #1e3c72;
+            text-decoration: underline;
+        }
+
+        .formula {
+            background: white;
+            padding: 15px;
+            border: 2px dashed #2a5298;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .test-box {
+            background: #e7e3ff;
+            border-left: 4px solid #6f42c1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .test-title {
+            font-weight: bold;
+            color: #4a2c7a;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Guía de Implementación del Transpilador</h1>
+            <p>Aprende a construir el JavaScriptCodeGenerator para RoboLang</p>
+        </header>
+
+        <div class="content">
+            <!-- Tabla de Contenidos -->
+            <div class="toc">
+                <h3>Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción: ¿Qué es un Transpilador?</a></li>
+                    <li><a href="#transpile">2. El Método transpile(): Orquestando las 4 Fases</a></li>
+                    <li><a href="#estructura">3. Estructura del JavaScriptCodeGenerator</a></li>
+                    <li><a href="#program">4. Implementando visitProgram()</a></li>
+                    <li><a href="#statements">5. Implementando Statements</a></li>
+                    <li><a href="#commands">6. Implementando Commands</a></li>
+                    <li><a href="#expressions">7. Implementando Expressions</a></li>
+                    <li><a href="#values">8. Implementando Values y Literals</a></li>
+                    <li><a href="#functions">9. Implementando Funciones (v3.0)</a></li>
+                    <li><a href="#helpers">10. Métodos Helper: Indentación y Variables Aleatorias</a></li>
+                    <li><a href="#checklist">11. Checklist de Implementación</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. Introducción -->
+            <div class="section" id="introduccion">
+                <h2>1. Introducción: ¿Qué es un Transpilador?</h2>
+
+                <p>
+                    Un <strong>transpilador</strong> (también llamado <em>source-to-source compiler</em>) es un programa que
+                    traduce código de un lenguaje de programación a otro lenguaje de programación de nivel similar.
+                </p>
+
+                <p>
+                    En nuestro caso, el transpilador RoboLang traduce código RoboLang a JavaScript ejecutable.
+                </p>
+
+                <div class="formula">
+                    Código RoboLang → [TRANSPILADOR] → Código JavaScript
+                </div>
+
+                <h3>Componentes del Transpilador</h3>
+
+                <table>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Función</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Transpiler</strong></td>
+                        <td>Orquestador de las 4 fases</td>
+                        <td>String (código RoboLang)</td>
+                        <td>TranspilationResult</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lexer</strong></td>
+                        <td>Análisis léxico</td>
+                        <td>String</td>
+                        <td>List&lt;Token&gt;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Parser</strong></td>
+                        <td>Análisis sintáctico</td>
+                        <td>List&lt;Token&gt;</td>
+                        <td>ProgramNode (AST)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SemanticAnalyzer</strong></td>
+                        <td>Análisis semántico</td>
+                        <td>ProgramNode</td>
+                        <td>SymbolTable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>JavaScriptCodeGenerator</strong></td>
+                        <td>Generación de código</td>
+                        <td>ProgramNode</td>
+                        <td>String (JavaScript)</td>
+                    </tr>
+                </table>
+
+                <div class="example-box">
+                    <div class="example-title">Ejemplo Completo del Flujo</div>
+                    <p><strong>Entrada (RoboLang):</strong></p>
+                    <pre>REPEAT 3 {
+    UP;
+    RIGHT;
+}</pre>
+                    <p><strong>Fase 1 - Lexer → Tokens:</strong></p>
+                    <pre>[REPEAT, NUMBER(3), LEFT_BRACE, UP, SEMICOLON, RIGHT, SEMICOLON, RIGHT_BRACE]</pre>
+                    <p><strong>Fase 2 - Parser → AST:</strong></p>
+                    <pre>ProgramNode
+  └── RepeatStatementNode(3)
+      └── StatementListNode
+          ├── MovementCommandNode(UP)
+          └── MovementCommandNode(RIGHT)</pre>
+                    <p><strong>Fase 3 - Semantic → Symbol Table:</strong></p>
+                    <pre>(vacía, no hay variables en este ejemplo)</pre>
+                    <p><strong>Fase 4 - CodeGen → JavaScript:</strong></p>
+                    <pre>const robot = RoboLangRuntime.getRobot();
+
+async function main() {
+    for (let a1b2c3 = 0; a1b2c3 < 3; a1b2c3++) {
+        await robot.moveUp();
+        await robot.moveRight();
+    }
+}
+
+main().catch(err => console.error('Error:', err));</pre>
+                </div>
+            </div>
+
+            <!-- 2. El Método transpile() -->
+            <div class="section" id="transpile">
+                <h2>2. El Método transpile(): Orquestando las 4 Fases</h2>
+
+                <p>
+                    El método <code>transpile()</code> en la clase <code>Transpiler</code> es el punto de entrada principal.
+                    Coordina las 4 fases del compilador de forma secuencial.
+                </p>
+
+                <h3>Estructura del Método transpile()</h3>
+
+                <pre>public TranspilationResult transpile(String roboLangCode) {
+    TranspilationResult result = new TranspilationResult();
+
+    try {
+        // Fase 1: Análisis Léxico
+        result.addPhaseLog("Phase 1: Lexical Analysis");
+        lastTokens = lexer.tokenize(roboLangCode);
+        result.addPhaseLog("  ✓ Tokenized: " + lastTokens.size() + " tokens");
+
+        // Fase 2: Análisis Sintáctico
+        result.addPhaseLog("Phase 2: Syntactic Analysis");
+        lastAST = parser.parse(lastTokens);
+        result.addPhaseLog("  ✓ AST constructed successfully");
+
+        // Fase 3: Análisis Semántico
+        result.addPhaseLog("Phase 3: Semantic Analysis");
+        lastSymbolTable = semanticAnalyzer.analyze(lastAST);
+        result.addPhaseLog("  ✓ Symbol table: " + lastSymbolTable.size() + " symbols");
+
+        // Verificar errores semánticos
+        if (lastSymbolTable.hasErrors()) {
+            result.setSuccess(false);
+            for (String error : lastSymbolTable.getErrors()) {
+                result.addError(error);
+            }
+            return result;
+        }
+
+        // Fase 4: Generación de Código
+        result.addPhaseLog("Phase 4: Code Generation");
+        String jsCode = codeGenerator.generate(lastAST);
+        result.addPhaseLog("  ✓ JavaScript generated");
+        result.setJavaScriptCode(jsCode);
+
+        result.setSuccess(true);
+        return result;
+
+    } catch (Exception e) {
+        result.setSuccess(false);
+        result.setErrorMessage("Transpilation failed: " + e.getMessage());
+        return result;
+    }
+}</pre>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Puntos Clave del Método transpile()</div>
+                    <ol>
+                        <li><strong>Secuencialidad:</strong> Cada fase depende del resultado de la anterior</li>
+                        <li><strong>Manejo de Errores:</strong> Si una fase falla, el proceso se detiene</li>
+                        <li><strong>Logging:</strong> Cada fase registra su progreso en el resultado</li>
+                        <li><strong>Validación Semántica:</strong> Verifica errores antes de generar código</li>
+                        <li><strong>Encapsulación:</strong> El resultado se encapsula en TranspilationResult</li>
+                    </ol>
+                </div>
+
+                <h3>¿Por qué separar en 4 fases?</h3>
+
+                <table>
+                    <tr>
+                        <th>Ventaja</th>
+                        <th>Explicación</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Modularidad</strong></td>
+                        <td>Cada fase tiene una responsabilidad clara y única</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debugging</strong></td>
+                        <td>Puedes inspeccionar la salida de cada fase independientemente</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reutilización</strong></td>
+                        <td>El Lexer y Parser pueden usarse sin CodeGen (ej: linters)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Testing</strong></td>
+                        <td>Puedes testear cada fase de forma aislada</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mantenibilidad</strong></td>
+                        <td>Cambios en una fase no afectan a las demás</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 3. Estructura del JavaScriptCodeGenerator -->
+            <div class="section" id="estructura">
+                <h2>3. Estructura del JavaScriptCodeGenerator</h2>
+
+                <p>
+                    El <code>JavaScriptCodeGenerator</code> implementa el patrón <strong>Visitor</strong> para recorrer el AST
+                    y generar código JavaScript. Cada nodo del AST tiene un método <code>visit</code> correspondiente.
+                </p>
+
+                <h3>Variables de Estado Importantes</h3>
+
+                <pre>public class JavaScriptCodeGenerator implements ASTVisitor&lt;String&gt; {
+
+    // Control de indentación
+    private int indentLevel = 0;
+
+    // Generación de variables aleatorias para loops
+    private Random random;
+    private Set&lt;String&gt; usedVariableNames;
+}</pre>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">¿Por qué necesitamos estas variables?</div>
+                    <ul>
+                        <li><strong>indentLevel:</strong> El código JavaScript debe estar bien indentado para ser legible</li>
+                        <li><strong>usedVariableNames:</strong> Evita colisiones de nombres en loops anidados</li>
+                    </ul>
+                    <p style="margin-top: 10px;">
+                        <strong>Nota:</strong> ¡Eso es todo! Solo necesitas estas 3 variables de estado. Simple y directo.
+                    </p>
+                </div>
+
+                <h3>Método generate(): Punto de Entrada</h3>
+
+                <pre>public String generate(ProgramNode program) {
+    // 1. Resetear todo el estado
+    indentLevel = 0;
+    usedVariableNames.clear();
+
+    // 2. Iniciar el recorrido del AST
+    return program.accept(this);
+}</pre>
+
+                <div class="warning-box">
+                    <div class="warning-title">IMPORTANTE: Siempre Resetear el Estado</div>
+                    <p>
+                        Antes de generar código, <strong>debes resetear todas las variables de estado</strong>.
+                        Si no lo haces, generar código múltiples veces dará resultados incorrectos.
+                    </p>
+                    <p>
+                        Ejemplo: Si no reseteas <code>usedVariableNames</code>, el segundo programa tendrá
+                        variables de loop que empiezan donde terminó el primer programa.
+                    </p>
+                </div>
+
+                <h3>Organización de los Métodos Visitor</h3>
+
+                <p>Los 27 métodos visitor se organizan en categorías:</p>
+
+                <table>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Métodos</th>
+                        <th>Cantidad</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Program y Estructura</strong></td>
+                        <td>visitProgram</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Statements</strong></td>
+                        <td>visitStatement, visitStatementList, visitStatementBlock, visitRepeatStatement, visitIfStatement, visitWhileStatement, visitVariableDeclaration, visitAssignment</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Funciones</strong></td>
+                        <td>visitFunctionDeclaration, visitMainFunction, visitParameter, visitReturnStatement, visitFunctionCall</td>
+                        <td>5</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Commands</strong></td>
+                        <td>visitSimpleCommand, visitMovementCommand, visitPenCommand</td>
+                        <td>3</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Expressions</strong></td>
+                        <td>visitCondition, visitOrExpression, visitAndExpression, visitNotExpression, visitPrimaryExpression, visitComparisonExpression, visitComparisonOperator</td>
+                        <td>7</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Values y Literals</strong></td>
+                        <td>visitValue, visitSensor, visitNumericSensor, visitBooleanSensor, visitNumber, visitDigit, visitBoolean, visitIdentifier</td>
+                        <td>8</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 4. visitProgram() -->
+            <div class="section" id="program">
+                <h2>4. Implementando visitProgram()</h2>
+
+                <p>
+                    <code>visitProgram()</code> es el método más importante porque genera la estructura completa del programa JavaScript.
+                </p>
+
+                <h3>Estructura del Código JavaScript Generado</h3>
+
+                <div class="steps">
+                    <div class="step"><strong>Header:</strong> Comentarios indicando que es código generado</div>
+                    <div class="step"><strong>Robot instance:</strong> <code>const robot = RoboLangRuntime.getRobot();</code></div>
+                    <div class="step"><strong>Funciones definidas:</strong> Todas las funciones FUNCTION</div>
+                    <div class="step"><strong>Función main:</strong> El punto de entrada MAIN</div>
+                    <div class="step"><strong>Ejecución:</strong> <code>main().catch(...)</code></div>
+                </div>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Proceso de Pensamiento para visitProgram()</div>
+                    <ol>
+                        <li><strong>¿Qué información tengo?</strong>
+                            <ul>
+                                <li>ProgramNode contiene: functions, mainFunction, statementList</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Qué debo generar?</strong>
+                            <ul>
+                                <li>Un programa JavaScript completo que pueda ejecutarse</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿En qué orden?</strong>
+                            <ul>
+                                <li>Primero el header y la instancia del robot</li>
+                                <li>Luego generar todas las funciones FUNCTION directamente</li>
+                                <li>Después generar la función main() directamente</li>
+                                <li>Finalmente agregar la llamada a main()</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Qué casos especiales debo manejar?</strong>
+                            <ul>
+                                <li>Programa sin MAIN explícito (v2.0 vs v3.0)</li>
+                                <li>Programa solo con funciones (sin statements sueltos)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <h3>Pasos para Implementar visitProgram()</h3>
+
+                <div class="steps">
+                    <div class="step">
+                        <strong>Paso 1:</strong> Crear un StringBuilder para acumular el código
+                    </div>
+                    <div class="step">
+                        <strong>Paso 2:</strong> Agregar el header con comentarios
+                    </div>
+                    <div class="step">
+                        <strong>Paso 3:</strong> Agregar <code>const robot = RoboLangRuntime.getRobot();\n\n</code>
+                    </div>
+                    <div class="step">
+                        <strong>Paso 4:</strong> Procesar todas las funciones (si existen)
+                        <ul>
+                            <li>Recorrer <code>node.getFunctions()</code></li>
+                            <li>Para cada función, llamar <code>String funcCode = function.accept(this)</code></li>
+                            <li>Agregar el código retornado al StringBuilder principal</li>
+                        </ul>
+                    </div>
+                    <div class="step">
+                        <strong>Paso 5:</strong> Procesar MAIN (si existe)
+                        <ul>
+                            <li>Verificar si <code>node.getMainFunction() != null</code></li>
+                            <li>Si existe, llamar <code>String mainCode = node.getMainFunction().accept(this)</code></li>
+                            <li>Agregar el código retornado al StringBuilder</li>
+                        </ul>
+                    </div>
+                    <div class="step">
+                        <strong>Paso 6:</strong> Si no hay MAIN, crear uno con los statements sueltos
+                        <ul>
+                            <li>Verificar <code>node.getMainFunction() == null && node.getStatementList() != null</code></li>
+                            <li>Generar <code>async function main() { ... }</code></li>
+                            <li>Dentro, procesar <code>node.getStatementList().accept(this)</code></li>
+                        </ul>
+                    </div>
+                    <div class="step">
+                        <strong>Paso 7:</strong> Agregar la llamada final
+                        <ul>
+                            <li><code>main().catch(err => console.error('Error:', err));</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="hint-box">
+                    <div class="hint-title">¡Simple y Directo!</div>
+                    <p>
+                        Esta implementación es directa: cada método <code>visit</code> retorna el código JavaScript
+                        que le corresponde, y <code>visitProgram()</code> simplemente los concatena en el orden correcto.
+                    </p>
+                    <p>
+                        No necesitas buffers intermedios ni variables de estado complejas.
+                    </p>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">Ejemplo: Programa v2.0 sin MAIN</div>
+                    <p><strong>RoboLang:</strong></p>
+                    <pre>UP;
+DOWN;
+LEFT;</pre>
+                    <p><strong>JavaScript generado:</strong></p>
+                    <pre>// ============================================
+// RoboLang Compiled Program
+// Generated by JavaScriptCodeGenerator
+// ============================================
+
+const robot = RoboLangRuntime.getRobot();
+
+// Main Entry Point
+async function main() {
+    await robot.moveUp();
+    await robot.moveDown();
+    await robot.moveLeft();
+}
+
+// Execute
+main().catch(err => console.error('Error:', err));</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">Ejemplo: Programa v3.0 con MAIN y FUNCTION</div>
+                    <p><strong>RoboLang:</strong></p>
+                    <pre>FUNCTION avanzar(pasos) {
+    REPEAT pasos { UP; }
+}
+
+MAIN {
+    avanzar(3);
+}</pre>
+                    <p><strong>JavaScript generado:</strong></p>
+                    <pre>// ============================================
+// RoboLang Compiled Program
+// Generated by JavaScriptCodeGenerator
+// ============================================
+
+const robot = RoboLangRuntime.getRobot();
+
+async function avanzar(pasos) {
+    for (let x3k7m2 = 0; x3k7m2 < pasos; x3k7m2++) {
+        await robot.moveUp();
+    }
+}
+
+// Main Entry Point
+async function main() {
+    await avanzar(3);
+}
+
+// Execute
+main().catch(err => console.error('Error:', err));</pre>
+                </div>
+            </div>
+
+            <!-- 5. Statements -->
+            <div class="section" id="statements">
+                <h2>5. Implementando Statements</h2>
+
+                <p>
+                    Los <strong>statements</strong> son construcciones que ejecutan acciones pero no devuelven valores.
+                    Ejemplos: REPEAT, IF, WHILE, VAR, asignaciones.
+                </p>
+
+                <h3>5.1 visitRepeatStatement() - EJEMPLO COMPLETO</h3>
+
+                <p>Este es el ÚNICO método donde te mostraré el código completo como referencia:</p>
+
+                <pre>@Override
+public String visitRepeatStatement(RepeatStatementNode node) {
+    // 1. Generar una variable de loop única y aleatoria
+    String loopVar = getLoopVariable();
+
+    // 2. Obtener el valor del contador (puede ser número o identificador)
+    String value;
+    if (node.getRepeatCount() != null) {
+        value = node.getRepeatCount().accept(this);
+    } else if (node.getRepeatCountIdentifier() != null) {
+        value = node.getRepeatCountIdentifier().accept(this);
+    } else {
+        value = "0"; // Default fallback
+    }
+
+    // 3. Construir el código JavaScript
+    StringBuilder code = new StringBuilder();
+
+    // Header del for: for (let varName = 0; varName < count; varName++)
+    code.append("for (let ").append(loopVar).append(" = 0; ");
+    code.append(loopVar).append(" < ").append(value).append("; ");
+    code.append(loopVar).append("++) {\n");
+
+    // 4. Generar el cuerpo del loop (aumentar indentación)
+    indentLevel++;
+    String body = node.getStatementBlock().accept(this);
+    code.append(body);
+    indentLevel--;
+
+    // 5. Cerrar el for
+    code.append(indent()).append("}");
+
+    return code.toString();
+}</pre>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis Detallado de visitRepeatStatement()</div>
+                    <ol>
+                        <li><strong>¿Por qué variable aleatoria?</strong>
+                            <ul>
+                                <li>En loops anidados, no podemos usar siempre "i"</li>
+                                <li>Ejemplo: <code>REPEAT 3 { REPEAT 2 { ... } }</code> necesita dos variables distintas</li>
+                                <li>getLoopVariable() genera nombres únicos como "a1b2c3", "x7k9m2"</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Por qué dos formas de obtener el contador?</strong>
+                            <ul>
+                                <li>v1.0: <code>REPEAT 5 { ... }</code> → usa node.getRepeatCount()</li>
+                                <li>v2.0+: <code>REPEAT veces { ... }</code> → usa node.getRepeatCountIdentifier()</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Por qué aumentar/disminuir indentLevel?</strong>
+                            <ul>
+                                <li>El cuerpo del loop debe estar indentado</li>
+                                <li>Cada statement en el cuerpo llamará a indent() para generar los espacios</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">Ejemplo: REPEAT con número</div>
+                    <p><strong>RoboLang:</strong> <code>REPEAT 3 { UP; }</code></p>
+                    <p><strong>JavaScript:</strong></p>
+                    <pre>for (let a1b2c3 = 0; a1b2c3 < 3; a1b2c3++) {
+    await robot.moveUp();
+}</pre>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">Ejemplo: REPEAT con variable</div>
+                    <p><strong>RoboLang:</strong></p>
+                    <pre>VAR veces;
+veces := 5;
+REPEAT veces { RIGHT; }</pre>
+                    <p><strong>JavaScript:</strong></p>
+                    <pre>let veces;
+veces = 5;
+for (let p7x2k9 = 0; p7x2k9 < veces; p7x2k9++) {
+    await robot.moveRight();
+}</pre>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitRepeatStatement</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testRepeatWithNumber"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testRepeatWithVariable"</pre>
+                </div>
+
+                <h3>5.2 visitIfStatement() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Proceso de Pensamiento</div>
+                    <ol>
+                        <li><strong>¿Qué información tengo?</strong>
+                            <ul>
+                                <li>IfStatementNode contiene: condition, thenBlock, elseBlock (opcional)</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Qué debo generar?</strong>
+                            <ul>
+                                <li>Estructura: <code>if (condición) { ... } else { ... }</code></li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Qué hacer con cada parte?</strong>
+                            <ul>
+                                <li>Condición: <code>node.getCondition().accept(this)</code> → genera expresión JS</li>
+                                <li>Then block: <code>node.getThenBlock().accept(this)</code> → genera statements</li>
+                                <li>Else block: verificar si existe antes de procesar</li>
+                            </ul>
+                        </li>
+                        <li><strong>¿Cómo manejar la indentación?</strong>
+                            <ul>
+                                <li>Aumentar indentLevel antes de procesar los bloques</li>
+                                <li>Disminuir después</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Crear StringBuilder</div>
+                    <div class="step">Generar condición: <code>String condition = node.getCondition().accept(this);</code></div>
+                    <div class="step">Escribir: <code>"if (" + condition + ") {\n"</code></div>
+                    <div class="step">Aumentar indentLevel</div>
+                    <div class="step">Generar bloque then: <code>node.getThenBlock().accept(this)</code></div>
+                    <div class="step">Disminuir indentLevel</div>
+                    <div class="step">Verificar si hay ELSE: <code>if (node.getElseBlock() != null)</code></div>
+                    <div class="step">Si hay ELSE, escribir: <code>"} else {\n"</code> y repetir proceso de indentación</div>
+                    <div class="step">Cerrar con <code>indent() + "}"</code></div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitIfStatement</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testIfWithoutElse"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testIfElse"</pre>
+                </div>
+
+                <h3>5.3 visitWhileStatement() - CÓMO Implementarlo</h3>
+
+                <div class="hint-box">
+                    <div class="hint-title">Pista: Casi idéntico a IF</div>
+                    <p>
+                        El WHILE es muy similar al IF, pero:
+                    </p>
+                    <ul>
+                        <li>Usa <code>while</code> en lugar de <code>if</code></li>
+                        <li>No tiene bloque else</li>
+                        <li>Misma lógica de indentación</li>
+                    </ul>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitWhileStatement</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testWhileLoop"</pre>
+                </div>
+
+                <h3>5.4 visitVariableDeclaration() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p><strong>RoboLang:</strong> <code>VAR contador;</code></p>
+                    <p><strong>JavaScript:</strong> <code>let contador;</code></p>
+                    <p>
+                        Es muy simple: solo necesitas obtener el nombre de la variable y anteponer <code>let</code>.
+                    </p>
+                    <p>
+                        <strong>Pasos:</strong>
+                    </p>
+                    <ol>
+                        <li>Obtener el nombre: <code>String varName = node.getIdentifier().accept(this);</code></li>
+                        <li>Retornar: <code>"let " + varName + ";"</code></li>
+                    </ol>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitVariableDeclaration</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testVariableDeclaration"</pre>
+                </div>
+
+                <h3>5.5 visitAssignment() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p><strong>RoboLang:</strong> <code>contador := 5;</code></p>
+                    <p><strong>JavaScript:</strong> <code>contador = 5;</code></p>
+                    <p>
+                        <strong>Pasos:</strong>
+                    </p>
+                    <ol>
+                        <li>Obtener el identificador: <code>node.getIdentifier().accept(this)</code></li>
+                        <li>Obtener el valor: <code>node.getValue().accept(this)</code></li>
+                        <li>Retornar: <code>varName + " = " + value + ";"</code></li>
+                    </ol>
+                    <p>
+                        Nota: El operador <code>:=</code> de RoboLang se convierte en <code>=</code> de JavaScript.
+                    </p>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitAssignment</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testVariableAssignmentWithNumber"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testVariableAssignmentWithSensor"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testVariableAssignmentWithBoolean"</pre>
+                </div>
+
+                <h3>5.6 visitStatementList() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Un StatementList contiene una lista de statements. Debes:
+                    </p>
+                    <ol>
+                        <li>Recorrer <code>node.getStatements()</code> con un for</li>
+                        <li>Para cada statement, llamar <code>statement.accept(this)</code></li>
+                        <li>Agregar indentación antes de cada statement</li>
+                        <li>Agregar un salto de línea después de cada statement</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">Cuidado con la Indentación</div>
+                    <p>
+                        En visitStatementList(), debes llamar a <code>indent()</code> antes de cada statement.
+                        No aumentes/disminuyas indentLevel aquí, eso lo hacen los padres (IF, WHILE, REPEAT, etc.)
+                    </p>
+                </div>
+            </div>
+
+            <!-- 6. Commands -->
+            <div class="section" id="commands">
+                <h2>6. Implementando Commands</h2>
+
+                <p>
+                    Los <strong>commands</strong> son las acciones básicas del robot: UP, DOWN, LEFT, RIGHT, PENUP, PENDOWN.
+                </p>
+
+                <h3>6.1 visitMovementCommand() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Cada comando de movimiento debe traducirse a una llamada a la API del robot.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>RoboLang</th>
+                            <th>JavaScript</th>
+                            <th>¿async/await?</th>
+                        </tr>
+                        <tr>
+                            <td>UP</td>
+                            <td>await robot.moveUp();</td>
+                            <td>✅ SÍ (animación)</td>
+                        </tr>
+                        <tr>
+                            <td>DOWN</td>
+                            <td>await robot.moveDown();</td>
+                            <td>✅ SÍ (animación)</td>
+                        </tr>
+                        <tr>
+                            <td>LEFT</td>
+                            <td>await robot.moveLeft();</td>
+                            <td>✅ SÍ (animación)</td>
+                        </tr>
+                        <tr>
+                            <td>RIGHT</td>
+                            <td>await robot.moveRight();</td>
+                            <td>✅ SÍ (animación)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Obtener el tipo de comando: <code>TokenType type = node.getCommandType();</code></div>
+                    <div class="step">Usar un switch para mapear cada tipo a su método correspondiente</div>
+                    <div class="step">Todos los movimientos llevan <code>await</code></div>
+                    <div class="step">Incluir un caso default por si aparece un comando desconocido</div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitMovementCommand</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testBasicMovementCommands"</pre>
+                </div>
+
+                <h3>6.2 visitPenCommand() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <table>
+                        <tr>
+                            <th>RoboLang</th>
+                            <th>JavaScript</th>
+                            <th>¿async/await?</th>
+                        </tr>
+                        <tr>
+                            <td>PENUP</td>
+                            <td>robot.penUp();</td>
+                            <td>❌ NO (instantáneo)</td>
+                        </tr>
+                        <tr>
+                            <td>PENDOWN</td>
+                            <td>robot.penDown();</td>
+                            <td>❌ NO (instantáneo)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">IMPORTANTE: Sin await</div>
+                    <p>
+                        Los comandos de pluma (PENUP/PENDOWN) NO llevan <code>await</code> porque son instantáneos.
+                        Solo los movimientos llevan await porque tienen animación.
+                    </p>
+                </div>
+
+                <h4>Implementación:</h4>
+                <p>Muy similar a visitMovementCommand(), pero sin <code>await</code>.</p>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitPenCommand</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testPenCommands"</pre>
+                </div>
+            </div>
+
+            <!-- 7. Expressions -->
+            <div class="section" id="expressions">
+                <h2>7. Implementando Expressions</h2>
+
+                <p>
+                    Las <strong>expresiones</strong> son construcciones que evalúan a un valor. Se usan en condiciones de IF y WHILE.
+                </p>
+
+                <h3>Jerarquía de Expresiones (por precedencia)</h3>
+
+                <table>
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Operador</th>
+                        <th>Ejemplo RoboLang</th>
+                    </tr>
+                    <tr>
+                        <td>1. Más baja</td>
+                        <td>OR</td>
+                        <td>a = 1 OR b = 2</td>
+                    </tr>
+                    <tr>
+                        <td>2.</td>
+                        <td>AND</td>
+                        <td>a = 1 AND b = 2</td>
+                    </tr>
+                    <tr>
+                        <td>3.</td>
+                        <td>NOT</td>
+                        <td>NOT a = 1</td>
+                    </tr>
+                    <tr>
+                        <td>4. Más alta</td>
+                        <td>Comparación</td>
+                        <td>a = 1, b != 2, c < 3</td>
+                    </tr>
+                </table>
+
+                <h3>7.1 visitOrExpression() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Un OrExpression contiene una lista de AndExpressions separadas por OR.
+                    </p>
+                    <p><strong>Ejemplo:</strong> <code>a = 1 OR b = 2 OR c = 3</code></p>
+                    <p>Esto se parsea como: <code>OrExpression([AndExpr1, AndExpr2, AndExpr3])</code></p>
+                </div>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Obtener la lista: <code>List&lt;AndExpressionNode&gt; andExprs = node.getAndExpressions();</code></div>
+                    <div class="step"><strong>Caso especial:</strong> Si la lista tiene solo 1 elemento, no necesitas OR
+                        <ul><li>Retornar directamente: <code>andExprs.get(0).accept(this)</code></li></ul>
+                    </div>
+                    <div class="step">Si hay múltiples elementos, recorrer la lista con un for</div>
+                    <div class="step">Para cada elemento, llamar <code>accept(this)</code> y agregar <code>" || "</code> entre ellos</div>
+                    <div class="step">Cuidado con no agregar || después del último elemento</div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitOrExpression</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testOrOperator"</pre>
+                </div>
+
+                <h3>7.2 visitAndExpression() - CÓMO Implementarlo</h3>
+
+                <div class="hint-box">
+                    <div class="hint-title">Pista</div>
+                    <p>
+                        Casi idéntico a visitOrExpression(), pero:
+                    </p>
+                    <ul>
+                        <li>Trabaja con NotExpressions en lugar de AndExpressions</li>
+                        <li>Usa <code>" && "</code> en lugar de <code>" || "</code></li>
+                    </ul>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitAndExpression</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testAndOperator"</pre>
+                </div>
+
+                <h3>7.3 visitNotExpression() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Un NotExpression puede estar negado o no.
+                    </p>
+                    <p><strong>Ejemplo 1:</strong> <code>NOT a = 1</code> → isNegated = true</p>
+                    <p><strong>Ejemplo 2:</strong> <code>a = 1</code> → isNegated = false</p>
+                </div>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Generar la expresión interna: <code>String expr = node.getExpression().accept(this);</code></div>
+                    <div class="step">Verificar: <code>if (node.isNegated())</code></div>
+                    <div class="step">Si está negado: <code>return "!(" + expr + ")";</code></div>
+                    <div class="step">Si no está negado: <code>return expr;</code></div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitNotExpression</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testNotOperator"</pre>
+                </div>
+
+                <h3>7.4 visitComparisonExpression() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Una comparación tiene tres partes: izquierda, operador, derecha.
+                    </p>
+                    <p><strong>Ejemplo:</strong> <code>temperatura > 25</code></p>
+                    <ul>
+                        <li>Izquierda: temperatura (identificador)</li>
+                        <li>Operador: > (mayor que)</li>
+                        <li>Derecha: 25 (número)</li>
+                    </ul>
+                </div>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Obtener izquierda: <code>String left = node.getLeftValue().accept(this);</code></div>
+                    <div class="step">Obtener operador: <code>String op = node.getOperator().accept(this);</code></div>
+                    <div class="step">Obtener derecha: <code>String right = node.getRightValue().accept(this);</code></div>
+                    <div class="step">Retornar: <code>left + " " + op + " " + right</code></div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitComparisonExpression</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testComparisonExpressions"</pre>
+                </div>
+
+                <h3>7.5 visitComparisonOperator() - CÓMO Implementarlo</h3>
+
+                <div class="warning-box">
+                    <div class="warning-title">CRÍTICO: Conversión de Operadores</div>
+                    <table>
+                        <tr>
+                            <th>RoboLang</th>
+                            <th>JavaScript</th>
+                            <th>Razón</th>
+                        </tr>
+                        <tr>
+                            <td>=</td>
+                            <td>===</td>
+                            <td>JavaScript tiene igualdad estricta</td>
+                        </tr>
+                        <tr>
+                            <td>!=</td>
+                            <td>!==</td>
+                            <td>Desigualdad estricta</td>
+                        </tr>
+                        <tr>
+                            <td>&lt;, &lt;=, &gt;, &gt;=</td>
+                            <td>&lt;, &lt;=, &gt;, &gt;=</td>
+                            <td>Iguales en ambos lenguajes</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h4>Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Obtener el operador: <code>String op = node.getOperator();</code></div>
+                    <div class="step">Si es "=", retornar "==="</div>
+                    <div class="step">Si es "!=", retornar "!=="</div>
+                    <div class="step">Para los demás, retornar sin cambios</div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitComparisonOperator</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testComparisonExpressions"</pre>
+                </div>
+            </div>
+
+            <!-- 8. Values y Literals -->
+            <div class="section" id="values">
+                <h2>8. Implementando Values y Literals</h2>
+
+                <p>
+                    Los <strong>values</strong> y <strong>literals</strong> son los elementos más básicos: números, booleanos, identificadores, sensores.
+                </p>
+
+                <h3>8.1 visitNumber() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Un número en RoboLang debe convertirse a su representación en JavaScript.
+                    </p>
+                    <p><strong>Ejemplo:</strong> <code>42</code> → <code>"42"</code></p>
+                </div>
+
+                <h4>Implementación:</h4>
+                <p>Muy simple: <code>return String.valueOf(node.getValue());</code></p>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitNumber</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testRepeatWithNumber"</pre>
+                </div>
+
+                <h3>8.2 visitBoolean() - CÓMO Implementarlo</h3>
+
+                <p>Idéntico a visitNumber(): <code>return String.valueOf(node.getValue());</code></p>
+                <p>Los booleanos true/false son iguales en RoboLang y JavaScript.</p>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitBoolean</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testVariableAssignmentWithBoolean"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testReturnStatementWithBoolean"</pre>
+                </div>
+
+                <h3>8.3 visitIdentifier() - CÓMO Implementarlo</h3>
+
+                <p>Los identificadores (nombres de variables) son iguales en ambos lenguajes.</p>
+                <p><strong>Implementación:</strong> <code>return node.getName();</code></p>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitIdentifier</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testRepeatWithVariable"</pre>
+                </div>
+
+                <h3>8.4 visitNumericSensor() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Los sensores numéricos (DIST, TEMP, LIGHT, BATTERY) deben convertirse a llamadas a la API.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>RoboLang</th>
+                            <th>JavaScript</th>
+                        </tr>
+                        <tr>
+                            <td>DIST</td>
+                            <td>robot.getSensor('DIST')</td>
+                        </tr>
+                        <tr>
+                            <td>TEMP</td>
+                            <td>robot.getSensor('TEMP')</td>
+                        </tr>
+                        <tr>
+                            <td>LIGHT</td>
+                            <td>robot.getSensor('LIGHT')</td>
+                        </tr>
+                        <tr>
+                            <td>BATTERY</td>
+                            <td>robot.getSensor('BATTERY')</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h4>Implementación:</h4>
+                <div class="steps">
+                    <div class="step">Obtener el nombre del sensor: <code>String sensorName = node.getSensor();</code></div>
+                    <div class="step">Retornar: <code>"robot.getSensor('" + sensorName + "')"</code></div>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">IMPORTANTE: Comillas</div>
+                    <p>
+                        El nombre del sensor debe estar entre comillas simples en JavaScript:
+                        <code>'DIST'</code>, no <code>DIST</code> (sin comillas).
+                    </p>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitNumericSensor</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testNumericSensors"</pre>
+                </div>
+
+                <h3>8.5 visitBooleanSensor() - CÓMO Implementarlo</h3>
+
+                <p>Idéntico a visitNumericSensor(). El sensor OBSTACLE se maneja igual:</p>
+                <p><code>OBSTACLE</code> → <code>robot.getSensor('OBSTACLE')</code></p>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitBooleanSensor</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testBooleanSensor"</pre>
+                </div>
+            </div>
+
+            <!-- 9. Funciones v3.0 -->
+            <div class="section" id="functions">
+                <h2>9. Implementando Funciones (v3.0)</h2>
+
+                <p>
+                    Las funciones son una característica de RoboLang v3.0. Permiten definir bloques de código reutilizables.
+                </p>
+
+                <h3>9.1 visitFunctionDeclaration() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p><strong>RoboLang:</strong></p>
+                    <pre>FUNCTION cuadrado(lado) {
+    REPEAT lado {
+        UP;
+        RIGHT;
+    }
+}</pre>
+                    <p><strong>JavaScript:</strong></p>
+                    <pre>async function cuadrado(lado) {
+    for (let x7k2m3 = 0; x7k2m3 < lado; x7k2m3++) {
+        await robot.moveUp();
+        await robot.moveRight();
+    }
+}
+
+</pre>
+                </div>
+
+                <h4>Puntos Clave:</h4>
+
+                <ul>
+                    <li>Todas las funciones RoboLang deben ser <code>async</code> en JavaScript</li>
+                    <li>Los parámetros se copian tal cual</li>
+                    <li>El cuerpo se procesa con accept()</li>
+                    <li>Retornar el código generado directamente</li>
+                </ul>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Crear StringBuilder</div>
+                    <div class="step">Escribir: <code>"async function " + node.getFunctionName() + "("</code></div>
+                    <div class="step">Recorrer los parámetros con un for, separándolos con comas</div>
+                    <div class="step">Cerrar paréntesis: <code>") {\n"</code></div>
+                    <div class="step">Aumentar indentLevel</div>
+                    <div class="step">Generar el cuerpo: <code>node.getBody().accept(this)</code></div>
+                    <div class="step">Disminuir indentLevel</div>
+                    <div class="step">Cerrar: <code>"}\n\n"</code></div>
+                    <div class="step">Retornar el código completo: <code>return code.toString();</code></div>
+                </div>
+
+                <div class="hint-box">
+                    <div class="hint-title">Simple y Directo</div>
+                    <p>
+                        Este método retorna directamente el código JavaScript de la función completa.
+                        <code>visitProgram()</code> se encargará de concatenar todas las funciones en el orden correcto.
+                    </p>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitFunctionDeclaration</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testFunctionDeclarationWithoutParameters"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testFunctionDeclarationWithOneParameter"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testFunctionDeclarationWithMultipleParameters"</pre>
+                </div>
+
+                <h3>9.2 visitMainFunction() - CÓMO Implementarlo</h3>
+
+                <div class="hint-box">
+                    <div class="hint-title">Pista</div>
+                    <p>
+                        Muy similar a visitFunctionDeclaration(), pero:
+                    </p>
+                    <ul>
+                        <li>El nombre siempre es "main"</li>
+                        <li>No tiene parámetros</li>
+                        <li>Agregar comentario antes: <code>"// Main Entry Point\n"</code></li>
+                        <li>Retornar el código generado</li>
+                    </ul>
+                    <p style="margin-top: 10px;">
+                        <strong>Estructura:</strong><br>
+                        <code>// Main Entry Point\nasync function main() { ... }\n\n</code>
+                    </p>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitMainFunction</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testMainFunctionWithSimpleCommands"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testMainFunctionWithVariablesAndLogic"</pre>
+                </div>
+
+                <h3>9.3 visitFunctionCall() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p><strong>RoboLang:</strong> <code>cuadrado(5);</code></p>
+                    <p><strong>JavaScript:</strong> <code>await cuadrado(5);</code></p>
+                </div>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Escribir: <code>"await " + node.getFunctionName() + "("</code></div>
+                    <div class="step">Recorrer los argumentos, procesarlos con accept(), separar con comas</div>
+                    <div class="step">Cerrar: <code>");"</code></div>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-title">IMPORTANTE: await</div>
+                    <p>
+                        Todas las llamadas a funciones deben llevar <code>await</code> porque las funciones son async
+                        y pueden contener movimientos.
+                    </p>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitFunctionCall</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testFunctionCallWithoutArguments"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testFunctionCallWithOneArgument"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testFunctionCallWithMultipleArguments"</pre>
+                </div>
+
+                <h3>9.4 visitReturnStatement() - CÓMO Implementarlo</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Análisis</div>
+                    <p>
+                        Hay dos casos:
+                    </p>
+                    <ol>
+                        <li><strong>RETURN con valor:</strong> <code>RETURN x;</code> → <code>return x;</code></li>
+                        <li><strong>RETURN sin valor:</strong> <code>RETURN;</code> → <code>return;</code></li>
+                    </ol>
+                </div>
+
+                <h4>Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Verificar: <code>if (node.hasReturnValue())</code></div>
+                    <div class="step">Si hay valor, obtenerlo: <code>node.getReturnValue().accept(this)</code></div>
+                    <div class="step">Retornar: <code>"return " + value + ";"</code></div>
+                    <div class="step">Si no hay valor, retornar: <code>"return;"</code></div>
+                </div>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitReturnStatement</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testReturnStatementWithoutValue"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testReturnStatementWithNumber"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testReturnStatementWithIdentifier"
+mvn test -Dtest="JavaScriptCodeGeneratorTest#testReturnStatementWithBoolean"</pre>
+                </div>
+
+                <h3>9.5 visitParameter() - CÓMO Implementarlo</h3>
+
+                <p>Muy simple: <code>return node.getName();</code></p>
+                <p>Los parámetros son nombres que se copian tal cual a JavaScript.</p>
+
+                <div class="test-box">
+                    <div class="test-title">🧪 Ejecutar Tests de visitParameter</div>
+                    <pre>mvn test -Dtest="JavaScriptCodeGeneratorTest#testParameterGeneration"</pre>
+                </div>
+            </div>
+
+            <!-- 10. Helpers -->
+            <div class="section" id="helpers">
+                <h2>10. Métodos Helper: Indentación y Variables Aleatorias</h2>
+
+                <p>
+                    Los <strong>helpers</strong> son métodos auxiliares que no son parte del visitor pero son esenciales
+                    para generar código correcto.
+                </p>
+
+                <h3>10.1 indent() - Generar Espacios de Indentación</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">Propósito</div>
+                    <p>
+                        Generar una cadena con espacios según el nivel de indentación actual.
+                    </p>
+                    <p><strong>Ejemplo:</strong> Si <code>indentLevel = 2</code>, retornar "        " (8 espacios)</p>
+                </div>
+
+                <h4>Implementación:</h4>
+
+                <pre>private String indent() {
+    return "    ".repeat(Math.max(0, indentLevel));
+}</pre>
+
+                <p>Usamos 4 espacios por nivel de indentación.</p>
+
+                <h3>10.2 generateRandomVariableName() - Variables Aleatorias para Loops</h3>
+
+                <div class="thinking-box">
+                    <div class="thinking-title">¿Por qué variables aleatorias?</div>
+                    <p>
+                        En loops anidados, no podemos reutilizar el mismo nombre de variable:
+                    </p>
+                    <pre>REPEAT 3 {
+    REPEAT 2 {
+        UP;
+    }
+}</pre>
+                    <p>Si usamos siempre "i", tendríamos:</p>
+                    <pre>for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {  // ❌ Error: 'i' ya está declarado
+        await robot.moveUp();
+    }
+}</pre>
+                    <p>Con variables aleatorias:</p>
+                    <pre>for (let a1b2c3 = 0; a1b2c3 < 3; a1b2c3++) {
+    for (let x7k9m2 = 0; x7k9m2 < 2; x7k9m2++) {  // ✅ Correcto
+        await robot.moveUp();
+    }
+}</pre>
+                </div>
+
+                <h4>Formato de las Variables</h4>
+
+                <p>Las variables tienen el formato: <strong>letra + 5 caracteres alfanuméricos</strong></p>
+                <p>Ejemplos: <code>a1b2c3</code>, <code>p7x2k9</code>, <code>z4m8n1</code></p>
+
+                <h4>Pasos de Implementación:</h4>
+
+                <div class="steps">
+                    <div class="step">Crear un StringBuilder</div>
+                    <div class="step">Primer carácter: letra minúscula aleatoria (a-z)</div>
+                    <div class="step">Siguientes 5 caracteres: letra minúscula o dígito aleatorio</div>
+                    <div class="step">Verificar si el nombre ya fue usado (en usedVariableNames)</div>
+                    <div class="step">Si ya existe, generar otro (máximo 100 intentos)</div>
+                    <div class="step">Agregar a usedVariableNames</div>
+                    <div class="step">Retornar el nombre</div>
+                </div>
+
+                <h3>10.3 reset() - Limpiar Estado entre Compilaciones</h3>
+
+                <div class="warning-box">
+                    <div class="warning-title">CRÍTICO</div>
+                    <p>
+                        Si no reseteas el estado, compilar múltiples programas dará resultados incorrectos.
+                    </p>
+                </div>
+
+                <h4>Qué resetear:</h4>
+
+                <ul>
+                    <li><code>indentLevel</code> → 0</li>
+                    <li><code>usedVariableNames</code> → clear()</li>
+                </ul>
+
+                <p>El método reset() se llama automáticamente en generate() al inicio.</p>
+
+                <div class="hint-box">
+                    <div class="hint-title">¡Eso es todo!</div>
+                    <p>
+                        Solo necesitas resetear 2 cosas. Mantener el código simple hace que sea más fácil
+                        de entender y menos propenso a errores.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 11. Checklist -->
+            <div class="section" id="checklist">
+                <h2>11. Checklist de Implementación</h2>
+
+                <p>
+                    Usa esta lista para verificar que tu implementación está completa.
+                </p>
+
+                <h3>Estructura Básica</h3>
+
+                <ul>
+                    <li>✅ Clase JavaScriptCodeGenerator implementa ASTVisitor&lt;String&gt;</li>
+                    <li>✅ Variables de estado declaradas (indentLevel, random, usedVariableNames, etc.)</li>
+                    <li>✅ Constructor inicializa todas las variables</li>
+                    <li>✅ Método generate() resetea estado y llama a program.accept(this)</li>
+                    <li>✅ Método reset() limpia todas las variables</li>
+                </ul>
+
+                <h3>Program y Estructura</h3>
+
+                <ul>
+                    <li>✅ visitProgram() genera header completo</li>
+                    <li>✅ visitProgram() genera <code>const robot = RoboLangRuntime.getRobot();</code></li>
+                    <li>✅ visitProgram() procesa funciones y las concatena directamente</li>
+                    <li>✅ visitProgram() procesa MAIN (si existe)</li>
+                    <li>✅ visitProgram() crea main() automático si no hay MAIN explícito</li>
+                    <li>✅ visitProgram() genera llamada final a main()</li>
+                </ul>
+
+                <h3>Statements (8 métodos)</h3>
+
+                <ul>
+                    <li>✅ visitStatement() delega al statement interno</li>
+                    <li>✅ visitStatementList() recorre statements con indentación</li>
+                    <li>✅ visitStatementBlock() delega al statementList interno</li>
+                    <li>✅ visitRepeatStatement() genera for con variable aleatoria</li>
+                    <li>✅ visitIfStatement() genera if/else con indentación correcta</li>
+                    <li>✅ visitWhileStatement() genera while con indentación correcta</li>
+                    <li>✅ visitVariableDeclaration() genera <code>let varName;</code></li>
+                    <li>✅ visitAssignment() genera <code>varName = value;</code></li>
+                </ul>
+
+                <h3>Funciones v3.0 (5 métodos)</h3>
+
+                <ul>
+                    <li>✅ visitFunctionDeclaration() genera async function completa</li>
+                    <li>✅ visitFunctionDeclaration() retorna el código directamente</li>
+                    <li>✅ visitMainFunction() genera main() completa</li>
+                    <li>✅ visitMainFunction() retorna el código directamente</li>
+                    <li>✅ visitParameter() retorna el nombre del parámetro</li>
+                    <li>✅ visitReturnStatement() genera return con/sin valor</li>
+                    <li>✅ visitFunctionCall() genera <code>await functionName(args);</code></li>
+                </ul>
+
+                <h3>Commands (3 métodos)</h3>
+
+                <ul>
+                    <li>✅ visitSimpleCommand() delega al comando interno</li>
+                    <li>✅ visitMovementCommand() mapea UP/DOWN/LEFT/RIGHT con await</li>
+                    <li>✅ visitPenCommand() mapea PENUP/PENDOWN sin await</li>
+                </ul>
+
+                <h3>Expressions (7 métodos)</h3>
+
+                <ul>
+                    <li>✅ visitCondition() delega a OrExpression</li>
+                    <li>✅ visitOrExpression() une expresiones con ||</li>
+                    <li>✅ visitAndExpression() une expresiones con &&</li>
+                    <li>✅ visitNotExpression() agrega ! si está negado</li>
+                    <li>✅ visitPrimaryExpression() agrega paréntesis si está parentizada</li>
+                    <li>✅ visitComparisonExpression() genera left op right</li>
+                    <li>✅ visitComparisonOperator() convierte = a === y != a !==</li>
+                </ul>
+
+                <h3>Values y Literals (8 métodos)</h3>
+
+                <ul>
+                    <li>✅ visitValue() delega al valor interno</li>
+                    <li>✅ visitSensor() delega al sensor interno</li>
+                    <li>✅ visitNumericSensor() genera <code>robot.getSensor('NOMBRE')</code></li>
+                    <li>✅ visitBooleanSensor() genera <code>robot.getSensor('OBSTACLE')</code></li>
+                    <li>✅ visitNumber() retorna String.valueOf(node.getValue())</li>
+                    <li>✅ visitDigit() retorna String.valueOf(node.getValue())</li>
+                    <li>✅ visitBoolean() retorna String.valueOf(node.getValue())</li>
+                    <li>✅ visitIdentifier() retorna node.getName()</li>
+                </ul>
+
+                <h3>Helpers (2 métodos)</h3>
+
+                <ul>
+                    <li>✅ indent() genera espacios según indentLevel</li>
+                    <li>✅ generateRandomVariableName() genera nombres únicos</li>
+                </ul>
+
+                <h3>Detalles Importantes</h3>
+
+                <ul>
+                    <li>✅ Movimientos usan <code>await</code></li>
+                    <li>✅ Comandos de pluma NO usan <code>await</code></li>
+                    <li>✅ Funciones son <code>async</code></li>
+                    <li>✅ Llamadas a funciones usan <code>await</code></li>
+                    <li>✅ Variables de loop son aleatorias y únicas</li>
+                    <li>✅ Operador = se convierte a ===</li>
+                    <li>✅ Operador != se convierte a !==</li>
+                    <li>✅ Sensores llevan comillas: <code>'DIST'</code></li>
+                    <li>✅ Indentación se maneja correctamente en todos los bloques</li>
+                    <li>✅ Estado se resetea antes de cada generación</li>
+                </ul>
+
+                <h3>Testing</h3>
+
+                <ul>
+                    <li>✅ Programa simple v2.0 (sin MAIN)</li>
+                    <li>✅ Programa v3.0 (con MAIN y FUNCTION)</li>
+                    <li>✅ Programa con REPEAT</li>
+                    <li>✅ Programa con IF/ELSE</li>
+                    <li>✅ Programa con WHILE</li>
+                    <li>✅ Programa con variables</li>
+                    <li>✅ Programa con sensores</li>
+                    <li>✅ Programa con expresiones lógicas (AND, OR, NOT)</li>
+                    <li>✅ Programa con loops anidados</li>
+                    <li>✅ Programa con funciones y parámetros</li>
+                </ul>
+
+                <div class="example-box">
+                    <div class="example-title">¡Felicitaciones!</div>
+                    <p>
+                        Si has completado todos los puntos del checklist, tu implementación del
+                        JavaScriptCodeGenerator está completa y lista para generar código JavaScript
+                        ejecutable a partir de programas RoboLang.
+                    </p>
+                    <p style="margin-top: 20px; text-align: center; font-size: 1.2em;">
+                        <strong>🎉 Has construido un transpilador completo 🎉</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+                <p style="color: #1e3c72; font-weight: bold; font-size: 1.2em;">
+                    Recuerda: Esta guía te enseña CÓMO pensar el problema
+                </p>
+                <p style="color: #666; margin-top: 10px;">
+                    El verdadero aprendizaje viene de implementarlo tú mismo, entendiendo cada decisión.
+                    No copies código, entiende el PROCESO.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
