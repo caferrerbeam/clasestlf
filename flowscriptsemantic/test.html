@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - FlowScript Docs</title>
+</head>
+<body>
+    <h1>Diagnóstico de Carga de Datos</h1>
+    <div id="output"></div>
+
+    <script src="nodes-data.js"></script>
+    <script src="nodes-complete.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        output.innerHTML = `
+            <h2>Estado de window.nodesData:</h2>
+            <p>¿Existe window.nodesData? ${typeof window.nodesData !== 'undefined' ? 'SÍ' : 'NO'}</p>
+            <p>Cantidad de nodos: ${window.nodesData ? Object.keys(window.nodesData).length : 0}</p>
+            <h3>Primeros 10 nodos:</h3>
+            <ul>
+                ${window.nodesData ? Object.keys(window.nodesData).slice(0, 10).map(key => `<li>${key}: ${window.nodesData[key].title}</li>`).join('') : '<li>No hay datos</li>'}
+            </ul>
+            <h3>Últimos 10 nodos:</h3>
+            <ul>
+                ${window.nodesData ? Object.keys(window.nodesData).slice(-10).map(key => `<li>${key}: ${window.nodesData[key].title}</li>`).join('') : '<li>No hay datos</li>'}
+            </ul>
+        `;
+    </script>
+</body>
+</html>

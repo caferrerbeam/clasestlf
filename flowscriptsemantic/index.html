@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowScript - Arquitectura del Compilador</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Highlight.js para resaltado de sintaxis -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>FlowScript</h1>
+            <p>Documentación Técnica del Compilador</p>
+        </div>
+
+        <div class="nav-section">
+            <h3>🏠 Inicio</h3>
+            <a href="#overview" class="nav-link">Visión General</a>
+            <a href="#architecture" class="nav-link">Arquitectura</a>
+            <a href="#pipeline" class="nav-link">Pipeline de Compilación</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>📝 Literales</h3>
+            <a href="#integer-literal" class="nav-link">IntegerLiteral</a>
+            <a href="#decimal-literal" class="nav-link">DecimalLiteral</a>
+            <a href="#string-literal" class="nav-link">StringLiteral</a>
+            <a href="#boolean-literal" class="nav-link">BooleanLiteral</a>
+            <a href="#null-literal" class="nav-link">NullLiteral</a>
+            <a href="#list-literal" class="nav-link">ListLiteral</a>
+            <a href="#object-literal" class="nav-link">ObjectLiteral</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>🔢 Expresiones Básicas</h3>
+            <a href="#identifier" class="nav-link">Identifier</a>
+            <a href="#function-call" class="nav-link">FunctionCall</a>
+            <a href="#property-access" class="nav-link">PropertyAccess</a>
+            <a href="#index-access" class="nav-link">IndexAccess</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>➕ Expresiones Binarias</h3>
+            <a href="#additive-expression" class="nav-link">AdditiveExpression</a>
+            <a href="#multiplicative-expression" class="nav-link">MultiplicativeExpression</a>
+            <a href="#relational-expression" class="nav-link">RelationalExpression</a>
+            <a href="#equality-expression" class="nav-link">EqualityExpression</a>
+            <a href="#logical-and-expression" class="nav-link">LogicalAndExpression</a>
+            <a href="#logical-or-expression" class="nav-link">LogicalOrExpression</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>🔄 Expresiones Especiales</h3>
+            <a href="#unary-expression" class="nav-link">UnaryExpression</a>
+            <a href="#ternary-expression" class="nav-link">TernaryExpression</a>
+            <a href="#postfix-expression" class="nav-link">PostfixExpression</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>🗄️ Operaciones Especiales</h3>
+            <a href="#db-execute" class="nav-link">db.ejecutar()</a>
+            <a href="#db-query" class="nav-link">db.consultar()</a>
+            <a href="#http-get" class="nav-link">http.get()</a>
+            <a href="#http-post" class="nav-link">http.post()</a>
+            <a href="#http-delete" class="nav-link">http.delete()</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>🔀 Control de Flujo</h3>
+            <a href="#if-statement" class="nav-link">IfStatement</a>
+            <a href="#while-statement" class="nav-link">WhileStatement</a>
+            <a href="#for-statement" class="nav-link">ForStatement</a>
+            <a href="#for-range-statement" class="nav-link">ForRangeStatement</a>
+            <a href="#try-statement" class="nav-link">TryStatement</a>
+            <a href="#return-statement" class="nav-link">ReturnStatement</a>
+            <a href="#throw-statement" class="nav-link">ThrowStatement</a>
+            <a href="#break-statement" class="nav-link">BreakStatement</a>
+            <a href="#continue-statement" class="nav-link">ContinueStatement</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>📦 Declaraciones</h3>
+            <a href="#program" class="nav-link">Program</a>
+            <a href="#function-declaration" class="nav-link">FunctionDeclaration</a>
+            <a href="#variable-declaration" class="nav-link">VariableDeclaration</a>
+            <a href="#import-declaration" class="nav-link">ImportDeclaration</a>
+        </div>
+
+        <div class="nav-section">
+            <h3>🏭 Procesos BPMN</h3>
+            <a href="#process-declaration" class="nav-link">ProcessDeclaration</a>
+            <a href="#start-element" class="nav-link">StartElement</a>
+            <a href="#end-element" class="nav-link">EndElement</a>
+            <a href="#task-element" class="nav-link">TaskElement</a>
+            <a href="#exclusive-gateway" class="nav-link">ExclusiveGateway</a>
+            <a href="#parallel-gateway" class="nav-link">ParallelGateway</a>
+            <a href="#goto-statement" class="nav-link">GotoStatement</a>
+        </div>
+
+        <div class="nav-section" style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; padding: 1rem; margin-top: 1rem;">
+            <h3>🚀 Guías Avanzadas</h3>
+            <a href="generacion-codigo-avanzada.html" class="nav-link" style="color: #fbbf24; font-weight: 600;">
+                📖 Generación de Código Avanzada
+            </a>
+            <p style="font-size: 0.85rem; color: #a0aec0; margin-top: 0.5rem; line-height: 1.4;">
+                Explicación profunda de Gateways BPMN y Métodos Especiales (DB/HTTP)
+            </p>
+        </div>
+    </nav>
+
+    <main class="content">
+        <section id="overview" class="doc-section">
+            <h1>🏗️ Arquitectura del Compilador FlowScript</h1>
+            <p class="subtitle">Documentación técnica exhaustiva de la implementación del compilador</p>
+
+            <div class="info-box">
+                <h3>📚 Acerca de esta Documentación</h3>
+                <p>Esta documentación explica el <strong>CÓMO</strong> (implementación técnica), no el <strong>QUÉ</strong> (funcionalidad).</p>
+                <p>Para cada nodo AST, encontrarás:</p>
+                <ul>
+                    <li>📖 Regla gramatical que lo genera</li>
+                    <li>🌳 Estructura del nodo AST</li>
+                    <li>🔍 Análisis semántico aplicado</li>
+                    <li>⚙️ Generación de código Java</li>
+                    <li>💡 Ejemplos de código FlowScript → Java</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15)); border-left: 4px solid #fbbf24; margin-top: 2rem;">
+                <h3>🚀 Documentación Avanzada</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                    ¿Quieres entender a fondo cómo se generan <strong>Gateways BPMN</strong> y <strong>Métodos Especiales</strong> (DB/HTTP)?
+                </p>
+                <a href="generacion-codigo-avanzada.html" style="display: inline-block; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1e1e1e; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: transform 0.2s; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);">
+                    📖 Ir a Generación de Código Avanzada →
+                </a>
+                <p style="margin-top: 1rem; font-size: 0.95rem; color: #a0aec0;">
+                    Explicación ultra-detallada del código del generador con ejemplos paso a paso, patrones Java avanzados, y el patrón Lambda IIFE.
+                </p>
+            </div>
+        </section>
+
+        <section id="architecture" class="doc-section">
+            <h2>🏛️ Arquitectura General</h2>
+
+            <div class="architecture-diagram">
+                <div class="arch-box">
+                    <h4>1️⃣ Análisis Léxico</h4>
+                    <p><code>Lexer</code></p>
+                    <p>FlowScript → Tokens</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="arch-box">
+                    <h4>2️⃣ Análisis Sintáctico</h4>
+                    <p><code>Parser</code></p>
+                    <p>Tokens → AST</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="arch-box">
+                    <h4>3️⃣ Análisis Semántico</h4>
+                    <p><code>SemanticAnalyzer</code></p>
+                    <p>AST → AST Validado</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="arch-box">
+                    <h4>4️⃣ Generación de Código</h4>
+                    <p><code>CodeGenerator</code></p>
+                    <p>AST → Java</p>
+                </div>
+            </div>
+
+            <h3>Componentes Principales</h3>
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>🔤 Lexer</h4>
+                    <p><code>com.flowscript.lexer.Lexer</code></p>
+                    <p>Tokenizador basado en AFD (Autómatas Finitos Deterministas)</p>
+                </div>
+                <div class="component-card">
+                    <h4>📊 Parser</h4>
+                    <p><code>com.flowscript.sintactic.Parser</code></p>
+                    <p>Parser recursivo descendente</p>
+                </div>
+                <div class="component-card">
+                    <h4>🔍 Semantic Analyzer</h4>
+                    <p><code>com.flowscript.semantic.analyzer.SemanticAnalyzer</code></p>
+                    <p>Patrón Visitor para análisis semántico</p>
+                </div>
+                <div class="component-card">
+                    <h4>⚙️ Code Generator</h4>
+                    <p><code>com.flowscript.codegen.CodeGenerator</code></p>
+                    <p>Generador de código Java</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="pipeline" class="doc-section">
+            <h2>🔄 Pipeline de Compilación</h2>
+
+            <div class="pipeline-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Tokenización</h3>
+                    <div class="code-example">
+                        <div class="code-label">FlowScript</div>
+                        <pre><code>funcion suma(a: entero, b: entero) -> entero {
+    retornar a + b
+}</code></pre>
+                    </div>
+                    <div class="arrow-down">↓</div>
+                    <div class="code-example">
+                        <div class="code-label">Tokens</div>
+                        <pre><code>[KEYWORD(funcion), IDENTIFIER(suma), LPAREN, IDENTIFIER(a),
+ COLON, KEYWORD(entero), COMMA, IDENTIFIER(b), COLON,
+ KEYWORD(entero), RPAREN, ARROW, KEYWORD(entero), LBRACE,
+ KEYWORD(retornar), IDENTIFIER(a), PLUS, IDENTIFIER(b),
+ RBRACE]</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Parsing (AST)</h3>
+                    <div class="code-example">
+                        <div class="code-label">Abstract Syntax Tree</div>
+                        <pre><code>FunctionDeclarationNode
+├─ name: "suma"
+├─ parameters: [
+│   ParameterNode(name: "a", type: "entero"),
+│   ParameterNode(name: "b", type: "entero")
+│  ]
+├─ returnType: "entero"
+└─ body: BlockNode
+    └─ ReturnStatementNode
+        └─ AdditiveExpressionNode
+            ├─ left: IdentifierNode("a")
+            ├─ operator: "+"
+            └─ right: IdentifierNode("b")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Análisis Semántico</h3>
+                    <div class="validation-list">
+                        <div class="validation-item">✓ Validación de tipos</div>
+                        <div class="validation-item">✓ Verificación de declaraciones</div>
+                        <div class="validation-item">✓ Análisis de alcance (scope)</div>
+                        <div class="validation-item">✓ Validación de retornos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Generación de Código</h3>
+                    <div class="code-example">
+                        <div class="code-label">Java Generado</div>
+                        <pre><code>public static int suma(int a, int b)
+{
+    System.out.println("[ENTRADA] suma(a, b)");
+    return a + b;
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aquí irán todas las secciones de nodos individuales -->
+        <div id="nodes-content"></div>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="nodes-data.js"></script>
+    <script src="nodes-complete.js"></script>
+    <script src="render-nodes.js"></script>
+</body>
+</html>

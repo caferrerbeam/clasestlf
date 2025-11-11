@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowScript - Generación de Código Avanzada</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc {
+            background: rgba(124, 58, 237, 0.1);
+            border-left: 4px solid #7c3aed;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border-radius: 10px;
+        }
+
+        .toc h2 {
+            color: #a78bfa;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 0.5rem 0;
+        }
+
+        .toc a {
+            color: #c4b5fd;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .toc a:hover {
+            color: #fff;
+            padding-left: 10px;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #fbbf24;
+            border-bottom: 2px solid #fbbf24;
+            padding-bottom: 0.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem 0;
+            color: #60a5fa;
+        }
+
+        .section h4 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem 0;
+            color: #34d399;
+        }
+
+        .explanation {
+            background: rgba(124, 58, 237, 0.1);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 4px solid #7c3aed;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            margin: 1.5rem 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-header {
+            background: rgba(124, 58, 237, 0.3);
+            padding: 1rem 1.5rem;
+            color: #a78bfa;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-header::before {
+            content: "📝";
+            font-size: 1.2rem;
+        }
+
+        pre {
+            margin: 0 !important;
+            background: #1e1e1e !important;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-header {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .flowscript-header {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .java-header {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .key-point {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .key-point::before {
+            content: "💡 ";
+            font-size: 1.2rem;
+        }
+
+        .warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .warning::before {
+            content: "⚠️ ";
+            font-size: 1.2rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-card h5 {
+            color: #a78bfa;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .step {
+            background: rgba(96, 165, 250, 0.1);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 3px solid #60a5fa;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #60a5fa;
+            color: #1e1e1e;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Generación de Código Avanzada</h1>
+        <p class="subtitle">Explicación detallada de cómo FlowScript genera código Java para Gateways y Métodos Especiales</p>
+
+        <div class="toc">
+            <h2>📋 Tabla de Contenidos</h2>
+            <ul>
+                <li><a href="#gateways">1. Gateways BPMN</a></li>
+                <li><a href="#exclusive-gateway">1.1 Gateway Exclusivo (if-else if-else)</a></li>
+                <li><a href="#parallel-gateway">1.2 Gateway Paralelo (CompletableFuture)</a></li>
+                <li><a href="#metodos-especiales">2. Métodos Especiales</a></li>
+                <li><a href="#db-ejecutar">2.1 db.ejecutar() - Operaciones JDBC</a></li>
+                <li><a href="#db-consultar">2.2 db.consultar() - Queries con ResultSet</a></li>
+                <li><a href="#http-get">2.3 http.get() - HttpClient GET</a></li>
+                <li><a href="#http-post">2.4 http.post() - HttpClient POST</a></li>
+                <li><a href="#patron-lambda-iife">3. Patrón Lambda IIFE</a></li>
+            </ul>
+        </div>
+
+        <!-- SECCIÓN 1: GATEWAYS -->
+        <div class="section" id="gateways">
+            <h2>1. 🔀 Gateways BPMN</h2>
+
+            <div class="explanation">
+                <p><strong>¿Qué son los Gateways?</strong></p>
+                <p>Los gateways en BPMN representan puntos de decisión en el flujo de un proceso. FlowScript implementa dos tipos:</p>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><strong>Gateway Exclusivo</strong>: Evalúa condiciones y toma UNA sola rama (XOR)</li>
+                    <li><strong>Gateway Paralelo</strong>: Ejecuta TODAS las ramas simultáneamente (AND)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- EXCLUSIVE GATEWAY -->
+        <div class="section" id="exclusive-gateway">
+            <h2>1.1 🔵 Gateway Exclusivo (Exclusive Gateway)</h2>
+
+            <h3>🎯 Concepto</h3>
+            <div class="explanation">
+                El gateway exclusivo evalúa múltiples condiciones <strong>en orden</strong> y ejecuta la primera que sea verdadera.
+                Es equivalente a una estructura <code>if-else if-else</code> en Java.
+            </div>
+
+            <h3>📝 Ejemplo de Uso</h3>
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">FlowScript</div>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">proceso ValidarEdad {
+    inicio Main
+
+    gateway VerificarEdad {
+        cuando (edad >= 18 y edad < 65) go_to Adulto
+        cuando (edad >= 65) go_to Senior
+        sino go_to Menor
+    }
+
+    tarea Adulto { /* acciones */ }
+    tarea Senior { /* acciones */ }
+    tarea Menor { /* acciones */ }
+
+    fin
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Java Generado</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">public static void ValidarEdad() {
+    System.out.println("[ENTRADA] Proceso: ValidarEdad");
+
+    // === GATEWAY: VerificarEdad ===
+    System.out.println("[GATEWAY ENTRADA] VerificarEdad");
+
+    if (edad >= 18 && edad < 65) {
+        // Go to: Adulto
+        // === TAREA: Adulto ===
+        /* acciones */
+    }
+    else if (edad >= 65) {
+        // Go to: Senior
+        // === TAREA: Senior ===
+        /* acciones */
+    }
+    else {
+        // Go to: Menor
+        // === TAREA: Menor ===
+        /* acciones */
+    }
+
+    System.out.println("[GATEWAY SALIDA] VerificarEdad");
+    System.out.println("[SALIDA] Proceso: ValidarEdad");
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>⚙️ Código del Generador</h3>
+            <div class="code-block">
+                <div class="code-header">ProcessGenerator.java - generateExclusiveGateway()</div>
+                <pre><code class="language-java">private void generateExclusiveGateway(ExclusiveGatewayNode gateway) {
+    emitter.emitComment("=== GATEWAY: " + gateway.getGatewayName() + " ===");
+    emitter.emit("System.out.println(\"[GATEWAY ENTRADA] " + gateway.getGatewayName() + "\");");
+
+    List&lt;WhenClauseNode&gt; whenClauses = gateway.getWhenClauses();
+
+    if (whenClauses == null || whenClauses.isEmpty()) {
+        return;
+    }
+
+    // Primera cláusula when → if
+    WhenClauseNode firstWhen = whenClauses.get(0);
+    String condition = expressionGenerator.generate(firstWhen.getCondition());
+    emitter.emit("if (" + condition + ")");
+    emitter.openBlock();
+    emitter.emitComment("Go to: " + firstWhen.getTargetTask());
+    emitter.closeBlock();
+
+    // Cláusulas when subsecuentes → else if
+    for (int i = 1; i < whenClauses.size(); i++) {
+        WhenClauseNode when = whenClauses.get(i);
+        String cond = expressionGenerator.generate(when.getCondition());
+        emitter.emit("else if (" + cond + ")");
+        emitter.openBlock();
+        emitter.emitComment("Go to: " + when.getTargetTask());
+        emitter.closeBlock();
+    }
+
+    // Cláusula else (opcional)
+    if (gateway.getElseClause() != null) {
+        emitter.emit("else");
+        emitter.openBlock();
+        emitter.emitComment("Go to: " + gateway.getElseClause().getTargetTask());
+        emitter.closeBlock();
+    }
+
+    emitter.emit("System.out.println(\"[GATEWAY SALIDA] " + gateway.getGatewayName() + "\");");
+    emitter.newLine();
+}</code></pre>
+            </div>
+
+            <h3>🔍 Explicación Paso a Paso</h3>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Logging de Entrada</strong>: Se imprime un mensaje indicando que se entró al gateway
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Primera Condición</strong>: La primera cláusula <code>cuando</code> se traduce a un <code>if</code>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Condiciones Adicionales</strong>: Las siguientes cláusulas <code>cuando</code> se traducen a <code>else if</code>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Rama Else</strong>: Si existe cláusula <code>sino</code>, se traduce a <code>else</code>
+            </div>
+
+            <div class="step">
+                <span class="step-number">5</span>
+                <strong>Logging de Salida</strong>: Se imprime un mensaje indicando que se salió del gateway
+            </div>
+
+            <div class="key-point">
+                <strong>Punto Clave:</strong> El gateway exclusivo es <strong>determinista</strong> - solo UNA rama se ejecuta,
+                la primera cuya condición sea verdadera.
+            </div>
+        </div>
+
+        <!-- PARALLEL GATEWAY -->
+        <div class="section" id="parallel-gateway">
+            <h2>1.2 🔴 Gateway Paralelo (Parallel Gateway)</h2>
+
+            <h3>🎯 Concepto</h3>
+            <div class="explanation">
+                El gateway paralelo ejecuta <strong>TODAS las ramas simultáneamente</strong> usando programación asíncrona.
+                En Java se implementa con <code>CompletableFuture</code> y el patrón <code>allOf().join()</code> para esperar
+                a que todas las ramas completen antes de continuar.
+            </div>
+
+            <h3>📝 Ejemplo de Uso</h3>
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">FlowScript</div>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">proceso ProcesarOrden {
+    inicio Main
+
+    gateway Paralelo paralelo {
+        rama go_to VerificarInventario
+        rama go_to CalcularEnvio
+        rama go_to ValidarPago
+        unir go_to ConfirmarOrden
+    }
+
+    tarea VerificarInventario { /* ... */ }
+    tarea CalcularEnvio { /* ... */ }
+    tarea ValidarPago { /* ... */ }
+    tarea ConfirmarOrden { /* ... */ }
+
+    fin
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Java Generado</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">public static void ProcesarOrden() {
+    System.out.println("[ENTRADA] Proceso: ProcesarOrden");
+
+    // === PARALLEL GATEWAY: Paralelo ===
+    System.out.println("[PARALLEL GATEWAY ENTRADA] Paralelo - Iniciando ramas paralelas");
+
+    CompletableFuture&lt;Void&gt; Paralelo_rama0 = CompletableFuture.runAsync(() -> {
+        try {
+            // Branch to: VerificarInventario
+            // === TAREA: VerificarInventario ===
+            /* ... */
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error in parallel branch 0", e);
+        }
+    });
+
+    CompletableFuture&lt;Void&gt; Paralelo_rama1 = CompletableFuture.runAsync(() -> {
+        try {
+            // Branch to: CalcularEnvio
+            // === TAREA: CalcularEnvio ===
+            /* ... */
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error in parallel branch 1", e);
+        }
+    });
+
+    CompletableFuture&lt;Void&gt; Paralelo_rama2 = CompletableFuture.runAsync(() -> {
+        try {
+            // Branch to: ValidarPago
+            // === TAREA: ValidarPago ===
+            /* ... */
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error in parallel branch 2", e);
+        }
+    });
+
+    // === JOIN: Esperar todas las ramas ===
+    CompletableFuture.allOf(Paralelo_rama0, Paralelo_rama1, Paralelo_rama2).join();
+    System.out.println("[PARALLEL GATEWAY SALIDA] Paralelo - Todas las ramas completadas");
+
+    // Continue to: ConfirmarOrden
+
+    System.out.println("[SALIDA] Proceso: ProcesarOrden");
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>⚙️ Código del Generador</h3>
+            <div class="code-block">
+                <div class="code-header">ProcessGenerator.java - generateParallelGateway()</div>
+                <pre><code class="language-java">private void generateParallelGateway(ParallelGatewayNode gateway) {
+    emitter.emitComment("=== PARALLEL GATEWAY: " + gateway.getGatewayName() + " ===");
+    emitter.emit("System.out.println(\"[PARALLEL GATEWAY ENTRADA] " + gateway.getGatewayName() +
+                 " - Iniciando ramas paralelas\");");
+
+    List&lt;ParallelBranchNode&gt; branches = gateway.getBranches();
+
+    if (branches == null || branches.isEmpty()) {
+        return;
+    }
+
+    // Usar el nombre del gateway como prefijo para evitar colisiones
+    String gatewayPrefix = gateway.getGatewayName();
+
+    // Generar CompletableFuture para cada rama
+    for (int i = 0; i < branches.size(); i++) {
+        ParallelBranchNode branch = branches.get(i);
+        emitter.emit("CompletableFuture<Void> " + gatewayPrefix + "_rama" + i +
+                    " = CompletableFuture.runAsync(() ->");
+        emitter.openBlock();
+        emitter.emit("try");
+        emitter.openBlock();
+        emitter.emitComment("Branch to: " + branch.getTargetTask());
+        // Aquí se generaría el código de la tarea
+        emitter.closeBlock();
+        emitter.emit("catch (Exception e)");
+        emitter.openBlock();
+        emitter.emit("throw new RuntimeException(\"Error in parallel branch " + i + "\", e);");
+        emitter.closeBlock();
+        emitter.closeBlock();
+        emitter.emit(");");
+        emitter.newLine();
+    }
+
+    // Generar join - esperar todas las ramas
+    emitter.emitComment("=== JOIN: Esperar todas las ramas ===");
+
+    StringBuilder allOf = new StringBuilder("CompletableFuture.allOf(");
+    for (int i = 0; i < branches.size(); i++) {
+        if (i > 0) allOf.append(", ");
+        allOf.append(gatewayPrefix).append("_rama").append(i);
+    }
+    allOf.append(").join();");
+
+    emitter.emit(allOf.toString());
+    emitter.emit("System.out.println(\"[PARALLEL GATEWAY SALIDA] " + gateway.getGatewayName() +
+                 " - Todas las ramas completadas\");");
+    emitter.newLine();
+
+    // Continuar al destino del join
+    if (gateway.getJoinClause() != null) {
+        emitter.emitComment("Continue to: " + gateway.getJoinClause().getTargetTask());
+        emitter.newLine();
+    }
+}</code></pre>
+            </div>
+
+            <h3>🔍 Explicación Técnica Detallada</h3>
+
+            <h4>1️⃣ CompletableFuture - ¿Qué es?</h4>
+            <div class="explanation">
+                <code>CompletableFuture&lt;Void&gt;</code> es una clase de Java (desde Java 8) que representa una computación asíncrona.
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>&lt;Void&gt;</code> indica que la tarea no retorna ningún valor</li>
+                    <li><code>runAsync()</code> ejecuta el código en un thread del pool común de Java</li>
+                    <li>Permite ejecutar código en paralelo sin crear threads manualmente</li>
+                </ul>
+            </div>
+
+            <h4>2️⃣ Patrón allOf().join()</h4>
+            <div class="explanation">
+                <strong>CompletableFuture.allOf(future1, future2, ...)</strong> crea un nuevo CompletableFuture que se completa
+                cuando TODOS los futures dados se han completado.
+                <br><br>
+                <strong>.join()</strong> es un método bloqueante que espera a que el future se complete. Es similar a <code>.get()</code>
+                pero no lanza checked exceptions.
+            </div>
+
+            <div class="key-point">
+                <strong>Punto Clave:</strong> El gateway paralelo NO es verdaderamente paralelo en hardware - usa el ForkJoinPool
+                común de Java que gestiona un pool de threads. Pero desde el punto de vista lógico, las ramas se ejecutan concurrentemente.
+            </div>
+
+            <div class="warning">
+                <strong>Importante:</strong> Si alguna rama lanza una excepción, se propaga como <code>RuntimeException</code>
+                con el mensaje "Error in parallel branch X". Esto permite identificar qué rama falló.
+            </div>
+
+            <h4>3️⃣ Nombrado de Variables</h4>
+            <div class="explanation">
+                Las variables se nombran como <code>GatewayName_rama0</code>, <code>GatewayName_rama1</code>, etc. usando el nombre
+                del gateway como prefijo. Esto evita colisiones si hay múltiples gateways paralelos en el mismo proceso.
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h5>🎯 Thread Pool</h5>
+                    <p>Usa ForkJoinPool.commonPool() automáticamente</p>
+                </div>
+                <div class="feature-card">
+                    <h5>⚡ Rendimiento</h5>
+                    <p>Ejecuta ramas en paralelo real (multi-core)</p>
+                </div>
+                <div class="feature-card">
+                    <h5>🔒 Sincronización</h5>
+                    <p>join() garantiza que todas completen antes de continuar</p>
+                </div>
+                <div class="feature-card">
+                    <h5>🛡️ Manejo de Errores</h5>
+                    <p>Cada rama tiene try-catch individual</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: MÉTODOS ESPECIALES -->
+        <div class="section" id="metodos-especiales">
+            <h2>2. 🔧 Métodos Especiales</h2>
+
+            <div class="explanation">
+                <p><strong>¿Por qué métodos especiales?</strong></p>
+                <p>FlowScript proporciona operaciones integradas para interactuar con bases de datos y APIs HTTP sin necesidad
+                de escribir código boilerplate. Estos métodos se traducen a código Java completo inline.</p>
+            </div>
+
+            <div class="key-point">
+                <strong>Patrón Común:</strong> Todos los métodos especiales usan el patrón <strong>Lambda IIFE</strong>
+                (Immediately Invoked Function Expression) para encapsular la lógica y retornar el resultado directamente.
+            </div>
+        </div>
+
+        <!-- DB.EJECUTAR -->
+        <div class="section" id="db-ejecutar">
+            <h2>2.1 💾 db.ejecutar() - Operaciones de Escritura en BD</h2>
+
+            <h3>🎯 Propósito</h3>
+            <div class="explanation">
+                Ejecuta operaciones SQL que <strong>modifican</strong> datos: INSERT, UPDATE, DELETE.
+                Retorna el número de filas afectadas como <code>Integer</code>.
+            </div>
+
+            <h3>📝 Ejemplo Completo</h3>
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">FlowScript</div>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">variable nombre = "Juan Pérez"
+variable edad = 25
+variable email = "juan@example.com"
+
+variable filasAfectadas = db.ejecutar(
+    "INSERT INTO usuarios (nombre, edad, email) VALUES (?, ?, ?)",
+    [nombre, edad, email]
+)</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Java Generado (Formateado)</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">String nombre = "Juan Pérez";
+int edad = 25;
+String email = "juan@example.com";
+
+int filasAfectadas = ((java.util.function.Supplier&lt;Integer&gt;)(() -> {
+    try (java.sql.Connection __conn = java.sql.DriverManager.getConnection(
+            "jdbc:h2:mem:flowscript;DB_CLOSE_DELAY=-1", "sa", "");
+         java.sql.PreparedStatement __stmt = __conn.prepareStatement(
+            "INSERT INTO usuarios (nombre, edad, email) VALUES (?, ?, ?)")) {
+
+        java.util.List&lt;?&gt; __params = List.of(nombre, edad, email);
+        for (int i = 0; i < __params.size(); i++) {
+            __stmt.setObject(i + 1, __params.get(i));
+        }
+
+        int __result = __stmt.executeUpdate();
+        System.out.println("[DB EXECUTE] INSERT INTO usuarios ... | Affected rows: " + __result);
+        return __result;
+
+    } catch (java.sql.SQLException __e) {
+        throw new RuntimeException("Database execution error: " + __e.getMessage(), __e);
+    }
+})).get();</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>⚙️ Código del Generador</h3>
+            <div class="code-block">
+                <div class="code-header">ExpressionGenerator.java - generateDbExecute()</div>
+                <pre><code class="language-java">private String generateDbExecute(DbExecuteNode node) {
+    String query = generate(node.getQuery());
+    String params = generate(node.getParameters());
+
+    return "((java.util.function.Supplier&lt;Integer&gt;)(() -> {\n" +
+           "        try (java.sql.Connection __conn = java.sql.DriverManager.getConnection(\"jdbc:h2:mem:flowscript;DB_CLOSE_DELAY=-1\", \"sa\", \"\");\n" +
+           "             java.sql.PreparedStatement __stmt = __conn.prepareStatement(" + query + ")) {\n" +
+           "            java.util.List&lt;?&gt; __params = " + params + ";\n" +
+           "            for (int i = 0; i < __params.size(); i++) {\n" +
+           "                __stmt.setObject(i + 1, __params.get(i));\n" +
+           "            }\n" +
+           "            int __result = __stmt.executeUpdate();\n" +
+           "            System.out.println(\"[DB EXECUTE] \" + " + query + " + \" | Affected rows: \" + __result);\n" +
+           "            return __result;\n" +
+           "        } catch (java.sql.SQLException __e) {\n" +
+           "            throw new RuntimeException(\"Database execution error: \" + __e.getMessage(), __e);\n" +
+           "        }\n" +
+           "    })).get()";
+}</code></pre>
+            </div>
+
+            <h3>🔍 Análisis Profundo</h3>
+
+            <h4>1️⃣ Try-with-resources</h4>
+            <div class="explanation">
+                <code>try (Connection conn = ...; PreparedStatement stmt = ...)</code> es una estructura de Java 7+ que
+                <strong>automáticamente cierra</strong> los recursos cuando se sale del bloque try, incluso si hay una excepción.
+                <br><br>
+                Esto es crítico para evitar <strong>memory leaks</strong> y conexiones de BD abiertas.
+            </div>
+
+            <h4>2️⃣ PreparedStatement vs Statement</h4>
+            <div class="key-point">
+                Se usa <code>PreparedStatement</code> en lugar de <code>Statement</code> por dos razones:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><strong>Seguridad:</strong> Previene inyección SQL</li>
+                    <li><strong>Rendimiento:</strong> La BD puede cachear el plan de ejecución</li>
+                </ul>
+            </div>
+
+            <h4>3️⃣ setObject() vs setString/setInt</h4>
+            <div class="explanation">
+                <code>stmt.setObject(index, value)</code> es genérico - detecta automáticamente el tipo del parámetro.
+                Es menos eficiente que métodos específicos (<code>setInt</code>, <code>setString</code>) pero más flexible
+                cuando los parámetros vienen de una lista dinámica.
+            </div>
+
+            <div class="warning">
+                <strong>Nota:</strong> Los índices en PreparedStatement empiezan en 1, no en 0. Por eso usamos <code>i + 1</code>.
+            </div>
+
+            <h4>4️⃣ executeUpdate() vs executeQuery()</h4>
+            <div class="explanation">
+                <ul style="margin-left: 2rem;">
+                    <li><code>executeUpdate()</code>: Para INSERT, UPDATE, DELETE - retorna número de filas afectadas</li>
+                    <li><code>executeQuery()</code>: Para SELECT - retorna un ResultSet</li>
+                </ul>
+            </div>
+
+            <h4>5️⃣ Variables con doble guión bajo (__)</h4>
+            <div class="key-point">
+                Todas las variables internas usan prefijo <code>__</code> (doble guión bajo) para evitar colisiones con
+                variables del usuario. Por ejemplo: <code>__conn</code>, <code>__stmt</code>, <code>__params</code>.
+            </div>
+        </div>
+
+        <!-- DB.CONSULTAR -->
+        <div class="section" id="db-consultar">
+            <h2>2.2 🔍 db.consultar() - Queries con ResultSet</h2>
+
+            <h3>🎯 Propósito</h3>
+            <div class="explanation">
+                Ejecuta consultas SQL SELECT y retorna los resultados como <code>List&lt;Map&lt;String, Object&gt;&gt;</code>.
+                Cada fila es un Map donde las claves son nombres de columnas y los valores son los datos.
+            </div>
+
+            <h3>📝 Ejemplo Completo</h3>
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">FlowScript</div>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">variable edad_minima = 18
+
+variable usuarios = db.consultar(
+    "SELECT nombre, edad, email FROM usuarios WHERE edad >= ?",
+    [edad_minima]
+)
+
+// Iterar sobre resultados
+para cada usuario en usuarios {
+    imprimir(usuario.nombre + " - " + usuario.edad)
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Java Generado (Formateado)</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">int edad_minima = 18;
+
+List&lt;Map&lt;String, Object&gt;&gt; usuarios = ((java.util.function.Supplier&lt;java.util.List&lt;java.util.Map&lt;String, Object&gt;&gt;&gt;)(() -> {
+    java.util.List&lt;java.util.Map&lt;String, Object&gt;&gt; __results = new java.util.ArrayList&lt;&gt;();
+
+    try (java.sql.Connection __conn = java.sql.DriverManager.getConnection(...);
+         java.sql.PreparedStatement __stmt = __conn.prepareStatement(
+            "SELECT nombre, edad, email FROM usuarios WHERE edad >= ?")) {
+
+        java.util.List&lt;?&gt; __params = List.of(edad_minima);
+        for (int i = 0; i < __params.size(); i++) {
+            __stmt.setObject(i + 1, __params.get(i));
+        }
+
+        try (java.sql.ResultSet __rs = __stmt.executeQuery()) {
+            java.sql.ResultSetMetaData __meta = __rs.getMetaData();
+            int __colCount = __meta.getColumnCount();
+
+            while (__rs.next()) {
+                java.util.Map&lt;String, Object&gt; __row = new java.util.LinkedHashMap&lt;&gt;();
+                for (int i = 1; i <= __colCount; i++) {
+                    __row.put(__meta.getColumnLabel(i), __rs.getObject(i));
+                }
+                __results.add(__row);
+            }
+        }
+
+        System.out.println("[DB QUERY] SELECT ... | Results: " + __results.size() + " rows");
+        return __results;
+
+    } catch (java.sql.SQLException __e) {
+        throw new RuntimeException("Database query error: " + __e.getMessage(), __e);
+    }
+})).get();</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🔍 Análisis Técnico Detallado</h3>
+
+            <h4>1️⃣ ResultSetMetaData - ¿Qué es?</h4>
+            <div class="explanation">
+                <code>ResultSetMetaData</code> contiene información sobre las columnas del ResultSet:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>getColumnCount()</code>: Número de columnas</li>
+                    <li><code>getColumnLabel(i)</code>: Nombre de la columna (o alias si se usó AS)</li>
+                    <li><code>getColumnType(i)</code>: Tipo de dato SQL de la columna</li>
+                </ul>
+                <br>
+                Esto permite procesar dinámicamente cualquier query sin conocer de antemano las columnas.
+            </div>
+
+            <h4>2️⃣ LinkedHashMap vs HashMap</h4>
+            <div class="key-point">
+                Se usa <code>LinkedHashMap</code> en lugar de <code>HashMap</code> para <strong>preservar el orden</strong> de las columnas
+                tal como aparecen en el SELECT. Esto es importante para iteración predecible.
+            </div>
+
+            <h4>3️⃣ Extracción de Datos con ResultSet</h4>
+            <div class="explanation">
+                <strong>while (__rs.next())</strong> itera sobre cada fila:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>next()</code> mueve el cursor a la siguiente fila y retorna false si no hay más</li>
+                    <li><code>getObject(i)</code> obtiene el valor de la columna i como Object</li>
+                    <li>Los índices empiezan en 1 (no 0)</li>
+                </ul>
+            </div>
+
+            <h4>4️⃣ Estructura de Datos Retornada</h4>
+            <div class="code-block">
+                <div class="code-header">Ejemplo de estructura retornada</div>
+                <pre><code class="language-java">List&lt;Map&lt;String, Object&gt;&gt; usuarios = [
+    {
+        "nombre": "Juan Pérez",
+        "edad": 25,
+        "email": "juan@example.com"
+    },
+    {
+        "nombre": "María García",
+        "edad": 30,
+        "email": "maria@example.com"
+    }
+]</code></pre>
+            </div>
+
+            <h4>5️⃣ Try-with-resources Anidado</h4>
+            <div class="explanation">
+                Hay DOS niveles de try-with-resources:
+                <ol style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><strong>Outer:</strong> Cierra Connection y PreparedStatement</li>
+                    <li><strong>Inner:</strong> Cierra ResultSet</li>
+                </ol>
+                Esto garantiza que todos los recursos se liberen en el orden correcto.
+            </div>
+
+            <div class="warning">
+                <strong>Importante:</strong> ResultSet debe cerrarse ANTES que PreparedStatement, que debe cerrarse ANTES que Connection.
+                El try-with-resources anidado maneja esto automáticamente.
+            </div>
+        </div>
+
+        <!-- HTTP.GET -->
+        <div class="section" id="http-get">
+            <h2>2.3 🌐 http.get() - Peticiones HTTP GET</h2>
+
+            <h3>🎯 Propósito</h3>
+            <div class="explanation">
+                Realiza peticiones HTTP GET a APIs REST. Retorna <code>Map&lt;String, Object&gt;</code> con:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>"status"</code>: Código HTTP (200, 404, etc.)</li>
+                    <li><code>"body"</code>: Respuesta como String</li>
+                    <li><code>"error"</code>: Mensaje de error si falla (en lugar de body)</li>
+                </ul>
+            </div>
+
+            <h3>📝 Ejemplo Completo</h3>
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">FlowScript</div>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">variable url = "https://api.github.com/users/octocat"
+variable headers = {
+    "Accept": "application/json",
+    "User-Agent": "FlowScript"
+}
+
+variable respuesta = http.get(url, headers)
+
+si (respuesta.status == 200) {
+    imprimir("Usuario encontrado: " + respuesta.body)
+} sino {
+    imprimir("Error: " + respuesta.error)
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Java Generado (Formateado)</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">String url = "https://api.github.com/users/octocat";
+Map&lt;String, Object&gt; headers = Map.of(
+    "Accept", "application/json",
+    "User-Agent", "FlowScript"
+);
+
+Map&lt;String, Object&gt; respuesta = ((java.util.function.Supplier&lt;java.util.Map&lt;String, Object&gt;&gt;)(() -> {
+    try {
+        java.net.http.HttpClient __client = java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(30))
+            .build();
+
+        java.net.http.HttpRequest.Builder __builder = java.net.http.HttpRequest.newBuilder()
+            .uri(java.net.URI.create(url))
+            .GET()
+            .timeout(java.time.Duration.ofSeconds(30));
+
+        java.util.Map&lt;String, Object&gt; __headers = headers;
+        if (__headers != null) {
+            for (java.util.Map.Entry&lt;String, Object&gt; __h : __headers.entrySet()) {
+                __builder.header(__h.getKey(), String.valueOf(__h.getValue()));
+            }
+        }
+
+        java.net.http.HttpRequest __request = __builder.build();
+        java.net.http.HttpResponse&lt;String&gt; __response = __client.send(__request,
+            java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        java.util.Map&lt;String, Object&gt; __result = new java.util.LinkedHashMap&lt;&gt;();
+        __result.put("status", __response.statusCode());
+        __result.put("body", __response.body());
+
+        System.out.println("[HTTP GET] " + url + " | Status: " + __response.statusCode());
+        return __result;
+
+    } catch (Exception __e) {
+        java.util.Map&lt;String, Object&gt; __error = new java.util.LinkedHashMap&lt;&gt;();
+        __error.put("status", 0);
+        __error.put("error", __e.getMessage());
+        return __error;
+    }
+})).get();</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🔍 Análisis Técnico</h3>
+
+            <h4>1️⃣ HttpClient (Java 11+)</h4>
+            <div class="explanation">
+                <code>java.net.http.HttpClient</code> es la API moderna de Java para HTTP (introducida en Java 11).
+                Reemplaza a las antiguas clases <code>HttpURLConnection</code> con una API más limpia y moderna.
+                <br><br>
+                <strong>Características:</strong>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Soporte HTTP/1.1 y HTTP/2</li>
+                    <li>API fluida con builder pattern</li>
+                    <li>Soporte para timeouts</li>
+                    <li>Soporte para peticiones síncronas y asíncronas</li>
+                </ul>
+            </div>
+
+            <h4>2️⃣ Builder Pattern</h4>
+            <div class="key-point">
+                El código usa el patrón Builder en dos niveles:
+                <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                    <li><code>HttpClient.newBuilder()</code>: Configura el cliente HTTP</li>
+                    <li><code>HttpRequest.newBuilder()</code>: Construye la petición</li>
+                </ul>
+                Esto permite configurar opciones de forma legible y encadenada.
+            </div>
+
+            <h4>3️⃣ Timeouts</h4>
+            <div class="explanation">
+                Se configuran DOS tipos de timeout:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><strong>connectTimeout:</strong> Tiempo máximo para establecer conexión (30s)</li>
+                    <li><strong>request timeout:</strong> Tiempo máximo para recibir respuesta (30s)</li>
+                </ul>
+                Esto previene que la aplicación se cuelgue esperando respuestas de APIs lentas.
+            </div>
+
+            <h4>4️⃣ Headers Dinámicos</h4>
+            <div class="code-block">
+                <div class="code-header">Procesamiento de headers</div>
+                <pre><code class="language-java">java.util.Map&lt;String, Object&gt; __headers = headers;
+if (__headers != null) {
+    for (java.util.Map.Entry&lt;String, Object&gt; __h : __headers.entrySet()) {
+        __builder.header(__h.getKey(), String.valueOf(__h.getValue()));
+    }
+}</code></pre>
+            </div>
+
+            <div class="explanation">
+                Los headers se procesan dinámicamente desde un Map:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Se itera sobre cada entrada del Map</li>
+                    <li>La clave es el nombre del header</li>
+                    <li>El valor se convierte a String con <code>String.valueOf()</code></li>
+                    <li>Se añade al builder con <code>.header(name, value)</code></li>
+                </ul>
+            </div>
+
+            <h4>5️⃣ BodyHandlers</h4>
+            <div class="explanation">
+                <code>HttpResponse.BodyHandlers.ofString()</code> indica cómo procesar el cuerpo de la respuesta:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>ofString()</code>: Convierte a String (para JSON, HTML, texto)</li>
+                    <li><code>ofByteArray()</code>: Retorna bytes (para archivos binarios)</li>
+                    <li><code>ofInputStream()</code>: Stream para respuestas grandes</li>
+                </ul>
+            </div>
+
+            <h4>6️⃣ Manejo de Errores</h4>
+            <div class="warning">
+                Si ocurre cualquier excepción (red caída, timeout, DNS error, etc.), se retorna un Map con:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>status: 0</code>: Indica error (status code válido empieza en 100)</li>
+                    <li><code>error: "mensaje"</code>: Descripción del error</li>
+                </ul>
+                Esto permite al código FlowScript manejar errores sin crashear.
+            </div>
+        </div>
+
+        <!-- HTTP.POST -->
+        <div class="section" id="http-post">
+            <h2>2.4 📤 http.post() - Peticiones HTTP POST</h2>
+
+            <h3>🎯 Propósito</h3>
+            <div class="explanation">
+                Realiza peticiones HTTP POST para enviar datos a APIs REST. Similar a GET pero con body.
+            </div>
+
+            <h3>📝 Ejemplo Completo</h3>
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">FlowScript</div>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">variable usuario = {
+    "nombre": "Juan Pérez",
+    "email": "juan@example.com",
+    "edad": 25
+}
+
+variable headers = {
+    "Content-Type": "application/json"
+}
+
+variable respuesta = http.post(
+    "https://api.example.com/users",
+    usuario,
+    headers
+)
+
+imprimir("Status: " + respuesta.status)</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Java Generado (Formateado)</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">Map&lt;String, Object&gt; usuario = Map.of(
+    "nombre", "Juan Pérez",
+    "email", "juan@example.com",
+    "edad", 25
+);
+
+Map&lt;String, Object&gt; headers = Map.of(
+    "Content-Type", "application/json"
+);
+
+Map&lt;String, Object&gt; respuesta = ((java.util.function.Supplier&lt;java.util.Map&lt;String, Object&gt;&gt;)(() -> {
+    try {
+        com.google.gson.Gson __gson = new com.google.gson.Gson();
+        String __jsonBody = __gson.toJson(usuario);
+
+        java.net.http.HttpClient __client = java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(30))
+            .build();
+
+        java.net.http.HttpRequest.Builder __builder = java.net.http.HttpRequest.newBuilder()
+            .uri(java.net.URI.create("https://api.example.com/users"))
+            .POST(java.net.http.HttpRequest.BodyPublishers.ofString(__jsonBody))
+            .timeout(java.time.Duration.ofSeconds(30));
+
+        // ... headers ...
+
+        java.net.http.HttpRequest __request = __builder.build();
+        java.net.http.HttpResponse&lt;String&gt; __response = __client.send(__request,
+            java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        java.util.Map&lt;String, Object&gt; __result = new java.util.LinkedHashMap&lt;&gt;();
+        __result.put("status", __response.statusCode());
+        __result.put("body", __response.body());
+        return __result;
+
+    } catch (Exception __e) {
+        // ... error handling ...
+    }
+})).get();</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🔍 Diferencias clave con GET</h3>
+
+            <h4>1️⃣ Serialización JSON con Gson</h4>
+            <div class="explanation">
+                <code>com.google.gson.Gson</code> es una librería de Google para convertir objetos Java a JSON y viceversa.
+                <br><br>
+                <code>__gson.toJson(usuario)</code> convierte el Map a una cadena JSON:
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">Transformación</div>
+                <pre><code class="language-java">// Map Java
+Map.of("nombre", "Juan", "edad", 25)
+
+// JSON String generado por Gson
+"{\"nombre\":\"Juan\",\"edad\":25}"</code></pre>
+            </div>
+
+            <h4>2️⃣ BodyPublishers</h4>
+            <div class="key-point">
+                <code>.POST(HttpRequest.BodyPublishers.ofString(__jsonBody))</code>
+                <br><br>
+                Especifica el cuerpo de la petición POST. Opciones:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>ofString(str)</code>: Envía String como cuerpo</li>
+                    <li><code>ofByteArray(bytes)</code>: Envía bytes</li>
+                    <li><code>ofFile(path)</code>: Envía archivo</li>
+                    <li><code>noBody()</code>: POST sin cuerpo</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>Dependencia Externa:</strong> El código generado requiere Gson en el classpath.
+                Esto se debe incluir en el pom.xml:
+                <pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.google.code.gson&lt;/groupId&gt;
+    &lt;artifactId&gt;gson&lt;/artifactId&gt;
+    &lt;version&gt;2.10.1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+            </div>
+        </div>
+
+        <!-- PATRÓN LAMBDA IIFE -->
+        <div class="section" id="patron-lambda-iife">
+            <h2>3. 🎭 Patrón Lambda IIFE (Immediately Invoked Function Expression)</h2>
+
+            <h3>🎯 ¿Qué es?</h3>
+            <div class="explanation">
+                IIFE es un patrón de programación donde defines y ejecutas una función en la misma expresión.
+                En Java, se implementa con lambdas y el método <code>.get()</code> de Supplier.
+            </div>
+
+            <h3>📝 Estructura del Patrón</h3>
+            <div class="code-block">
+                <div class="code-header">Anatomía de Lambda IIFE</div>
+                <pre><code class="language-java">// Patrón completo
+((java.util.function.Supplier&lt;TipoRetorno&gt;)(() -> {
+    // Código aquí
+    return valor;
+})).get()
+
+// Desglosado:
+// 1. Supplier&lt;TipoRetorno&gt;    - Interface funcional que retorna TipoRetorno
+// 2. () -> { ... }             - Lambda sin parámetros
+// 3. .get()                    - Invoca la lambda inmediatamente</code></pre>
+            </div>
+
+            <h3>🔍 ¿Por qué usar este patrón?</h3>
+
+            <h4>✅ Ventajas</h4>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h5>1. Encapsulación</h5>
+                    <p>Variables locales (__conn, __stmt) no contaminan el scope externo</p>
+                </div>
+                <div class="feature-card">
+                    <h5>2. Expresión, no Statement</h5>
+                    <p>Se puede usar en cualquier lugar que acepte una expresión (asignación, parámetro, return)</p>
+                </div>
+                <div class="feature-card">
+                    <h5>3. Try-with-resources</h5>
+                    <p>Permite usar try-with-resources dentro de una expresión</p>
+                </div>
+                <div class="feature-card">
+                    <h5>4. Retorno directo</h5>
+                    <p>El resultado se retorna directamente donde se necesita</p>
+                </div>
+            </div>
+
+            <h3>📊 Comparación: Sin IIFE vs Con IIFE</h3>
+
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="panel-header flowscript-header">Sin IIFE (Verboso)</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">// Necesitas método auxiliar
+private static int ejecutarDB(String sql, List params) {
+    try (Connection conn = ...) {
+        // código
+    }
+}
+
+// Uso
+int resultado = ejecutarDB(sql, params);</code></pre>
+                    </div>
+                </div>
+
+                <div class="comparison-panel">
+                    <div class="panel-header java-header">Con IIFE (Inline)</div>
+                    <div class="code-block">
+                        <pre><code class="language-java">// Todo inline
+int resultado = ((Supplier&lt;Integer&gt;)(() -> {
+    try (Connection conn = ...) {
+        // código
+        return filas;
+    }
+})).get();</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🎓 Conceptos de Java Avanzados</h3>
+
+            <h4>1️⃣ Supplier&lt;T&gt;</h4>
+            <div class="explanation">
+                <code>java.util.function.Supplier&lt;T&gt;</code> es una interface funcional (tiene un solo método abstracto):
+                <pre style="margin-top: 1rem;"><code class="language-java">@FunctionalInterface
+public interface Supplier&lt;T&gt; {
+    T get();
+}</code></pre>
+                Representa una función que NO toma parámetros y RETORNA un valor de tipo T.
+            </div>
+
+            <h4>2️⃣ Cast a Supplier</h4>
+            <div class="explanation">
+                <code>((java.util.function.Supplier&lt;Integer&gt;)(...lambda...))</code>
+                <br><br>
+                El cast explícito es necesario porque Java no puede inferir el tipo de retorno de la lambda solo con <code>.get()</code>.
+                El compilador necesita saber que esta lambda es un Supplier específico.
+            </div>
+
+            <h4>3️⃣ Lambda () -> { }</h4>
+            <div class="key-point">
+                <code>() -> { código }</code> es la sintaxis de lambda en Java:
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li><code>()</code>: Sin parámetros</li>
+                    <li><code>-></code>: Operador lambda</li>
+                    <li><code>{ }</code>: Cuerpo de la lambda (puede tener múltiples líneas)</li>
+                </ul>
+            </div>
+
+            <h4>4️⃣ Invocación con .get()</h4>
+            <div class="explanation">
+                <code>.get()</code> invoca el método del Supplier, ejecutando el código de la lambda y retornando el resultado.
+                <br><br>
+                Sin <code>.get()</code>, tendríamos un objeto Supplier, no el resultado.
+            </div>
+
+            <h3>🧪 Ejemplo Didáctico Paso a Paso</h3>
+
+            <div class="code-block">
+                <div class="code-header">Evolución del patrón</div>
+                <pre><code class="language-java">// Paso 1: Lambda básica
+Supplier&lt;Integer&gt; lambda = () -> {
+    return 42;
+};
+
+// Paso 2: Invocar la lambda
+int resultado = lambda.get(); // 42
+
+// Paso 3: Todo en una expresión (IIFE)
+int resultado = ((Supplier&lt;Integer&gt;)(() -> {
+    return 42;
+})).get(); // 42
+
+// Paso 4: Con lógica compleja (try-with-resources)
+int resultado = ((Supplier&lt;Integer&gt;)(() -> {
+    try (Connection conn = getConnection()) {
+        // código JDBC
+        return conn.prepareStatement("...").executeUpdate();
+    }
+})).get();</code></pre>
+            </div>
+
+            <div class="key-point">
+                <strong>El "Truco":</strong> Al poner la lambda entre paréntesis y llamar <code>.get()</code> inmediatamente,
+                convertimos un bloque de código multi-línea (con try-catch, variables locales, etc.) en una <strong>expresión</strong>
+                que puede usarse donde sea que Java espere un valor.
+            </div>
+
+            <h3>🌟 Casos de Uso del Patrón</h3>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h5>Operaciones BD</h5>
+                    <p>Encapsular try-with-resources de JDBC inline</p>
+                </div>
+                <div class="feature-card">
+                    <h5>HTTP Requests</h5>
+                    <p>Manejar excepciones de red sin contaminar scope</p>
+                </div>
+                <div class="feature-card">
+                    <h5>Cálculos complejos</h5>
+                    <p>Variables temporales sin declarar métodos auxiliares</p>
+                </div>
+                <div class="feature-card">
+                    <h5>Lazy evaluation</h5>
+                    <p>Diferir ejecución hasta que se llame .get()</p>
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>Nota de rendimiento:</strong> Este patrón NO crea overhead significativo. La JVM optimiza las lambdas
+                y el código resultante es tan eficiente como si estuviera en un método separado.
+            </div>
+        </div>
+
+        <!-- CONCLUSIÓN -->
+        <div class="section">
+            <h2>🎯 Conclusión</h2>
+
+            <div class="explanation">
+                <p>FlowScript genera código Java altamente optimizado y moderno usando patrones avanzados:</p>
+
+                <ul style="margin-left: 2rem; margin-top: 1rem; line-height: 2;">
+                    <li><strong>Gateways BPMN</strong>: Control de flujo con if-else y ejecución paralela con CompletableFuture</li>
+                    <li><strong>Operaciones BD</strong>: JDBC inline con try-with-resources y PreparedStatement</li>
+                    <li><strong>HTTP Requests</strong>: HttpClient moderno (Java 11+) con timeouts y headers dinámicos</li>
+                    <li><strong>Lambda IIFE</strong>: Encapsulación de código complejo en expresiones inline</li>
+                </ul>
+
+                <p style="margin-top: 2rem;">
+                    Estos patrones permiten a FlowScript generar código Java equivalente a lo que escribiría un desarrollador
+                experimentado, manteniendo las mejores prácticas de:
+                </p>
+
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>✅ Gestión de recursos (try-with-resources)</li>
+                    <li>✅ Seguridad (PreparedStatement para prevenir SQL injection)</li>
+                    <li>✅ Concurrencia (CompletableFuture para paralelismo)</li>
+                    <li>✅ Manejo de errores (try-catch con mensajes descriptivos)</li>
+                    <li>✅ Logging (trazas de entrada/salida en procesos y gateways)</li>
+                </ul>
+            </div>
+
+            <div class="key-point" style="margin-top: 2rem; font-size: 1.1rem;">
+                <strong>💡 Para los estudiantes:</strong> Este código es el OBJETIVO. Deben implementar generadores similares
+                en su propio compilador, entendiendo cada patrón y decisión de diseño. La documentación muestra el "qué"
+                y el "cómo", ustedes deben implementar el "por qué".
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Apply syntax highlighting
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.highlightAll();
+        });
+
+        // Smooth scroll for TOC links
+        document.querySelectorAll('.toc a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>
